@@ -1,6 +1,6 @@
 class_name LookCamera
 extends Camera3D
-## Stationary first-person look; locomotion belongs to SKL-02.
+## First-person view. LevelScope follows the motor's eye position after physics movement.
 
 @export var radians_per_pixel: float = 0.0025
 @export_range(1.0, 89.0) var pitch_limit_degrees: float = 85.0

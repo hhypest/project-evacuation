@@ -42,7 +42,8 @@ try {
     $null = Invoke-CheckedGodot -Arguments @('--headless', '--path', '.', '--script', $relative, '--check-only')
   }
   Write-Output "Parse/type checks passed ($($scripts.Count) scripts)."
-  $report = Invoke-CheckedGodot -Arguments @('--headless', '--path', '.', '--fixed-fps', '60', '--script', 'tests/run_tests.gd', '--', '--suite', 'all')
+  # Exercise the documented real-time command so a short watchdog cannot pass only under acceleration.
+  $report = Invoke-CheckedGodot -Arguments @('--headless', '--path', '.', '--script', 'tests/run_tests.gd', '--', '--suite', 'all')
   if ($report -notmatch 'TEST_RESULT total=([1-9]\d*) failed=0') { throw "Missing nonempty successful test report: $report" }
   Write-Output $report
   if (-not $SkipRunnerSelfCheck) {

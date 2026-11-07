@@ -81,7 +81,7 @@ text = "Выход"
 
 [node name="Note" type="Label" parent="Center/Menu/Margin/Stack"]
 layout_mode = 2
-text = "Мышь — обзор · Esc — пауза · R — перезапуск\nПеремещение и головоломки появятся на следующих этапах."
+text = "WASD — движение · Shift — ходьба · Space — прыжок\nCtrl — приседание · Мышь — обзор · Esc — пауза · R — перезапуск"
 
 [node name="GameHint" type="Label" parent="."]
 unique_name_in_owner = true
@@ -90,7 +90,7 @@ offset_top = 24.0
 offset_right = 800.0
 offset_bottom = 58.0
 mouse_filter = 2
-text = "Тестовая камера · Мышь — обзор · Esc — меню паузы · R — перезапуск"
+text = "Полигон движения · WASD · Space · Ctrl · Shift · Esc — пауза · R — перезапуск"
 
 [node name="Crosshair" type="Label" parent="."]
 unique_name_in_owner = true
