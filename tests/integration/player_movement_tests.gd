@@ -112,6 +112,14 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("ladder top dismount reaches platform",
 		_player.position.y > 2.9 and _player.position.z < -21.2, "position=%s" % _player.position))
 	await _close(tree)
+	_open(tree, Vector3(30, -2.5, -2))
+	command = MovementCommand.new()
+	await _ticks(tree, command, 120)
+	results.append(TestOutcome.new("idle swimmer passively rises at configured speed in Jolt water volume",
+		_player.mode == MovementStep.Mode.SWIM and _player.position.y > -1.7
+		and absf(_player.velocity.y - _player.profile.buoyancy_speed) < 0.01,
+		"position=%s velocity=%s" % [_player.position, _player.velocity]))
+	await _close(tree)
 	_open(tree, Vector3(30, -1.5, -2))
 	command = MovementCommand.new()
 	command.jump_held = true

@@ -30,11 +30,12 @@ func execute(
 			swim_wish += up
 		if command.crouching:
 			swim_wish -= up
-		result.velocity = observation.velocity.move_toward(swim_wish.limit_length() * profile.swim_speed,
-			profile.swim_acceleration * delta)
 		if swim_wish.is_zero_approx():
-			result.velocity = result.velocity.move_toward(up * profile.buoyancy_speed,
+			result.velocity = observation.velocity.move_toward(up * profile.buoyancy_speed,
 				profile.buoyancy_acceleration * delta)
+		else:
+			result.velocity = observation.velocity.move_toward(swim_wish.limit_length() * profile.swim_speed,
+				profile.swim_acceleration * delta)
 		if observation.near_water_surface and command.jump_held:
 			result.velocity = result.velocity.slide(up) + up * profile.water_jump_speed
 			result.jumped = true
