@@ -15,7 +15,10 @@ func _run() -> void:
 	if not _parse_arguments(OS.get_cmdline_user_args()):
 		quit(2)
 		return
-	var suites: Array[TestSuite] = [SessionTests.new(), RuntimeTests.new(), PhysicsTests.new(), ScopeTests.new()]
+	var suites: Array[TestSuite] = [
+		SessionTests.new(), SessionControllerTests.new(), InputBufferTests.new(),
+		RuntimeTests.new(), PhysicsTests.new(), ScopeLoadTests.new(), ScopeTests.new(),
+	]
 	var count: int = 0
 	var failed: int = 0
 	create_timer(30.0, true, false, true).timeout.connect(_on_timeout)

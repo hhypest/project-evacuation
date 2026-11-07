@@ -21,7 +21,11 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("restart from pause creates a running generation",
 		session.restart() and session.get_generation() == 2
 		and session.get_phase() == SessionLifecycle.Phase.RUNNING))
+	results.append(TestOutcome.new("return to menu preserves generation, new session advances it",
+		session.return_to_menu() and not session.return_to_menu()
+		and session.get_generation() == 2 and session.start() and session.get_generation() == 3))
 	session.stop()
 	results.append(TestOutcome.new("stopped session rejects further transitions",
-		not session.start() and not session.resume() and not session.restart() and not session.stop()))
+		not session.start() and not session.resume() and not session.restart()
+		and not session.return_to_menu() and not session.stop()))
 	return results
