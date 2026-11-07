@@ -46,6 +46,13 @@ func restart() -> bool:
 	return true
 
 
+func return_to_menu() -> bool:
+	if _phase != Phase.RUNNING and _phase != Phase.PAUSED:
+		return false
+	_phase = Phase.READY
+	return true
+
+
 func stop() -> bool:
 	if _phase == Phase.STOPPED:
 		return false

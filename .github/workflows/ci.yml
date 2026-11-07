@@ -35,5 +35,5 @@ jobs:
           chmod +x builds/evacuation.x86_64
           if ($LASTEXITCODE -ne 0) { throw 'chmod failed' }
           $output = (& ./builds/evacuation.x86_64 --headless --fixed-fps 60 --quit-after 120 2>&1 | Out-String)
-          if ($LASTEXITCODE -ne 0 -or $output -match '(SCRIPT ERROR:|ERROR:)' -or $output -notmatch 'FOUNDATION_READY') { throw $output }
+          if ($LASTEXITCODE -ne 0 -or $output -match '(SCRIPT ERROR:|ERROR:)' -or $output -notmatch 'SESSION_READY') { throw $output }
           Write-Output $output

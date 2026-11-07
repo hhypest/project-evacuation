@@ -23,8 +23,7 @@ function Invoke-CheckedGodot {
   $exitCode = $LASTEXITCODE
   $output = ($captured | ForEach-Object { "$_" }) -join "`n"
   if ($exitCode -ne $ExpectedExit -or ($ExpectedExit -eq 0 -and $output -match '(?m)(SCRIPT ERROR:|ERROR:|WARNING:)')) {
-    Write-Output $output
-    throw "Godot check failed: exit=$exitCode expected=$ExpectedExit args=$Arguments"
+    throw "Godot check failed: exit=$exitCode expected=$ExpectedExit args=$Arguments`n$output"
   }
   return $output
 }

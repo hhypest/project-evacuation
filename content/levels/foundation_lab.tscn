@@ -1,4 +1,6 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/presentation/player/look_camera.gd" id="1"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMaterial"]
 albedo_color = Color(0.13, 0.17, 0.21, 1)
@@ -77,7 +79,8 @@ position = Vector3(0, 0.015, 2)
 mesh = SubResource("MarkerMesh")
 
 [node name="Camera" type="Camera3D" parent="."]
-position = Vector3(7, 5, 9)
-rotation_degrees = Vector3(-22, 38, 0)
+position = Vector3(0, 1.65, 6)
+rotation_degrees = Vector3(-10, 0, 0)
 current = true
 fov = 65.0
+script = ExtResource("1")
