@@ -1,0 +1,18 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/devices/power_node_side/power_node_side_albedo.png" id="1_qnng5"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/power_node_side/power_node_side_emission.png" id="2_ums8v"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/power_node_side/power_node_side_normal.png" id="3_dmyee"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/power_node_side/power_node_side_orm.png" id="4_7l3co"]
+
+[resource]
+resource_name = "power_node_side"
+albedo_texture = ExtResource("1_qnng5")
+orm_texture = ExtResource("4_7l3co")
+emission_enabled = true
+emission = Color(0.9098039, 0.5882353, 0.23529412, 1)
+emission_energy_multiplier = 1.6
+emission_operator = 1
+emission_texture = ExtResource("2_ums8v")
+normal_enabled = true
+normal_texture = ExtResource("3_dmyee")

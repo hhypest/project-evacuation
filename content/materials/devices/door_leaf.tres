@@ -1,0 +1,18 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/devices/door_leaf/door_leaf_albedo.png" id="1_peppi"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/door_leaf/door_leaf_emission.png" id="2_57vfi"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/door_leaf/door_leaf_normal.png" id="3_w4s14"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/door_leaf/door_leaf_orm.png" id="4_2kh12"]
+
+[resource]
+resource_name = "door_leaf"
+albedo_texture = ExtResource("1_peppi")
+orm_texture = ExtResource("4_2kh12")
+emission_enabled = true
+emission = Color(0.9098039, 0.5882353, 0.23529412, 1)
+emission_energy_multiplier = 1.6
+emission_operator = 1
+emission_texture = ExtResource("2_57vfi")
+normal_enabled = true
+normal_texture = ExtResource("3_w4s14")

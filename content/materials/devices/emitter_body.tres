@@ -1,0 +1,12 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/devices/emitter_body/emitter_body_albedo.png" id="1_x8cxa"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/emitter_body/emitter_body_normal.png" id="2_02ecm"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/emitter_body/emitter_body_orm.png" id="3_4uptf"]
+
+[resource]
+resource_name = "emitter_body"
+albedo_texture = ExtResource("1_x8cxa")
+orm_texture = ExtResource("3_4uptf")
+normal_enabled = true
+normal_texture = ExtResource("2_02ecm")

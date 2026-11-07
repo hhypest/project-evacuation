@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/devices/cube_face/cube_face_albedo.png" id="1_ujecu"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/cube_face/cube_face_emission.png" id="2_x4kry"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/cube_face/cube_face_normal.png" id="3_qs7v1"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/cube_face/cube_face_orm.png" id="4_pxkxo"]
+
+[resource]
+resource_name = "cube_face"
+albedo_texture = ExtResource("1_ujecu")
+orm_texture = ExtResource("4_pxkxo")
+emission_enabled = true
+emission = Color(0.91764706, 0.9490196, 1, 1)
+emission_energy_multiplier = 1.2
+emission_operator = 1
+emission_texture = ExtResource("2_x4kry")
+normal_enabled = true
+normal_texture = ExtResource("3_qs7v1")
+uv1_scale = Vector3(3, 2, 1)

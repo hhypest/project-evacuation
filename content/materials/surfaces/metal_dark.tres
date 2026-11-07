@@ -1,0 +1,12 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/metal_dark/metal_dark_albedo.png" id="1_13p30"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/metal_dark/metal_dark_normal.png" id="2_kfw2k"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/metal_dark/metal_dark_orm.png" id="3_o3g5s"]
+
+[resource]
+resource_name = "metal_dark"
+albedo_texture = ExtResource("1_13p30")
+orm_texture = ExtResource("3_o3g5s")
+normal_enabled = true
+normal_texture = ExtResource("2_kfw2k")
