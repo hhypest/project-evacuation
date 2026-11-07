@@ -1,0 +1,83 @@
+[gd_scene load_steps=10 format=3]
+
+[sub_resource type="StandardMaterial3D" id="FloorMaterial"]
+albedo_color = Color(0.13, 0.17, 0.21, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="FloorMesh"]
+material = SubResource("FloorMaterial")
+size = Vector3(18, 1, 18)
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(18, 1, 18)
+
+[sub_resource type="StandardMaterial3D" id="CubeMaterial"]
+albedo_color = Color(0.12, 0.72, 0.77, 1)
+metallic = 0.25
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="CubeMesh"]
+material = SubResource("CubeMaterial")
+
+[sub_resource type="BoxShape3D" id="CubeShape"]
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 1
+background_color = Color(0.025, 0.037, 0.055, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.55, 0.68, 0.85, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="MarkerMaterial"]
+albedo_color = Color(0.44, 0.68, 0.73, 1)
+emission_enabled = true
+emission = Color(0.1, 0.45, 0.5, 1)
+
+[sub_resource type="BoxMesh" id="MarkerMesh"]
+material = SubResource("MarkerMaterial")
+size = Vector3(4, 0.02, 0.03)
+
+[node name="FoundationLab" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-52, -30, 0)
+light_color = Color(0.85, 0.92, 1, 1)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.5, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("FloorMesh")
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="TestCube" type="RigidBody3D" parent="."]
+position = Vector3(0, 3, 0)
+mass = 20.0
+collision_layer = 2
+collision_mask = 7
+
+[node name="Mesh" type="MeshInstance3D" parent="TestCube"]
+mesh = SubResource("CubeMesh")
+
+[node name="Collision" type="CollisionShape3D" parent="TestCube"]
+shape = SubResource("CubeShape")
+
+[node name="Marker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.015, 2)
+mesh = SubResource("MarkerMesh")
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(7, 5, 9)
+rotation_degrees = Vector3(-22, 38, 0)
+current = true
+fov = 65.0

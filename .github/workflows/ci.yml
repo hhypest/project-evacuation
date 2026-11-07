@@ -1,0 +1,39 @@
+name: Foundation checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned Standard editor
+        shell: pwsh
+        run: |
+          $binary = ./tools/setup.ps1 -SkipTemplates
+          "GODOT_BIN=$binary" >> $env:GITHUB_ENV
+      - name: Types, layers, unit, contracts, Jolt and regressions
+        shell: pwsh
+        run: ./tools/check.ps1
+      - name: Install matching export templates
+        shell: pwsh
+        run: |
+          ./tools/setup.ps1
+      - name: Windows and Linux release exports
+        shell: pwsh
+        run: ./tools/export.ps1
+      - name: Linux exported runtime smoke (CPU only)
+        shell: pwsh
+        run: |
+          chmod +x builds/evacuation.x86_64
+          if ($LASTEXITCODE -ne 0) { throw 'chmod failed' }
+          $output = (& ./builds/evacuation.x86_64 --headless --fixed-fps 60 --quit-after 120 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 0 -or $output -match '(SCRIPT ERROR:|ERROR:)' -or $output -notmatch 'FOUNDATION_READY') { throw $output }
+          Write-Output $output
