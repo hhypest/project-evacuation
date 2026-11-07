@@ -14,6 +14,6 @@ The pinned engine reports its bundled dependencies and their exact copyright not
 - [Upstream component copyright metadata](content/licenses/GODOT_COPYRIGHT.json).
 - [Full third-party license texts](content/licenses/GODOT_THIRD_PARTY.txt).
 
-Regenerate these files with the pinned editor and `--headless --path . --script tools/generate_notices.gd` when the engine changes. The raw notice metadata is copied without relabeling its components as project MIT. Preserve the notice files beside distributed binaries; `tools/export.ps1` creates that layout and export presets also include them in the package. Export templates come from the same verified upstream release as the editor; archive checksums are locked in [tools/toolchain.json](tools/toolchain.json).
+Regenerate these files with the pinned editor and `--headless --path . --script tools/generate_notices.gd` when the engine changes. The raw notice metadata is copied without relabeling its components as project MIT. Preserve `content/licenses/` beside distributed binaries; `tools/export.ps1` creates that layout and export presets also include them in the package. Export templates come from the same verified upstream release as the editor; archive checksums are locked in the repository's [tools/toolchain.json](https://github.com/hhypest/project-evacuation/blob/main/tools/toolchain.json).
 
 Packaging and platform verification are separate. Steamworks, if introduced later, requires its own entry and distribution review.

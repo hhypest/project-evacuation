@@ -22,7 +22,8 @@ try {
     Write-Output "Exported $($preset[0])"
   }
   Copy-Item -LiteralPath LICENSE,THIRD_PARTY_NOTICES.md -Destination builds
-  Copy-Item -LiteralPath content/licenses -Destination builds -Recurse -Force
+  New-Item -ItemType Directory -Path builds/content -Force | Out-Null
+  Copy-Item -LiteralPath content/licenses -Destination builds/content -Recurse -Force
   Get-FileHash -LiteralPath builds/evacuation.exe,builds/evacuation.x86_64 -Algorithm SHA256 | Format-Table Hash,Path
 } finally {
   Pop-Location
