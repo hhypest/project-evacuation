@@ -4,6 +4,16 @@ extends Node3D
 
 
 func _ready() -> void:
+	_carry_cube("LightCube", &"lab.cube.light", Vector3(-7, 1, 10), 5.0)
+	_carry_cube("LimitCube", &"lab.cube.limit", Vector3(-10, 1, 10), 40.0)
+	_carry_cube("HeavyCube", &"lab.cube.heavy", Vector3(-13, 1, 10), 80.0)
+	_box("CarryWall", Vector3(20, 1.5, 7), Vector3(0.2, 3, 6), Color(0.35, 0.4, 0.43))
+	_box("CarryCeiling", Vector3(17, 2.2, 7), Vector3(3, 0.2, 4), Color(0.35, 0.4, 0.43))
+	_box("CarryBack", Vector3(17, 1.5, 4), Vector3(6, 3, 0.2), Color(0.35, 0.4, 0.43))
+	_sign("Перенос · E взять/отпустить · ЛКМ бросить", Vector3(-9, 2.5, 10))
+	_sign("Стена / потолок", Vector3(17, 3, 4))
+	var medium: CarryRigidBody = get_node("TestCube") as CarryRigidBody
+	_handles(medium)
 	for index: int in range(5):
 		var height: float = float(index + 1) * 0.2
 		_box("Step%d" % index, Vector3(-7, height * 0.5, -3.0 - float(index) * 0.8),
@@ -55,10 +65,37 @@ func _box(label: String, at: Vector3, size: Vector3, color: Color) -> StaticBody
 	return body
 
 
+func _carry_cube(label: String, id: StringName, at: Vector3, kilograms: float) -> void:
+	var body: CarryRigidBody = CarryRigidBody.new()
+	body.name = label
+	body.stable_id = id
+	body.position = at
+	body.mass = kilograms
+	body.collision_layer = 2
+	body.collision_mask = 7
+	_attach_box(body, Vector3.ONE, Color(0.7, 0.72, 0.7))
+	_handles(body)
+	var sign: Label3D = Label3D.new()
+	sign.text = "%.0f кг" % kilograms
+	sign.position = Vector3(0, 0.55, 0)
+	sign.pixel_size = 0.005
+	sign.font_size = 40
+	body.add_child(sign)
+	add_child(body)
+
+
+func _handles(body: CarryRigidBody) -> void:
+	for side: float in [-1.0, 1.0]:
+		var handle: MeshInstance3D = _mesh(Vector3(0.08, 0.4, 0.05), Color(0.88, 0.37, 0.12))
+		handle.position = Vector3(side * 0.35, 0, 0.52)
+		body.add_child(handle)
+
+
 func _attach_box(body: PhysicsBody3D, size: Vector3, color: Color) -> void:
 	var shape: BoxShape3D = BoxShape3D.new()
 	shape.size = size
 	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.name = "Collision"
 	collision.shape = shape
 	body.add_child(collision)
 	var mesh: MeshInstance3D = _mesh(size, color)

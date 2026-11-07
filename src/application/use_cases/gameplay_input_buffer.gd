@@ -4,7 +4,7 @@ extends RefCounted
 
 const ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_back", &"move_left", &"move_right",
-	&"jump", &"crouch", &"walk", &"interact",
+	&"jump", &"crouch", &"walk", &"interact", &"throw_prop",
 ]
 
 var _enabled: bool = false
@@ -14,6 +14,7 @@ var _blocked: Dictionary[StringName, bool] = {}
 var _look_delta: Vector2 = Vector2.ZERO
 var _jump_requested: bool = false
 var _interact_requested: bool = false
+var _throw_requested: bool = false
 
 
 func configure(enabled: bool, generation: int) -> void:
@@ -51,6 +52,8 @@ func record_action(action: StringName, pressed: bool, repeated: bool = false) ->
 		_jump_requested = true
 	elif action == &"interact":
 		_interact_requested = true
+	elif action == &"throw_prop":
+		_throw_requested = true
 
 
 func record_look(delta: Vector2) -> void:
@@ -70,6 +73,7 @@ func take_frame() -> GameplayInputFrame:
 		frame.jump_requested = _jump_requested
 		frame.jump_held = _held.has(&"jump")
 		frame.interact_requested = _interact_requested
+		frame.throw_requested = _throw_requested
 		frame.crouching = _held.has(&"crouch")
 		frame.walking = _held.has(&"walk")
 	_clear_edges()
@@ -80,3 +84,4 @@ func _clear_edges() -> void:
 	_look_delta = Vector2.ZERO
 	_jump_requested = false
 	_interact_requested = false
+	_throw_requested = false

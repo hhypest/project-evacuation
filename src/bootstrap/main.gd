@@ -111,6 +111,8 @@ func _drop_scope() -> void:
 
 func _sync_session() -> void:
 	var status: SessionStatus = _session.get_status()
+	if not status.accepts_gameplay and _scope != null:
+		_scope.suspend_carry()
 	get_tree().paused = status.phase in [SessionLifecycle.Phase.READY, SessionLifecycle.Phase.PAUSED]
 	_input.set_gameplay_enabled(status.accepts_gameplay, status.generation)
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"

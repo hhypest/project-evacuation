@@ -107,10 +107,41 @@ func _run() -> void:
 	for _tick: int in range(150):
 		await physics_frame
 	await RenderingServer.frame_post_draw
+	var carry_scope: LevelScope = main.get_node("LevelScope") as LevelScope
+	var carry_camera: LookCamera = carry_scope.get_node("FoundationLab/Camera") as LookCamera
+	var cube: CarryRigidBody = carry_scope.get_node("FoundationLab/TestCube") as CarryRigidBody
+	TestInputEvents.key(KEY_W)
+	for _tick: int in range(30):
+		await physics_frame
+	TestInputEvents.key(KEY_W, false)
+	for _tick: int in range(20):
+		await physics_frame
+	var to_cube: Vector3 = cube.global_position - carry_camera.global_position
+	var pitch: float = atan2(to_cube.y, Vector2(to_cube.x, to_cube.z).length())
+	TestInputEvents.motion(Vector2(1, 0))
+	TestInputEvents.motion(Vector2(0, (carry_camera.rotation.x - pitch) / carry_camera.radians_per_pixel))
+	for _tick: int in range(3):
+		await physics_frame
+	TestInputEvents.key(KEY_E)
+	TestInputEvents.key(KEY_E, false)
+	for _tick: int in range(75):
+		await physics_frame
+	if not _check(carry_scope.held_prop_id() == &"lab.cube.medium" and cube.is_carried(), "E acquires a real physical cube"):
+		return
+	await RenderingServer.frame_post_draw
+	if not _capture(capture.get_basename() + "-carry.png"):
+		return
+	TestInputEvents.mouse_button(MOUSE_BUTTON_LEFT)
+	for _tick: int in range(3):
+		await physics_frame
+	TestInputEvents.mouse_button(MOUSE_BUTTON_LEFT, false)
+	if not _check(carry_scope.held_prop_id().is_empty() and cube.linear_velocity.length() > 2, "mouse throws and releases cube"):
+		return
+	await RenderingServer.frame_post_draw
 	if not _capture(capture):
 		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.
