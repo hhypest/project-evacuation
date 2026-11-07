@@ -19,3 +19,11 @@ static func motion(delta: Vector2) -> void:
 	event.screen_relative = delta
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
+
+
+static func mouse_button(button: MouseButton, pressed: bool = true) -> void:
+	var event: InputEventMouseButton = InputEventMouseButton.new()
+	event.button_index = button
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()

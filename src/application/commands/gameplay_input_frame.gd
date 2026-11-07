@@ -8,5 +8,6 @@ var look_delta: Vector2 = Vector2.ZERO
 var jump_requested: bool = false
 var jump_held: bool = false
 var interact_requested: bool = false
+var throw_requested: bool = false
 var crouching: bool = false
 var walking: bool = false

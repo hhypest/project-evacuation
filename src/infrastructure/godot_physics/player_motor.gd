@@ -146,6 +146,10 @@ func _push_props(desired: Vector3, delta: float) -> void:
 		if collider is not RigidBody3D or absf(collision.get_normal().dot(up_direction)) > 0.2:
 			continue
 		var body: RigidBody3D = collider as RigidBody3D
+		if body is CarryRigidBody:
+			var carried: CarryRigidBody = body as CarryRigidBody
+			if carried.is_carried():
+				continue
 		if pushed.has(body.get_instance_id()):
 			continue
 		pushed[body.get_instance_id()] = true

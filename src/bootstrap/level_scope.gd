@@ -6,6 +6,8 @@ var _generation: int = -1
 var _level: Node3D
 var _camera: LookCamera
 var _player: PlayerMotor
+var _carry: CarryController
+var _tick_id: int = 0
 
 
 func open(scene: PackedScene, generation: int) -> bool:
@@ -23,12 +25,27 @@ func open(scene: PackedScene, generation: int) -> bool:
 	if camera == null or player == null:
 		level.free()
 		return false
+	var profile: CarryProfile = (preload("res://content/definitions/default_carry.tres") as CarrySettings).to_profile()
+	if not profile.is_valid():
+		level.free()
+		return false
 	_generation = generation
 	_level = level
 	_camera = camera
 	_player = player
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(level)
+	var carry_world: CarryPhysicsAdapter = CarryPhysicsAdapter.new()
+	if not carry_world.configure(level, player, profile, generation):
+		carry_world.close()
+		remove_child(level)
+		level.queue_free()
+		_generation = -1
+		_level = null
+		_camera = null
+		_player = null
+		return false
+	_carry = CarryController.new(carry_world, profile, generation)
 	return true
 
 
@@ -45,10 +62,32 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	command.walking = frame.walking
 	_player.step(command, delta)
 	_camera.global_position = _player.eye_position()
+	_tick_id += 1
+	var carry_input: CarryInput = CarryInput.new()
+	carry_input.scope_id = _generation
+	carry_input.tick_id = _tick_id
+	carry_input.delta = delta
+	carry_input.view = _camera.global_transform
+	carry_input.carrier_velocity = _player.velocity
+	carry_input.interact = frame.interact_requested
+	carry_input.throw_requested = frame.throw_requested
+	_carry.step(carry_input)
+
+
+func held_prop_id() -> StringName:
+	return _carry.state.held_id if _carry != null else &""
+
+
+func suspend_carry() -> void:
+	if _carry != null:
+		_carry.suspend()
 
 
 func close() -> void:
 	_generation = -1
+	if _carry != null:
+		_carry.close()
+	_carry = null
 	_camera = null
 	_player = null
 	if get_parent() != null:
