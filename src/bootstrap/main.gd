@@ -43,9 +43,9 @@ func get_session_status() -> SessionStatus:
 	return _session.get_status()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if _scope != null and _session.get_status().accepts_gameplay:
-		_scope.apply_input(_input.take_frame())
+		_scope.apply_input(_input.take_frame(), delta)
 
 
 func _on_start_requested() -> void:

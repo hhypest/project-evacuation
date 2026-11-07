@@ -41,6 +41,33 @@ func _run() -> void:
 		return
 	for _tick: int in range(150):
 		await physics_frame
+	var player: PlayerMotor = main.get_node("LevelScope/FoundationLab/Player") as PlayerMotor
+	if not _check(player != null, "physical player"):
+		return
+	var origin: Vector3 = player.position
+	TestInputEvents.key(KEY_D)
+	for _tick: int in range(30):
+		await physics_frame
+	TestInputEvents.key(KEY_D, false)
+	for _tick: int in range(20):
+		await physics_frame
+	TestInputEvents.key(KEY_W)
+	for _tick: int in range(30):
+		await physics_frame
+	TestInputEvents.key(KEY_SPACE)
+	for _tick: int in range(6):
+		await physics_frame
+	TestInputEvents.key(KEY_SPACE, false)
+	TestInputEvents.key(KEY_CTRL)
+	for _tick: int in range(8):
+		await physics_frame
+	if not _check(player.position.x > origin.x + 2 and player.position.z < origin.z - 2
+		and player.position.y > 0.7 and player.crouched, "keyboard movement, jump and duck jump"):
+		return
+	TestInputEvents.key(KEY_CTRL, false)
+	TestInputEvents.key(KEY_W, false)
+	for _tick: int in range(60):
+		await physics_frame
 	var camera: LookCamera = main.get_node("LevelScope/FoundationLab/Camera") as LookCamera
 	if not _check(camera != null, "first-person look camera"):
 		return
@@ -83,7 +110,7 @@ func _run() -> void:
 	if not _capture(capture):
 		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s session=menu/start/pause/focus/resume/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.

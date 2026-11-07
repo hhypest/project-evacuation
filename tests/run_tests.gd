@@ -3,7 +3,6 @@ extends SceneTree
 
 var _suite: StringName = &"all"
 var _self_test_failure: bool = false
-var _finished: bool = false
 
 
 func _initialize() -> void:
@@ -17,11 +16,12 @@ func _run() -> void:
 		return
 	var suites: Array[TestSuite] = [
 		SessionTests.new(), SessionControllerTests.new(), InputBufferTests.new(),
-		RuntimeTests.new(), PhysicsTests.new(), ScopeLoadTests.new(), ScopeTests.new(),
+		MovementRulesTests.new(), RuntimeTests.new(), PhysicsTests.new(), ScopeLoadTests.new(),
+		PlayerMovementTests.new(), ScopeTests.new(),
 	]
 	var count: int = 0
 	var failed: int = 0
-	create_timer(30.0, true, false, true).timeout.connect(_on_timeout)
+	root.add_child(TestWatchdog.new())
 	print("TEST_RUN Godot=%s suite=%s" % [Engine.get_version_info()["string"], _suite])
 	for suite: TestSuite in suites:
 		if _suite != &"all" and suite.suite_name() != _suite:
@@ -43,7 +43,6 @@ func _run() -> void:
 	if count == 0:
 		failed += 1
 	print("TEST_RESULT total=%d failed=%d elapsed_ms=%d" % [count, failed, Time.get_ticks_msec() - started])
-	_finished = true
 	quit(0 if failed == 0 else 1)
 
 
@@ -67,9 +66,3 @@ func _parse_arguments(arguments: PackedStringArray) -> bool:
 		printerr("Unknown suite: " + str(_suite))
 		return false
 	return true
-
-
-func _on_timeout() -> void:
-	if not _finished:
-		printerr("TEST_TIMEOUT: suite did not complete within 30 seconds")
-		quit(3)

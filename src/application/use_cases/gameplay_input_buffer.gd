@@ -68,6 +68,7 @@ func take_frame() -> GameplayInputFrame:
 		).limit_length()
 		frame.look_delta = _look_delta
 		frame.jump_requested = _jump_requested
+		frame.jump_held = _held.has(&"jump")
 		frame.interact_requested = _interact_requested
 		frame.crouching = _held.has(&"crouch")
 		frame.walking = _held.has(&"walk")
