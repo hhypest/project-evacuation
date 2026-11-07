@@ -294,6 +294,163 @@
     "usage": "Силовой кабель, бесшовный; U вдоль кабеля; полоса горит под питанием"
   },
   {
+    "name": "chamber_terminal",
+    "group": "devices",
+    "size": [
+      1024,
+      768
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "screen",
+    "files": [
+      "chamber_terminal_albedo.png",
+      "chamber_terminal_normal.png",
+      "chamber_terminal_orm.png",
+      "chamber_terminal_emission.png"
+    ],
+    "usage": "Терминал камеры: экран со схемой камеры, клавиатура; обучение и состояния цепей (ADR-0006)"
+  },
+  {
+    "name": "vanguard_station",
+    "group": "devices",
+    "size": [
+      512,
+      768
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "white",
+    "files": [
+      "vanguard_station_albedo.png",
+      "vanguard_station_normal.png",
+      "vanguard_station_orm.png",
+      "vanguard_station_emission.png"
+    ],
+    "usage": "Станция авангарда: пополнение кислорода и крепление узла; совпадает с контрольной точкой"
+  },
+  {
+    "name": "basalt_wall",
+    "group": "alien",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "basalt_wall_albedo.png",
+      "basalt_wall_normal.png",
+      "basalt_wall_orm.png"
+    ],
+    "usage": "Монолитная кладка чужого слоя, 2 м на тайл"
+  },
+  {
+    "name": "basalt_floor",
+    "group": "alien",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "basalt_floor_albedo.png",
+      "basalt_floor_normal.png",
+      "basalt_floor_orm.png"
+    ],
+    "usage": "Плиты пола чужого слоя, 2 м на тайл"
+  },
+  {
+    "name": "glyph_panel",
+    "group": "alien",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": "alien",
+    "files": [
+      "glyph_panel_albedo.png",
+      "glyph_panel_normal.png",
+      "glyph_panel_orm.png",
+      "glyph_panel_emission.png"
+    ],
+    "usage": "Монолит с колонками неалфавитных глифов; бледное свечение — атмосфера, не сигнал"
+  },
+  {
+    "name": "power_channel",
+    "group": "alien",
+    "size": [
+      1024,
+      256
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "power_channel_albedo.png",
+      "power_channel_normal.png",
+      "power_channel_orm.png",
+      "power_channel_emission.png"
+    ],
+    "usage": "Канал кладки с человеческим кабелем и скобами; горит янтарём под питанием, бесшовно вдоль U"
+  },
+  {
+    "name": "portal_frame",
+    "group": "alien",
+    "size": [
+      1024,
+      256
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": "alien",
+    "files": [
+      "portal_frame_albedo.png",
+      "portal_frame_normal.png",
+      "portal_frame_orm.png",
+      "portal_frame_emission.png"
+    ],
+    "usage": "Рама портала: профиль поперёк V, мотивы вдоль U (бесшовно); холодная кромка"
+  },
+  {
+    "name": "biomass",
+    "group": "alien",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "biomass_albedo.png",
+      "biomass_normal.png",
+      "biomass_orm.png"
+    ],
+    "usage": "Микробные маты и осадки в нижних ярусах; не светятся, не влияют на сигналы"
+  },
+  {
     "name": "junction_relay",
     "group": "devices",
     "size": [

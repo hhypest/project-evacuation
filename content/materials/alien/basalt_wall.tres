@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/alien/basalt_wall/basalt_wall_albedo.png" id="1_b4e7a"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/basalt_wall/basalt_wall_normal.png" id="2_p18hp"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/basalt_wall/basalt_wall_orm.png" id="3_qfhlh"]
+
+[resource]
+resource_name = "basalt_wall"
+albedo_texture = ExtResource("1_b4e7a")
+orm_texture = ExtResource("3_qfhlh")
+normal_enabled = true
+normal_texture = ExtResource("2_p18hp")
+ao_enabled = true

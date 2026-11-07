@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/alien/glyph_panel/glyph_panel_albedo.png" id="1_ay6ci"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/glyph_panel/glyph_panel_emission.png" id="2_xffto"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/glyph_panel/glyph_panel_normal.png" id="3_g1yak"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/glyph_panel/glyph_panel_orm.png" id="4_iow07"]
+
+[resource]
+resource_name = "glyph_panel"
+albedo_texture = ExtResource("1_ay6ci")
+orm_texture = ExtResource("4_iow07")
+emission_enabled = true
+emission = Color(0.8627451, 0.9019608, 0.9490196, 1)
+emission_energy_multiplier = 0.6
+emission_operator = 1
+emission_texture = ExtResource("2_xffto")
+normal_enabled = true
+normal_texture = ExtResource("3_g1yak")
+ao_enabled = true

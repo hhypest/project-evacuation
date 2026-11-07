@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/alien/biomass/biomass_albedo.png" id="1_nu16n"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/biomass/biomass_normal.png" id="2_ntat7"]
+[ext_resource type="Texture2D" path="res://content/textures/alien/biomass/biomass_orm.png" id="3_5cylc"]
+
+[resource]
+resource_name = "biomass"
+albedo_texture = ExtResource("1_nu16n")
+orm_texture = ExtResource("3_5cylc")
+normal_enabled = true
+normal_texture = ExtResource("2_ntat7")
+ao_enabled = true
