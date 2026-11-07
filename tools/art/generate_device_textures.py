@@ -920,7 +920,16 @@ def main() -> None:
                          "files": files, "usage": asset.usage})
         rows[asset.group].append((asset, maps))
         print(f"{asset.group}/{asset.name}: {', '.join(files)}")
-    (args.out / "textures_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    manifest_path = args.out / "textures_manifest.json"
+    if args.only and manifest_path.exists():
+        # Частичная пересборка не должна терять записи остальных ассетов: обновляем только выбранные.
+        fresh = {str(entry["name"]): entry for entry in manifest}
+        previous = json.loads(manifest_path.read_text(encoding="utf-8"))
+        merged = [fresh.pop(str(entry["name"]), entry) for entry in previous]
+        manifest = merged + list(fresh.values())
+    order = {asset.name: i for i, asset in enumerate(ASSETS)}
+    manifest.sort(key=lambda entry: order.get(str(entry["name"]), len(order)))
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.preview is not None:
         args.preview.mkdir(parents=True, exist_ok=True)
         for group, items in rows.items():

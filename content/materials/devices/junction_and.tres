@@ -16,3 +16,4 @@ emission_operator = 1
 emission_texture = ExtResource("2_v3yup")
 normal_enabled = true
 normal_texture = ExtResource("3_v6fkl")
+ao_enabled = true

@@ -78,6 +78,8 @@ func _build_material(asset_name: String, group: String, emission: String) -> Err
 	material.normal_enabled = true
 	material.normal_texture = normal
 	material.orm_texture = orm
+	# ORM-канал R (ambient occlusion) учитывается только при включённом AO.
+	material.ao_enabled = true
 	if not emission.is_empty():
 		var mask: Texture2D = _load_texture(base + "_emission.png")
 		if mask == null:

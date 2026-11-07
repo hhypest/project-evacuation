@@ -10,3 +10,4 @@ albedo_texture = ExtResource("1_x8cxa")
 orm_texture = ExtResource("3_4uptf")
 normal_enabled = true
 normal_texture = ExtResource("2_02ecm")
+ao_enabled = true
