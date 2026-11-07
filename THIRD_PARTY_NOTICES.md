@@ -6,7 +6,7 @@ Own code, documentation and the procedural primitive scene in this repository ar
 | --- | --- | --- | --- |
 | Godot Engine Standard | 4.7.2-stable, official build `ed1daf0bf`; [release](https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable) | MIT plus upstream component licenses | Editor, runtime and export templates |
 | Jolt Physics | Version embedded by the pinned Godot build; [upstream](https://github.com/jrouwe/JoltPhysics), [Godot module](https://github.com/godotengine/godot/tree/4.7.2-stable/modules/jolt_physics) | MIT; see Godot copyright metadata and bundled texts | Built-in 3D simulation; no separate extension |
-| actions/checkout | v4.2.2, commit `11bd71901bbe5b1630ceea73d27597364c9af683`; [source](https://github.com/actions/checkout/tree/11bd71901bbe5b1630ceea73d27597364c9af683) | MIT | CI only; not shipped with the game |
+| actions/checkout | v7.0.1, commit `3d3c42e5aac5ba805825da76410c181273ba90b1`; [source](https://github.com/actions/checkout/tree/3d3c42e5aac5ba805825da76410c181273ba90b1) | MIT | CI only; not shipped with the game |
 
 The pinned engine reports its bundled dependencies and their exact copyright notices. They are preserved in:
 
