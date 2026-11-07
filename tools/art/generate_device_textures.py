@@ -53,6 +53,8 @@ EMISSION_SEMANTIC = {
     "amber": "Питание (каналы, индикаторы, заряд)",
     "gravity": "Гравитационное поле",
     "white": "Нейтральный индикатор состояния (не несёт цветовой семантики)",
+    "screen": "Экран человеческого терминала (нейтральный, не сигнал головоломки)",
+    "alien": "Декоративный свет чужого слоя: холодный почти белый, не сигнал",
 }
 
 
@@ -478,9 +480,8 @@ def dev_cube_face() -> Canvas:
     c.glass(lens, height=0.62, bevel=2)
     c.emissive(disk(c, S / 2, S / 2, 40) * 0.9 + ring(c, S / 2, S / 2, 40, 47) * 0.4)
     c.bolts([(S / 2 - 62, S / 2 - 62), (S / 2 + 62, S / 2 - 62), (S / 2 - 62, S / 2 + 62), (S / 2 + 62, S / 2 + 62)], 5)
-    # серийный номер на левом поле панели
-    c.painted(c.shape(digits("07", 88, 238, 34, 6)) * panel, "stripe_dark", height_add=0.002)
-    c.painted(c.shape(rect(S - 104, 230, S - 86, 282)) * panel, "marking")
+    # симметричные метки на боковых полях: BoxMesh зеркалит часть граней, поэтому цифр на кубе нет
+    c.painted(c.shape(union(rect(86, 230, 104, 282), rect(S - 104, 230, S - 86, 282))) * panel, "marking")
     return c
 
 
@@ -780,6 +781,245 @@ def dev_junction_box(kind: str) -> Callable[[], Canvas]:
     return build
 
 
+# --------------------------------------------------------------------------- чужой слой и SLICE-02
+
+def speckle(c: Canvas, density: float, seed_offset: int = 0) -> np.ndarray:
+    """Металлические включения в базальтовом композите — редкие точки."""
+    rr = np.random.default_rng(c.seed + 500 + seed_offset)
+    field = rr.random((c.h, c.w)).astype(np.float32)
+    dots = (field > 1.0 - density).astype(np.float32)
+    return np.clip(ndimage.gaussian_filter(dots, 0.6, mode="wrap") * 3.0, 0, 1)
+
+
+def stone(c: Canvas, mask: np.ndarray, height: float, bevel: float, tone: float = 1.0, rough: float = 0.7) -> None:
+    base = rgb("basalt") * tone
+    c.fill(mask, base, height=height, bevel=bevel, rough=rough, metal=0.0, paint=False, color_var=0.06, rough_var=0.12)
+
+
+def mat_basalt_wall() -> Canvas:
+    """Монолитная кладка чужого слоя: крупные блоки «не по росту», 2 м на тайл."""
+    c = Canvas(1024, 1024, True, True, seed=41)
+    stone(c, np.ones((c.h, c.w), np.float32), 0.2, 0.0, 0.7, 0.85)
+    rr = np.random.default_rng(41)
+    courses = [(0, 300), (300, 460), (460, 820), (820, 1024)]
+    for ci, (y0, y1) in enumerate(courses):
+        x = int(rr.integers(0, 200))
+        widths = [520, 380, 640, 300, 460] if ci % 2 == 0 else [700, 324, 410]
+        k = 0
+        start = x
+        while start < x + 1024:
+            w = widths[k % len(widths)]
+            k += 1
+            x0, x1 = start + 6, min(start + w, x + 1024) - 6
+            ya, yb = y0 + 6, y1 - 6
+            # крупный косой срез одного-двух углов — пропорции «не по росту»
+            cut = float(min(yb - ya, x1 - x0)) * (0.25 + 0.35 * float(rr.random()))
+            corners = int(rr.integers(0, 4))
+            pts = [(x0, ya), (x1, ya), (x1, yb), (x0, yb)]
+            if corners in (1, 3):
+                pts = [(x0 + cut, ya), (x1, ya), (x1, yb), (x0, yb), (x0, ya + cut)]
+            if corners in (2, 3):
+                pts = [p_ for p_ in pts if p_ != (x1, yb)]
+                idx = pts.index((x0, yb))
+                pts[idx:idx] = [(x1, yb - cut), (x1 - cut, yb)]
+            block = c.shape(poly(pts))
+            tone = 0.85 + 0.3 * float(rr.random())
+            stone(c, block, 0.62 + 0.08 * float(rr.random()), 7.0, tone, 0.62)
+            if (x1 - x0) > 360 and rr.random() > 0.35:
+                inset = c.shape(rect(x0 + 60, y0 + 46, x1 - 60, y1 - 46))
+                stone(c, inset, 0.52, 4.0, tone * 0.9, 0.48)
+            start += w
+    c.height += (c.noise(6, 4) - 0.5) * 0.05
+    flecks = speckle(c, 0.0025)
+    c.fill(flecks, rgb("steel") * 0.9, rough=0.28, metal=1.0, paint=False)
+    return c
+
+
+def mat_basalt_floor() -> Canvas:
+    """Плиты пола чужого слоя: метровые плиты со сдвигом, пыль в швах, полировка в середине."""
+    c = Canvas(1024, 1024, True, True, seed=42)
+    stone(c, np.ones((c.h, c.w), np.float32), 0.25, 0.0, 0.55, 0.9)
+    rr = np.random.default_rng(42)
+    for row in range(2):
+        off = 0 if row == 0 else 256
+        for col in range(3):
+            x0 = off + col * 512 + 5
+            y0 = row * 512 + 5
+            slab = c.shape(rect(x0, y0, x0 + 502, y0 + 502))
+            stone(c, slab, 0.6 + 0.05 * float(rr.random()), 6.0, 0.8 + 0.25 * float(rr.random()), 0.66)
+            if rr.random() > 0.4:
+                ln = c.shape(lines([(x0 + 60, y0 + 251, x0 + 442, y0 + 251)], 10))
+                c.fill(ln, rgb("basalt") * 0.6, height_add=-0.05, rough=0.9, paint=False)
+    polish = smoothstep(0.55, 0.85, c.noise(3, 3))
+    c.rough = np.clip(c.rough - polish * 0.25, 0.2, 1)
+    dust = np.clip((c.blur(c.height, 3.0) - c.height) * 30.0, 0, 1)
+    c.albedo = c.albedo * (1 - dust[..., None] * 0.6) + np.array([0.33, 0.27, 0.24])[None, None, :] * dust[..., None] * 0.6
+    c.fill(speckle(c, 0.002, 1), rgb("steel") * 0.85, rough=0.3, metal=1.0, paint=False)
+    return c
+
+
+def glyph(rr: np.random.Generator, cx: float, cy: float, s: float):
+    """Неалфавитный знак: асимметричная комбинация узлов, дуг и угловых штрихов."""
+    parts = []
+    nodes = [(cx + (rr.random() - 0.5) * s * 0.7, cy + (rr.random() - 0.5) * s * 0.9) for _ in range(int(rr.integers(2, 4)))]
+    segs = [(nodes[i][0], nodes[i][1], nodes[i + 1][0], nodes[i + 1][1]) for i in range(len(nodes) - 1)]
+    segs.append((cx, cy - s * 0.5, cx, cy + s * 0.5))
+    parts.append(lines(segs, s * 0.07))
+    for nx, ny in nodes:
+        if rr.random() > 0.4:
+            parts.append(arc(nx, ny, s * 0.12, 0, 360, s * 0.06))
+    if rr.random() > 0.5:
+        a0 = float(rr.integers(0, 4)) * 90.0
+        parts.append(arc(cx, cy, s * 0.35, a0, a0 + 150.0, s * 0.06))
+    return union(*parts)
+
+
+def mat_glyph_panel() -> Canvas:
+    """Монолит с вертикальными колонками глифов; бледное холодное свечение в бороздах (не игровой сигнал)."""
+    c = Canvas(1024, 1024, True, True, seed=43)
+    stone(c, np.ones((c.h, c.w), np.float32), 0.6, 0.0, 0.85, 0.55)
+    rr = np.random.default_rng(43)
+    carve = np.zeros((c.h, c.w), np.float32)
+    for col in range(4):
+        cx = 128 + col * 256
+        band = c.shape(rect(cx - 70, 0, cx + 70, 1024))
+        stone(c, band, 0.5, 3.0, 0.78, 0.45)
+        y = 60.0
+        while y < 1000:
+            s = 70 + float(rr.random()) * 40
+            carve = np.maximum(carve, c.shape(glyph(rr, cx, y + s * 0.5, s)))
+            y += s + 30
+    c.fill(carve, rgb("basalt") * 0.45, height_add=-0.12, rough=0.85, paint=False)
+    c.emissive(carve * smoothstep(0.3, 0.8, c.noise(3, 2)) * 0.6)
+    c.fill(speckle(c, 0.002, 2), rgb("steel"), rough=0.3, metal=1.0, paint=False)
+    return c
+
+
+def mat_power_channel() -> Canvas:
+    """Выпиленный канал чужой кладки с человеческим кабелем и скобами (бесшовно вдоль U)."""
+    c = Canvas(1024, 256, tile_x=True, seed=44)
+    stone(c, np.ones((c.h, c.w), np.float32), 0.6, 0.0, 0.85, 0.6)
+    groove = c.shape(rect(0, 92, 1024, 164))
+    stone(c, groove, 0.3, 3.0, 0.55, 0.8)
+    edges = c.shape(union(rect(0, 84, 1024, 92), rect(0, 164, 1024, 172)))
+    c.fill(edges, rgb("basalt") * 1.25, rough=0.3, paint=False)
+    cable = c.shape(rect(0, 110, 1024, 146, 0))
+    c.rubber(cable, height=0.42)
+    core = c.shape(rect(0, 124, 1024, 132))
+    c.glass(core, height=0.44)
+    c.emissive(core + groove * 0.18)
+    for i in range(4):
+        x = 128 + i * 256
+        clamp = c.shape(rect(x - 18, 80, x + 18, 176, 4))
+        c.painted(clamp, "panel_light", height=0.7, bevel=2)
+        c.bolts([(x, 92), (x, 164)], 5)
+        c.painted(c.shape(rect(x - 18, 122, x + 18, 134)) * clamp, "marking", height_add=0.003)
+    c.fill(speckle(c, 0.002, 3), rgb("steel"), rough=0.3, metal=1.0, paint=False)
+    return c
+
+
+def mat_portal_frame() -> Canvas:
+    """Рама портала (чужая): ступенчатый профиль поперёк V, повторяющиеся угловые мотивы вдоль U."""
+    c = Canvas(1024, 256, tile_x=True, seed=45)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    v = yy / c.h
+    profile = 0.3 + 0.35 * smoothstep(0.05, 0.2, v) + 0.2 * smoothstep(0.45, 0.55, v) - 0.25 * smoothstep(0.85, 0.97, v)
+    stone(c, np.ones((c.h, c.w), np.float32), 0.5, 0.0, 0.8, 0.4)
+    c.height = profile.astype(np.float32)
+    motif = np.zeros((c.h, c.w), np.float32)
+    for i in range(8):
+        x = 64 + i * 128
+        # ненаправленный мотив: ромб с вырезом и парные засечки (не стрелка — стрелки закреплены за гравитацией)
+        motif = np.maximum(motif, c.shape(poly([(x, 112), (x + 34, 146), (x, 180), (x - 34, 146)])))
+        motif = np.maximum(motif, c.shape(lines([(x - 56, 200, x - 40, 200), (x + 40, 200, x + 56, 200)], 6)))
+    c.fill(motif, rgb("basalt") * 0.5, height_add=-0.06, rough=0.8, paint=False)
+    inner = c.shape(rect(0, 8, 1024, 16))
+    c.emissive(inner * 0.8 + motif * 0.25)
+    c.fill(speckle(c, 0.002, 4), rgb("steel"), rough=0.3, metal=1.0, paint=False)
+    return c
+
+
+def dev_chamber_terminal() -> Canvas:
+    """Терминал камеры (человеческий): экран со схемой камеры, клавиши, индикатор питания."""
+    c = Canvas(1024, 768, seed=46)
+    W, H = 1024.0, 768.0
+    c.painted(np.ones((c.h, c.w), np.float32), "metal_dark", height=0.6)
+    c.fill(1 - c.shape(rect(10, 10, W - 10, H - 10, 24)), None, height=0.42, bevel=5)
+    bezel = c.shape(rect(120, 60, W - 60, 500, 18))
+    c.painted(bezel, "metal_dark", height=0.7, bevel=4)
+    screen = c.shape(rect(146, 84, W - 86, 476, 10))
+    c.glass(screen, height=0.55)
+    # схема камеры на экране — только линии и прямоугольники, без текста
+    ui = c.shape(union(
+        rect(176, 112, W - 116, 116), rect(176, 444, W - 116, 448),
+        lines([(220, 380, 420, 380), (420, 380, 420, 220), (420, 220, 700, 220), (700, 220, 700, 330), (700, 330, 860, 330)], 5),
+        rect(395, 195, 445, 245, 4), rect(675, 305, 725, 355, 4), rect(200, 360, 240, 400, 4),
+    ))
+    grid = np.zeros((c.h, c.w), np.float32)
+    grid[np.arange(c.h) % 40 == 0, :] = 1
+    grid[:, np.arange(c.w) % 40 == 0] = 1
+    c.emissive(screen * (0.08 + 0.12 * grid) + ui * screen * 0.95)
+    c.painted(c.shape(rect(30, 60, 96, 500, 10)), "stripe_dark", height=0.62)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    c.painted(c.shape(rect(30, 60, 96, 500, 10)) * (np.mod(xx + yy, 40) < 20), "marking", height_add=0.002)
+    for row in range(2):
+        for col in range(8):
+            x0, y0 = 150 + col * 96, 548 + row * 92
+            key = c.shape(rect(x0, y0, x0 + 72, y0 + 64, 10))
+            c.rubber(key, height=0.66, bevel=3)
+    c.painted(disk(c, 70, 580, 22), "metal_dark", height=0.72, bevel=2)
+    c.glass(disk(c, 70, 580, 14), height=0.6)
+    c.bolts([(40, 40), (W - 40, 40), (40, H - 40), (W - 40, H - 40)], 9)
+    return c
+
+
+def dev_vanguard_station() -> Canvas:
+    """Станция авангарда: пополнение кислорода и крепление силового узла (контрольная точка)."""
+    c = Canvas(512, 768, seed=47)
+    W, H = 512.0, 768.0
+    c.painted(np.ones((c.h, c.w), np.float32), "panel_light", height=0.6)
+    c.fill(1 - c.shape(rect(8, 8, W - 8, H - 8, 20)), None, height=0.42, bevel=4)
+    # пиктограммы: баллон и узел с ручками
+    c.painted(c.shape(union(rect(70, 60, 130, 200, 26), rect(88, 40, 112, 64, 4))), "stripe_dark", height_add=0.003)
+    c.painted(c.shape(union(rect(330, 90, 450, 180, 8), rect(350, 70, 370, 92), rect(410, 70, 430, 92))), "stripe_dark", height_add=0.003)
+    c.painted(c.shape(lightning(390, 135, 60)), "marking", height_add=0.004)
+    # разъём шланга
+    c.steel(ring(c, 256, 330, 70, 96), height=0.8, bevel=2)
+    c.painted(disk(c, 256, 330, 70), "metal_dark", height=0.5, bevel=3)
+    c.fill(disk(c, 256, 330, 34), rgb("dark"), height=0.3, rough=0.9, paint=False)
+    # шкала запаса — нейтральный индикатор
+    frame = c.shape(rect(150, 460, 362, 520, 8))
+    c.painted(frame, "metal_dark", height=0.7, bevel=2)
+    c.glass(c.shape(rect(158, 468, 354, 512, 6)), height=0.55)
+    for i in range(6):
+        x0 = 164 + i * 32
+        c.emissive(c.shape(rect(x0, 474, x0 + 26, 506, 3)))
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    band = c.shape(rect(20, 600, W - 20, 650))
+    c.painted(band, "stripe_dark", height=0.62)
+    c.painted(band * (np.mod(xx + yy, 48) < 24), "marking", height_add=0.002)
+    c.painted(c.shape(digits("03", 210, 680, 50, 9)), "stripe_dark", height_add=0.002)
+    c.bolts([(30, 30), (W - 30, 30), (30, H - 30), (W - 30, H - 30)], 8)
+    return c
+
+
+def mat_biomass() -> Canvas:
+    """Микробные маты терминатора и их минерализованные осадки: тёмно-красное и чёрное, не светятся."""
+    c = Canvas(1024, 1024, True, True, seed=48)
+    n1 = c.noise(6, 5)
+    ridged = 1.0 - np.abs(c.noise(10, 5) * 2.0 - 1.0)
+    veins = smoothstep(0.75, 0.95, ridged)
+    crust = smoothstep(0.35, 0.7, n1)
+    base = rgb("#2A0E0C") * (1 - crust[..., None]) + rgb("#0E0908") * crust[..., None]
+    c.albedo = base * (0.8 + 0.4 * c.noise(40, 3)[..., None])
+    c.height = (0.4 + 0.3 * crust + 0.12 * veins + 0.05 * c.noise(64, 3)).astype(np.float32)
+    c.rough = np.clip(0.75 - 0.4 * smoothstep(0.7, 0.9, c.noise(5, 3)), 0.2, 1).astype(np.float32)
+    mineral = smoothstep(0.82, 0.9, c.noise(24, 4)) * crust
+    c.albedo = c.albedo * (1 - mineral[..., None]) + rgb("#8C8478") * mineral[..., None]
+    c.albedo = c.albedo * (1 - veins[..., None] * 0.4) + rgb("#4A1712") * veins[..., None] * 0.4
+    return c
+
+
 @dataclass(frozen=True)
 class Asset:
     name: str
@@ -805,6 +1045,14 @@ ASSETS: list[Asset] = [
     Asset("door_leaf", "devices", dev_door_leaf, "amber", "Створки двери камеры (вид спереди, обе створки); лампа — питание замка"),
     Asset("power_node_side", "devices", dev_power_node, "amber", "Боковая панель силового узла HEVS-02; 8 сегментов заряда"),
     Asset("cable", "devices", dev_cable, "amber", "Силовой кабель, бесшовный; U вдоль кабеля; полоса горит под питанием"),
+    Asset("chamber_terminal", "devices", dev_chamber_terminal, "screen", "Терминал камеры: экран со схемой камеры, клавиатура; обучение и состояния цепей (ADR-0006)"),
+    Asset("vanguard_station", "devices", dev_vanguard_station, "white", "Станция авангарда: пополнение кислорода и крепление узла; совпадает с контрольной точкой"),
+    Asset("basalt_wall", "alien", mat_basalt_wall, None, "Монолитная кладка чужого слоя, 2 м на тайл"),
+    Asset("basalt_floor", "alien", mat_basalt_floor, None, "Плиты пола чужого слоя, 2 м на тайл"),
+    Asset("glyph_panel", "alien", mat_glyph_panel, "alien", "Монолит с колонками неалфавитных глифов; бледное свечение — атмосфера, не сигнал"),
+    Asset("power_channel", "alien", mat_power_channel, "amber", "Канал кладки с человеческим кабелем и скобами; горит янтарём под питанием, бесшовно вдоль U"),
+    Asset("portal_frame", "alien", mat_portal_frame, "alien", "Рама портала: профиль поперёк V, мотивы вдоль U (бесшовно); холодная кромка"),
+    Asset("biomass", "alien", mat_biomass, None, "Микробные маты и осадки в нижних ярусах; не светятся, не влияют на сигналы"),
 ] + [
     Asset(f"junction_{k}", "devices", dev_junction_box(k), "amber",
           f"Распределительная коробка цепи: {label}; 4 индикатора входов/выхода")
@@ -834,7 +1082,9 @@ def save_maps(asset: Asset, maps: dict[str, np.ndarray], out_dir: Path) -> list[
     return written
 
 
-EMISSION_PREVIEW = {"cyan": rgb("cyan"), "amber": rgb("amber"), "gravity": rgb("gravity"), "white": np.array([0.92, 0.95, 1.0], np.float32)}
+EMISSION_PREVIEW = {"cyan": rgb("cyan"), "amber": rgb("amber"), "gravity": rgb("gravity"),
+                    "white": np.array([0.92, 0.95, 1.0], np.float32), "screen": rgb("#C9DCE0"),
+                    "alien": rgb("#DCE6F2")}
 
 
 def shade(maps: dict[str, np.ndarray], emission: str | None) -> np.ndarray:
@@ -907,13 +1157,15 @@ def main() -> None:
     ap.add_argument("--only", nargs="*", default=None, help="имена ассетов")
     args = ap.parse_args()
     manifest: list[dict[str, object]] = []
-    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": []}
+    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": [], "alien": []}
     for asset in ASSETS:
         if args.only and asset.name not in args.only:
             continue
         canvas = asset.build()
-        maps = canvas.finish(wear=0.55 if asset.group == "devices" else 0.35,
-                             grime=0.55, scratches=50 if asset.group == "devices" else 120)
+        alien = asset.group == "alien"
+        maps = canvas.finish(wear=0.55 if asset.group == "devices" else (0.0 if alien else 0.35),
+                             grime=0.55, scratches=0 if alien else (50 if asset.group == "devices" else 120),
+                             normal_strength=4.0 if alien else 6.0)
         files = save_maps(asset, maps, args.out)
         manifest.append({"name": asset.name, "group": asset.group, "size": [canvas.w, canvas.h],
                          "tile": [canvas.tile_x, canvas.tile_y], "emission": asset.emission,
