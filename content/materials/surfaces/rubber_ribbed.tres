@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/rubber_ribbed/rubber_ribbed_albedo.png" id="1_4y2nc"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/rubber_ribbed/rubber_ribbed_normal.png" id="2_bweqo"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/rubber_ribbed/rubber_ribbed_orm.png" id="3_ybcxk"]
+
+[resource]
+resource_name = "rubber_ribbed"
+albedo_texture = ExtResource("1_4y2nc")
+orm_texture = ExtResource("3_ybcxk")
+normal_enabled = true
+normal_texture = ExtResource("2_bweqo")
+ao_enabled = true

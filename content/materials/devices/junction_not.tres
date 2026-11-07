@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/devices/junction_not/junction_not_albedo.png" id="1_3trtg"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/junction_not/junction_not_emission.png" id="2_kam1e"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/junction_not/junction_not_normal.png" id="3_icp2e"]
+[ext_resource type="Texture2D" path="res://content/textures/devices/junction_not/junction_not_orm.png" id="4_7m5jc"]
+
+[resource]
+resource_name = "junction_not"
+albedo_texture = ExtResource("1_3trtg")
+orm_texture = ExtResource("4_7m5jc")
+emission_enabled = true
+emission = Color(0.9098039, 0.5882353, 0.23529412, 1)
+emission_energy_multiplier = 1.6
+emission_operator = 1
+emission_texture = ExtResource("2_kam1e")
+normal_enabled = true
+normal_texture = ExtResource("3_icp2e")
+ao_enabled = true

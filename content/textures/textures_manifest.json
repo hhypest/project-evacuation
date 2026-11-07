@@ -1,0 +1,416 @@
+[
+  {
+    "name": "panel_light",
+    "group": "surfaces",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "panel_light_albedo.png",
+      "panel_light_normal.png",
+      "panel_light_orm.png"
+    ],
+    "usage": "Тайлящийся светлый окрашенный металл человеческого слоя, 1 м на тайл"
+  },
+  {
+    "name": "metal_dark",
+    "group": "surfaces",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "metal_dark_albedo.png",
+      "metal_dark_normal.png",
+      "metal_dark_orm.png"
+    ],
+    "usage": "Тайлящийся тёмный окрашенный металл, 1 м на тайл"
+  },
+  {
+    "name": "hazard_stripes",
+    "group": "surfaces",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "hazard_stripes_albedo.png",
+      "hazard_stripes_normal.png",
+      "hazard_stripes_orm.png"
+    ],
+    "usage": "Тайлящиеся предупредительные полосы (юбка напольной кнопки, кромки платформ)"
+  },
+  {
+    "name": "rubber_ribbed",
+    "group": "surfaces",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "rubber_ribbed_albedo.png",
+      "rubber_ribbed_normal.png",
+      "rubber_ribbed_orm.png"
+    ],
+    "usage": "Тайлящаяся рифлёная резина (накладки, ручки), 0,5 м на тайл"
+  },
+  {
+    "name": "diamond_plate",
+    "group": "surfaces",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "files": [
+      "diamond_plate_albedo.png",
+      "diamond_plate_normal.png",
+      "diamond_plate_orm.png"
+    ],
+    "usage": "Тайлящийся рифлёный стальной настил платформ, 1 м на тайл"
+  },
+  {
+    "name": "cube_face",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "white",
+    "files": [
+      "cube_face_albedo.png",
+      "cube_face_normal.png",
+      "cube_face_orm.png",
+      "cube_face_emission.png"
+    ],
+    "usage": "Грань куба 0,5 м; одна карта на шесть граней (BoxMesh: uv1_scale = (3, 2, 1))"
+  },
+  {
+    "name": "floor_button_top",
+    "group": "devices",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "floor_button_top_albedo.png",
+      "floor_button_top_normal.png",
+      "floor_button_top_orm.png",
+      "floor_button_top_emission.png"
+    ],
+    "usage": "Верх напольной кнопки, планарная развёртка диска; кольцо горит при активном сигнале"
+  },
+  {
+    "name": "wall_button_front",
+    "group": "devices",
+    "size": [
+      512,
+      768
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "wall_button_front_albedo.png",
+      "wall_button_front_normal.png",
+      "wall_button_front_orm.png",
+      "wall_button_front_emission.png"
+    ],
+    "usage": "Лицевая панель настенной кнопки 0,30 × 0,45 м; лампа — состояние выхода"
+  },
+  {
+    "name": "emitter_body",
+    "group": "devices",
+    "size": [
+      1024,
+      256
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": null,
+    "files": [
+      "emitter_body_albedo.png",
+      "emitter_body_normal.png",
+      "emitter_body_orm.png"
+    ],
+    "usage": "Ствол эмиттера, цилиндрическая развёртка (U по окружности бесшовно)"
+  },
+  {
+    "name": "emitter_lens",
+    "group": "devices",
+    "size": [
+      256,
+      256
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "cyan",
+    "files": [
+      "emitter_lens_albedo.png",
+      "emitter_lens_normal.png",
+      "emitter_lens_orm.png",
+      "emitter_lens_emission.png"
+    ],
+    "usage": "Торцевая линза эмиттера, планарный диск"
+  },
+  {
+    "name": "receiver_face",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "cyan",
+    "files": [
+      "receiver_face_albedo.png",
+      "receiver_face_normal.png",
+      "receiver_face_orm.png",
+      "receiver_face_emission.png"
+    ],
+    "usage": "Лицевая плита приёмника; 12 сегментов кольца для индикации попадания"
+  },
+  {
+    "name": "gravity_band",
+    "group": "devices",
+    "size": [
+      1024,
+      256
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": "gravity",
+    "files": [
+      "gravity_band_albedo.png",
+      "gravity_band_normal.png",
+      "gravity_band_orm.png",
+      "gravity_band_emission.png"
+    ],
+    "usage": "Пояс генератора поля; стрелки указывают направление поля вдоль +V"
+  },
+  {
+    "name": "door_leaf",
+    "group": "devices",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "door_leaf_albedo.png",
+      "door_leaf_normal.png",
+      "door_leaf_orm.png",
+      "door_leaf_emission.png"
+    ],
+    "usage": "Створки двери камеры (вид спереди, обе створки); лампа — питание замка"
+  },
+  {
+    "name": "power_node_side",
+    "group": "devices",
+    "size": [
+      512,
+      256
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "power_node_side_albedo.png",
+      "power_node_side_normal.png",
+      "power_node_side_orm.png",
+      "power_node_side_emission.png"
+    ],
+    "usage": "Боковая панель силового узла HEVS-02; 8 сегментов заряда"
+  },
+  {
+    "name": "cable",
+    "group": "devices",
+    "size": [
+      256,
+      64
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": "amber",
+    "files": [
+      "cable_albedo.png",
+      "cable_normal.png",
+      "cable_orm.png",
+      "cable_emission.png"
+    ],
+    "usage": "Силовой кабель, бесшовный; U вдоль кабеля; полоса горит под питанием"
+  },
+  {
+    "name": "junction_relay",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_relay_albedo.png",
+      "junction_relay_normal.png",
+      "junction_relay_orm.png",
+      "junction_relay_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: реле; 4 индикатора входов/выхода"
+  },
+  {
+    "name": "junction_and",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_and_albedo.png",
+      "junction_and_normal.png",
+      "junction_and_orm.png",
+      "junction_and_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: логическое И; 4 индикатора входов/выхода"
+  },
+  {
+    "name": "junction_or",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_or_albedo.png",
+      "junction_or_normal.png",
+      "junction_or_orm.png",
+      "junction_or_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: логическое ИЛИ; 4 индикатора входов/выхода"
+  },
+  {
+    "name": "junction_not",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_not_albedo.png",
+      "junction_not_normal.png",
+      "junction_not_orm.png",
+      "junction_not_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: логическое НЕ; 4 индикатора входов/выхода"
+  },
+  {
+    "name": "junction_delay",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_delay_albedo.png",
+      "junction_delay_normal.png",
+      "junction_delay_orm.png",
+      "junction_delay_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: задержка; 4 индикатора входов/выхода"
+  },
+  {
+    "name": "junction_latch",
+    "group": "devices",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "amber",
+    "files": [
+      "junction_latch_albedo.png",
+      "junction_latch_normal.png",
+      "junction_latch_orm.png",
+      "junction_latch_emission.png"
+    ],
+    "usage": "Распределительная коробка цепи: защёлка; 4 индикатора входов/выхода"
+  }
+]

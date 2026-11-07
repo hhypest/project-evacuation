@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/hazard_stripes/hazard_stripes_albedo.png" id="1_nta3g"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/hazard_stripes/hazard_stripes_normal.png" id="2_rp2ej"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/hazard_stripes/hazard_stripes_orm.png" id="3_umxdd"]
+
+[resource]
+resource_name = "hazard_stripes"
+albedo_texture = ExtResource("1_nta3g")
+orm_texture = ExtResource("3_umxdd")
+normal_enabled = true
+normal_texture = ExtResource("2_rp2ej")
+ao_enabled = true

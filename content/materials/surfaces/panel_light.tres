@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/panel_light/panel_light_albedo.png" id="1_ewc7j"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/panel_light/panel_light_normal.png" id="2_cy7p5"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/panel_light/panel_light_orm.png" id="3_mutj3"]
+
+[resource]
+resource_name = "panel_light"
+albedo_texture = ExtResource("1_ewc7j")
+orm_texture = ExtResource("3_mutj3")
+normal_enabled = true
+normal_texture = ExtResource("2_cy7p5")
+ao_enabled = true

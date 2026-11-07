@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/diamond_plate/diamond_plate_albedo.png" id="1_raitr"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/diamond_plate/diamond_plate_normal.png" id="2_7ecjr"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/diamond_plate/diamond_plate_orm.png" id="3_cqorg"]
+
+[resource]
+resource_name = "diamond_plate"
+albedo_texture = ExtResource("1_raitr")
+orm_texture = ExtResource("3_cqorg")
+normal_enabled = true
+normal_texture = ExtResource("2_7ecjr")
+ao_enabled = true
