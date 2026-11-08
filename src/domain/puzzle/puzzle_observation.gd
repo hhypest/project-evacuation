@@ -7,5 +7,5 @@ var tick_id: int = -1
 var loads: Dictionary[StringName, float] = {}
 ## Wall buttons pressed since the previous tick. Duplicates count once.
 var presses: Array[StringName] = []
-## Receiver ID -> whether a valid game beam hits it this tick.
-var beam_hits: Dictionary[StringName, bool] = {}
+## Beams that ended on a receiver this tick. Acceptance (power, channel, angle) is decided by the network.
+var beams: Array[BeamHit] = []
