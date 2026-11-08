@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_livery/hevs_livery_albedo.png" id="1_pnsil"]
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_livery/hevs_livery_emission.png" id="2_8iuc3"]
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_livery/hevs_livery_normal.png" id="3_nqsrr"]
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_livery/hevs_livery_orm.png" id="4_w0ehq"]
+
+[resource]
+resource_name = "hevs_livery"
+albedo_texture = ExtResource("1_pnsil")
+orm_texture = ExtResource("4_w0ehq")
+emission_enabled = true
+emission = Color(0.9098039, 0.5882353, 0.23529412, 1)
+emission_energy_multiplier = 1.6
+emission_operator = 1
+emission_texture = ExtResource("2_8iuc3")
+normal_enabled = true
+normal_texture = ExtResource("3_nqsrr")
+ao_enabled = true

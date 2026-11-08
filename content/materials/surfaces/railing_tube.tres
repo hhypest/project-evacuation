@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/railing_tube/railing_tube_albedo.png" id="1_v8ru7"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/railing_tube/railing_tube_normal.png" id="2_pri21"]
+[ext_resource type="Texture2D" path="res://content/textures/surfaces/railing_tube/railing_tube_orm.png" id="3_xqhju"]
+
+[resource]
+resource_name = "railing_tube"
+albedo_texture = ExtResource("1_v8ru7")
+orm_texture = ExtResource("3_xqhju")
+normal_enabled = true
+normal_texture = ExtResource("2_pri21")
+ao_enabled = true

@@ -2,6 +2,7 @@
   {
     "name": "panel_light",
     "group": "surfaces",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -11,6 +12,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "panel_light_albedo.png",
       "panel_light_normal.png",
@@ -21,6 +23,7 @@
   {
     "name": "metal_dark",
     "group": "surfaces",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -30,6 +33,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "metal_dark_albedo.png",
       "metal_dark_normal.png",
@@ -40,6 +44,7 @@
   {
     "name": "hazard_stripes",
     "group": "surfaces",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -49,6 +54,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "hazard_stripes_albedo.png",
       "hazard_stripes_normal.png",
@@ -59,6 +65,7 @@
   {
     "name": "rubber_ribbed",
     "group": "surfaces",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -68,6 +75,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "rubber_ribbed_albedo.png",
       "rubber_ribbed_normal.png",
@@ -78,6 +86,7 @@
   {
     "name": "diamond_plate",
     "group": "surfaces",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -87,6 +96,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "diamond_plate_albedo.png",
       "diamond_plate_normal.png",
@@ -97,6 +107,7 @@
   {
     "name": "cube_face",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -106,6 +117,7 @@
       false
     ],
     "emission": "white",
+    "alpha": false,
     "files": [
       "cube_face_albedo.png",
       "cube_face_normal.png",
@@ -117,6 +129,7 @@
   {
     "name": "floor_button_top",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -126,6 +139,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "floor_button_top_albedo.png",
       "floor_button_top_normal.png",
@@ -137,6 +151,7 @@
   {
     "name": "wall_button_front",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       768
@@ -146,6 +161,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "wall_button_front_albedo.png",
       "wall_button_front_normal.png",
@@ -157,6 +173,7 @@
   {
     "name": "emitter_body",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       1024,
       256
@@ -166,6 +183,7 @@
       false
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "emitter_body_albedo.png",
       "emitter_body_normal.png",
@@ -176,6 +194,7 @@
   {
     "name": "emitter_lens",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       256,
       256
@@ -185,6 +204,7 @@
       false
     ],
     "emission": "cyan",
+    "alpha": false,
     "files": [
       "emitter_lens_albedo.png",
       "emitter_lens_normal.png",
@@ -196,6 +216,7 @@
   {
     "name": "receiver_face",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -205,6 +226,7 @@
       false
     ],
     "emission": "cyan",
+    "alpha": false,
     "files": [
       "receiver_face_albedo.png",
       "receiver_face_normal.png",
@@ -216,6 +238,7 @@
   {
     "name": "gravity_band",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       1024,
       256
@@ -225,6 +248,7 @@
       false
     ],
     "emission": "gravity",
+    "alpha": false,
     "files": [
       "gravity_band_albedo.png",
       "gravity_band_normal.png",
@@ -236,6 +260,7 @@
   {
     "name": "door_leaf",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -245,6 +270,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "door_leaf_albedo.png",
       "door_leaf_normal.png",
@@ -256,6 +282,7 @@
   {
     "name": "power_node_side",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       256
@@ -265,6 +292,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "power_node_side_albedo.png",
       "power_node_side_normal.png",
@@ -276,6 +304,7 @@
   {
     "name": "cable",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       256,
       64
@@ -285,6 +314,7 @@
       true
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "cable_albedo.png",
       "cable_normal.png",
@@ -296,6 +326,7 @@
   {
     "name": "chamber_terminal",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       1024,
       768
@@ -305,6 +336,7 @@
       false
     ],
     "emission": "screen",
+    "alpha": false,
     "files": [
       "chamber_terminal_albedo.png",
       "chamber_terminal_normal.png",
@@ -316,6 +348,7 @@
   {
     "name": "vanguard_station",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       768
@@ -325,6 +358,7 @@
       false
     ],
     "emission": "white",
+    "alpha": false,
     "files": [
       "vanguard_station_albedo.png",
       "vanguard_station_normal.png",
@@ -336,6 +370,7 @@
   {
     "name": "basalt_wall",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -345,6 +380,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "basalt_wall_albedo.png",
       "basalt_wall_normal.png",
@@ -355,6 +391,7 @@
   {
     "name": "basalt_floor",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -364,6 +401,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "basalt_floor_albedo.png",
       "basalt_floor_normal.png",
@@ -374,6 +412,7 @@
   {
     "name": "glyph_panel",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -383,6 +422,7 @@
       true
     ],
     "emission": "alien",
+    "alpha": false,
     "files": [
       "glyph_panel_albedo.png",
       "glyph_panel_normal.png",
@@ -394,6 +434,7 @@
   {
     "name": "power_channel",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       256
@@ -403,6 +444,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "power_channel_albedo.png",
       "power_channel_normal.png",
@@ -414,6 +456,7 @@
   {
     "name": "portal_frame",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       256
@@ -423,6 +466,7 @@
       false
     ],
     "emission": "alien",
+    "alpha": false,
     "files": [
       "portal_frame_albedo.png",
       "portal_frame_normal.png",
@@ -434,6 +478,7 @@
   {
     "name": "biomass",
     "group": "alien",
+    "kind": "pbr",
     "size": [
       1024,
       1024
@@ -443,6 +488,7 @@
       true
     ],
     "emission": null,
+    "alpha": false,
     "files": [
       "biomass_albedo.png",
       "biomass_normal.png",
@@ -451,8 +497,199 @@
     "usage": "Микробные маты и осадки в нижних ярусах; не светятся, не влияют на сигналы"
   },
   {
+    "name": "suit_fabric",
+    "group": "suit",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "suit_fabric_albedo.png",
+      "suit_fabric_normal.png",
+      "suit_fabric_orm.png"
+    ],
+    "usage": "Ткань инженерного скафандра Клетуса: саржа, стёганые панели, строчка; 0,5 м на тайл"
+  },
+  {
+    "name": "chest_indicator",
+    "group": "suit",
+    "kind": "pbr",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "screen",
+    "alpha": false,
+    "files": [
+      "chest_indicator_albedo.png",
+      "chest_indicator_normal.png",
+      "chest_indicator_orm.png",
+      "chest_indicator_emission.png"
+    ],
+    "usage": "Нагрудный индикатор (блок жизнеобеспечения): экран состояния — дублирующий канал UI (ADR-0006)"
+  },
+  {
+    "name": "wrist_terminal",
+    "group": "suit",
+    "kind": "pbr",
+    "size": [
+      1024,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "screen",
+    "alpha": false,
+    "files": [
+      "wrist_terminal_albedo.png",
+      "wrist_terminal_normal.png",
+      "wrist_terminal_orm.png",
+      "wrist_terminal_emission.png"
+    ],
+    "usage": "Корпус наручного терминала; изображение экрана рисует игра, здесь — маска стекла"
+  },
+  {
+    "name": "grating",
+    "group": "surfaces",
+    "kind": "pbr",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": true,
+    "files": [
+      "grating_albedo.png",
+      "grating_normal.png",
+      "grating_orm.png"
+    ],
+    "usage": "Решётчатый настил с прозрачными просветами (alpha scissor), 0,5 м на тайл"
+  },
+  {
+    "name": "railing_tube",
+    "group": "surfaces",
+    "kind": "pbr",
+    "size": [
+      512,
+      128
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "railing_tube_albedo.png",
+      "railing_tube_normal.png",
+      "railing_tube_orm.png"
+    ],
+    "usage": "Труба ограждения: U вдоль трубы, V по окружности; бесшовно"
+  },
+  {
+    "name": "hevs_hull",
+    "group": "vehicle",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "hevs_hull_albedo.png",
+      "hevs_hull_normal.png",
+      "hevs_hull_orm.png"
+    ],
+    "usage": "Обшивка челнока HEVS: светлая краска, швы, заклёпки, нагрев и копоть; 2 м на тайл"
+  },
+  {
+    "name": "hevs_livery",
+    "group": "vehicle",
+    "kind": "pbr",
+    "size": [
+      1024,
+      256
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": "amber",
+    "alpha": false,
+    "files": [
+      "hevs_livery_albedo.png",
+      "hevs_livery_normal.png",
+      "hevs_livery_orm.png",
+      "hevs_livery_emission.png"
+    ],
+    "usage": "Лента ливреи HEVS-02: оранжевая полоса, «02», шевроны, янтарные маяки; бесшовно вдоль U"
+  },
+  {
+    "name": "planet_ground",
+    "group": "planet",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "planet_ground_albedo.png",
+      "planet_ground_normal.png",
+      "planet_ground_orm.png"
+    ],
+    "usage": "Грунт у подножия сооружения: обсидиан, пепел, плёнки матов; 2 м на тайл"
+  },
+  {
+    "name": "terminator_sky",
+    "group": "planet",
+    "kind": "panorama",
+    "size": [
+      2048,
+      1024
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "terminator_sky_panorama.png"
+    ],
+    "usage": "Панорама неба терминатора для Sky/витрин: неподвижный красный карлик, дымка, шторм, шпили"
+  },
+  {
     "name": "junction_relay",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -462,6 +699,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_relay_albedo.png",
       "junction_relay_normal.png",
@@ -473,6 +711,7 @@
   {
     "name": "junction_and",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -482,6 +721,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_and_albedo.png",
       "junction_and_normal.png",
@@ -493,6 +733,7 @@
   {
     "name": "junction_or",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -502,6 +743,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_or_albedo.png",
       "junction_or_normal.png",
@@ -513,6 +755,7 @@
   {
     "name": "junction_not",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -522,6 +765,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_not_albedo.png",
       "junction_not_normal.png",
@@ -533,6 +777,7 @@
   {
     "name": "junction_delay",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -542,6 +787,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_delay_albedo.png",
       "junction_delay_normal.png",
@@ -553,6 +799,7 @@
   {
     "name": "junction_latch",
     "group": "devices",
+    "kind": "pbr",
     "size": [
       512,
       512
@@ -562,6 +809,7 @@
       false
     ],
     "emission": "amber",
+    "alpha": false,
     "files": [
       "junction_latch_albedo.png",
       "junction_latch_normal.png",

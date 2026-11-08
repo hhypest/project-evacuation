@@ -61,7 +61,18 @@ func _build() -> int:
 		if not emission.is_empty() and not EMISSION_COLORS.has(emission):
 			push_error("Неизвестная семантика свечения: %s" % emission)
 			return 1
-		var error: Error = _build_material(str(name_value), str(group_value), emission)
+		var kind_value: Variant = entry.get("kind")
+		var kind: String = str(kind_value) if kind_value is String else "pbr"
+		var alpha_value: Variant = entry.get("alpha")
+		var alpha: bool = alpha_value is bool and alpha_value == true
+		var error: Error = OK
+		if kind == "panorama":
+			error = _build_sky(str(name_value), str(group_value))
+		elif kind == "pbr":
+			error = _build_material(str(name_value), str(group_value), emission, alpha)
+		else:
+			push_error("Неизвестный вид ассета: %s" % kind)
+			return 1
 		if error != OK:
 			return 1
 		built += 1
@@ -69,7 +80,7 @@ func _build() -> int:
 	return 0
 
 
-func _build_material(asset_name: String, group: String, emission: String) -> Error:
+func _build_material(asset_name: String, group: String, emission: String, alpha: bool) -> Error:
 	var base: String = "%s/%s/%s/%s" % [TEXTURE_ROOT, group, asset_name, asset_name]
 	var material: ORMMaterial3D = ORMMaterial3D.new()
 	material.resource_name = asset_name
@@ -95,13 +106,35 @@ func _build_material(asset_name: String, group: String, emission: String) -> Err
 		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	if asset_name == "cube_face":
 		material.uv1_scale = BOX_FACE_UV_SCALE
+	if alpha:
+		# Просветы решётки — жёсткий отрез без сортировки прозрачности; решётку видно с обеих сторон.
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+		material.alpha_scissor_threshold = 0.5
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return _save(material, group, asset_name)
+
+
+## Небо из равнопромежуточной панорамы: Sky с PanoramaSkyMaterial для WorldEnvironment и витрин.
+func _build_sky(asset_name: String, group: String) -> Error:
+	var texture: Texture2D = _load_texture("%s/%s/%s/%s_panorama.png" % [TEXTURE_ROOT, group, asset_name, asset_name])
+	if texture == null:
+		return ERR_FILE_NOT_FOUND
+	var panorama: PanoramaSkyMaterial = PanoramaSkyMaterial.new()
+	panorama.panorama = texture
+	var sky: Sky = Sky.new()
+	sky.resource_name = asset_name
+	sky.sky_material = panorama
+	return _save(sky, group, asset_name + "_sky")
+
+
+func _save(resource: Resource, group: String, file_name: String) -> Error:
 	var directory: String = "%s/%s" % [MATERIAL_ROOT, group]
 	var dir_error: Error = DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
 	if dir_error != OK:
 		push_error("Не удалось создать %s" % directory)
 		return dir_error
-	var path: String = "%s/%s.tres" % [directory, asset_name]
-	var save_error: Error = ResourceSaver.save(material, path)
+	var path: String = "%s/%s.tres" % [directory, file_name]
+	var save_error: Error = ResourceSaver.save(resource, path)
 	if save_error != OK:
 		push_error("Не удалось сохранить %s" % path)
 	return save_error

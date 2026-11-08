@@ -1,0 +1,10 @@
+[gd_resource type="Sky" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/planet/terminator_sky/terminator_sky_panorama.png" id="1_3yybo"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_nx8fu"]
+panorama = ExtResource("1_3yybo")
+
+[resource]
+resource_name = "terminator_sky"
+sky_material = SubResource("PanoramaSkyMaterial_nx8fu")

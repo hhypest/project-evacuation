@@ -1,14 +1,19 @@
 extends SceneTree
-## Собирает демонстрационную сцену материалов человеческого и чужого слоя:
-##   content/levels/material_showcase.tscn
+## Собирает демонстрационные сцены материалов:
+##   content/levels/material_showcase.tscn — интерьер: человеческий и чужой слой, скафандр;
+##   content/levels/vitrine_showcase.tscn — снаружи: небо терминатора, грунт, макет HEVS-02.
 ## Сцена служит для художественной проверки (читаемость состояний, свет, масштаб)
 ## и не входит в игровой маршрут. Запуск из корня репозитория:
 ##   godot --headless --path . --script tools/art/build_material_showcase.gd
 
 const SCENE_PATH: String = "res://content/levels/material_showcase.tscn"
+const VITRINE_PATH: String = "res://content/levels/vitrine_showcase.tscn"
 const DEVICES: String = "res://content/materials/devices/"
 const SURFACES: String = "res://content/materials/surfaces/"
 const ALIEN: String = "res://content/materials/alien/"
+const SUIT: String = "res://content/materials/suit/"
+const VEHICLE: String = "res://content/materials/vehicle/"
+const PLANET: String = "res://content/materials/planet/"
 const SEGMENTS: int = 40
 const CYAN: Color = Color("#38C8DC")
 const GRAVITY: Color = Color("#8B4FC4")
@@ -38,26 +43,38 @@ func _initialize() -> void:
 	_build_device_row(0.9, false)
 	_build_wall_devices()
 	_build_alien_features()
+	_build_catwalk_and_suit()
 	_build_swatches()
-	_build_camera()
-	if _failed:
+	_build_camera(Vector3(0.0, 3.2, 10.5), Vector3(0.0, 1.6, -2.0))
+	if not _save_scene(SCENE_PATH):
 		quit(1)
 		return
+	_root = Node3D.new()
+	_root.name = "VitrineShowcase"
+	_build_vitrine()
+	if not _save_scene(VITRINE_PATH):
+		quit(1)
+		return
+	quit(0)
+
+
+func _save_scene(path: String) -> bool:
+	if _failed:
+		_root.free()
+		return false
 	_assign_owner(_root)
 	var packed: PackedScene = PackedScene.new()
 	var pack_error: Error = packed.pack(_root)
-	if pack_error != OK:
-		push_error("Не удалось упаковать сцену")
-		quit(1)
-		return
-	var save_error: Error = ResourceSaver.save(packed, SCENE_PATH)
 	_root.free()
+	if pack_error != OK:
+		push_error("Не удалось упаковать сцену %s" % path)
+		return false
+	var save_error: Error = ResourceSaver.save(packed, path)
 	if save_error != OK:
-		push_error("Не удалось сохранить %s" % SCENE_PATH)
-		quit(1)
-		return
-	print("SHOWCASE_BUILT %s" % SCENE_PATH)
-	quit(0)
+		push_error("Не удалось сохранить %s" % path)
+		return false
+	print("SHOWCASE_BUILT %s" % path)
+	return true
 
 
 # --------------------------------------------------------------------------- материалы
@@ -416,14 +433,98 @@ func _build_swatches() -> void:
 				Vector3(1.0 + float(index) * 1.15, 4.7, -3.95))
 
 
-func _build_camera() -> void:
+func _build_camera(from: Vector3, to: Vector3) -> void:
 	var camera: Camera3D = Camera3D.new()
 	camera.name = "ShowcaseCamera"
 	camera.fov = 68.0
-	camera.position = Vector3(0.0, 3.2, 10.5)
+	camera.position = from
 	camera.current = true
 	_root.add_child(camera)
-	camera.look_at_from_position(camera.position, Vector3(0.0, 1.6, -2.0))
+	camera.look_at_from_position(from, to)
+
+
+## Решётчатый мостик с ограждением и манекен скафандра: ткань, нагрудный индикатор, наручный терминал.
+func _build_catwalk_and_suit() -> void:
+	var grating: Material = _material(SURFACES + "grating.tres")
+	var tube: Material = _material(SURFACES + "railing_tube.tres")
+	var dark: Material = _material(SURFACES + "metal_dark.tres")
+	var base: Vector3 = Vector3(-8.3, 0.0, 0.4)
+	var deck_y: float = 0.6
+	_instance(_box(Vector3(2.4, 0.04, 1.6), grating, grating, Vector2(2.0, 2.0)), "GratingDeck", base + Vector3(0.0, deck_y, 0.0))
+	for corner: Vector2 in [Vector2(-1.15, -0.75), Vector2(1.15, -0.75), Vector2(-1.15, 0.75), Vector2(1.15, 0.75)]:
+		_instance(_cylinder(0.04, deck_y, dark, dark), "DeckLeg", base + Vector3(corner.x, deck_y * 0.5, corner.y))
+		_instance(_cylinder(0.025, 1.0, tube, dark, 1.0, 2.0, true), "RailPost", base + Vector3(corner.x, deck_y + 0.5, corner.y))
+	_instance(_cylinder(0.025, 2.3, tube, dark, 1.0, 4.6, true), "RailFront", base + Vector3(0.0, deck_y + 1.0, 0.75),
+		Vector3(0.0, 0.0, 90.0))
+	_instance(_cylinder(0.025, 2.3, tube, dark, 1.0, 4.6, true), "RailFrontMid", base + Vector3(0.0, deck_y + 0.5, 0.75),
+		Vector3(0.0, 0.0, 90.0))
+	for side: float in [-1.15, 1.15]:
+		_instance(_cylinder(0.025, 1.5, tube, dark, 1.0, 3.0, true), "RailSide", base + Vector3(side, deck_y + 1.0, 0.0),
+			Vector3(90.0, 0.0, 0.0))
+	var fabric: Material = _material(SUIT + "suit_fabric.tres")
+	var chest: Material = _material(SUIT + "chest_indicator.tres")
+	var wrist: Material = _material(SUIT + "wrist_terminal.tres")
+	var torso: Vector3 = base + Vector3(0.0, deck_y + 0.95, -0.1)
+	_instance(_cylinder(0.24, 0.7, fabric, fabric, 3.0, 1.4), "SuitTorso", torso)
+	_instance(_box(Vector3(0.28, 0.28, 0.08), chest, fabric, Vector2(2.0, 2.0), true), "ChestIndicator",
+		torso + Vector3(0.0, 0.08, 0.26))
+	_instance(_cylinder(0.065, 0.5, fabric, fabric, 1.0, 1.0), "SuitForearm", torso + Vector3(0.3, -0.18, 0.25),
+		Vector3(90.0, 0.0, 0.0))
+	_instance(_box(Vector3(0.18, 0.09, 0.05), wrist, dark, Vector2(4.0, 4.0), true), "WristTerminal",
+		torso + Vector3(0.3, -0.105, 0.3), Vector3(-90.0, 0.0, 0.0))
+	_label("скафандр · решётка · ограждение", base + Vector3(0.0, deck_y + 1.55, 0.75), 28)
+
+
+## Витрина под открытым небом: панорама терминатора, грунт, чужой шпиль, макет HEVS-02 с ливреей.
+func _build_vitrine() -> void:
+	var sky_resource: Resource = load(PLANET + "terminator_sky_sky.tres")
+	var environment: Environment = Environment.new()
+	if sky_resource is Sky:
+		var sky: Sky = sky_resource
+		environment.background_mode = Environment.BG_SKY
+		environment.sky = sky
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	else:
+		push_error("Нет неба %s" % (PLANET + "terminator_sky_sky.tres"))
+		_failed = true
+	environment.ambient_light_energy = 0.8
+	environment.tonemap_mode = Environment.TONE_MAPPER_AGX
+	environment.glow_enabled = true
+	environment.fog_enabled = true
+	environment.fog_light_color = Color("#4F5230")
+	environment.fog_density = 0.0025
+	environment.fog_sky_affect = 0.15
+	var world: WorldEnvironment = WorldEnvironment.new()
+	world.name = "WorldEnvironment"
+	world.environment = environment
+	_root.add_child(world)
+	# неподвижный красный карлик у горизонта. Центр панорамы (u = 0,5) Godot показывает в направлении +Z
+	# (проверено рендером), поэтому свет приходит с +Z и падает под углом 4° — как диск на панораме.
+	var star: DirectionalLight3D = DirectionalLight3D.new()
+	star.name = "RedDwarf"
+	star.light_color = Color("#FFB27A")
+	star.light_energy = 1.4
+	star.shadow_enabled = true
+	star.rotation_degrees = Vector3(-4.0, 0.0, 0.0)
+	_root.add_child(star)
+	var ground: Material = _material(PLANET + "planet_ground.tres")
+	_instance(_box(Vector3(160.0, 0.2, 160.0), ground, ground, Vector2(0.5, 0.5)), "Ground", Vector3(0.0, -0.1, 0.0))
+	var basalt: Material = _material(ALIEN + "basalt_wall.tres")
+	_instance(_box(Vector3(8.0, 60.0, 8.0), basalt, basalt, Vector2(0.5, 0.5)), "AlienSpire", Vector3(-26.0, 30.0, 40.0),
+		Vector3(0.0, 20.0, 4.0))
+	var hull: Material = _material(VEHICLE + "hevs_hull.tres")
+	var livery: Material = _material(VEHICLE + "hevs_livery.tres")
+	var dark: Material = _material(SURFACES + "metal_dark.tres")
+	var hevs: Vector3 = Vector3(0.0, 1.9, 0.0)
+	_instance(_box(Vector3(7.0, 2.4, 3.4), hull, hull, Vector2(0.5, 0.5)), "HevsBody", hevs)
+	# лента ливреи: один тайл (два номера «02») на длину борта
+	_instance(_box(Vector3(7.06, 0.6, 3.46), livery, livery, Vector2(1.0 / 7.06, 1.0 / 0.6)), "HevsLivery",
+		hevs + Vector3(0.0, -0.1, 0.0))
+	_instance(_box(Vector3(2.0, 1.6, 3.0), hull, hull, Vector2(0.5, 0.5)), "HevsCockpit", hevs + Vector3(3.9, 0.1, 0.0),
+		Vector3(0.0, 0.0, -12.0))
+	for leg: Vector2 in [Vector2(-2.6, -1.4), Vector2(2.6, -1.4), Vector2(-2.6, 1.4), Vector2(2.6, 1.4)]:
+		_instance(_cylinder(0.12, 1.0, dark, dark), "HevsLeg", Vector3(leg.x, 0.5, leg.y))
+	_build_camera(Vector3(9.0, 2.6, 11.0), Vector3(0.0, 1.8, 0.0))
 
 
 func _assign_owner(node: Node) -> void:

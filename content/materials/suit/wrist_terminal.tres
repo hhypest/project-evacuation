@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/suit/wrist_terminal/wrist_terminal_albedo.png" id="1_e6tbe"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/wrist_terminal/wrist_terminal_emission.png" id="2_e5ors"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/wrist_terminal/wrist_terminal_normal.png" id="3_maa4x"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/wrist_terminal/wrist_terminal_orm.png" id="4_aknkc"]
+
+[resource]
+resource_name = "wrist_terminal"
+albedo_texture = ExtResource("1_e6tbe")
+orm_texture = ExtResource("4_aknkc")
+emission_enabled = true
+emission = Color(0.7882353, 0.8627451, 0.8784314, 1)
+emission_energy_multiplier = 1.4
+emission_operator = 1
+emission_texture = ExtResource("2_e5ors")
+normal_enabled = true
+normal_texture = ExtResource("3_maa4x")
+ao_enabled = true
