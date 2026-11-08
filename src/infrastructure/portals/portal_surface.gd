@@ -14,6 +14,8 @@ const ALL_LAYERS: int = 0xFFFFF
 const VIEW_HEIGHT: int = 1080
 
 var half_size: Vector2 = Vector2(0.8, 1.2)
+## The opening starts at the floor: no bottom bar and posts that stop at the floor.
+var floor_level: bool = true
 var accent: Color = Color(0.88, 0.42, 0.18)
 var partner: PortalSurface
 var powered: bool = false
@@ -28,12 +30,15 @@ func _ready() -> void:
 	var frame_color: Color = Color(0.88, 0.86, 0.82)
 	var depth: float = 0.4
 	for side: float in [-1.0, 1.0]:
-		var post: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.16, half_size.y * 2.0 + 0.32, depth), frame_color)
-		post.position = Vector3(side * (half_size.x + 0.08), 0, 0)
+		var post_height: float = half_size.y * 2.0 + (0.16 if floor_level else 0.32)
+		var post: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.16, post_height, depth), frame_color)
+		post.position = Vector3(side * (half_size.x + 0.08), 0.08 if floor_level else 0.0, 0)
 		add_child(post)
-		var bar: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(half_size.x * 2.0, 0.16, depth), frame_color)
-		bar.position = Vector3(0, side * (half_size.y + 0.08), 0)
-		add_child(bar)
+		# Floor-level openings have no sill: a bar flush with the floor plane z-fights with it.
+		if side > 0.0 or not floor_level:
+			var bar: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(half_size.x * 2.0, 0.16, depth), frame_color)
+			bar.position = Vector3(0, side * (half_size.y + 0.08), 0)
+			add_child(bar)
 		var lamp: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.05, half_size.y * 1.6, 0.02), accent)
 		lamp.position = Vector3(side * (half_size.x + 0.08), 0, depth * 0.5 + 0.01)
 		add_child(lamp)
