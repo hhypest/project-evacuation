@@ -111,7 +111,7 @@ func _logic(id: StringName, kind: DeviceDefinition.Kind, sources: Array[StringNa
 	return logic
 
 
-func _cube(label: String, id: StringName, at: Vector3, kilograms: float) -> CarryRigidBody:
+func _cube(label: String, id: StringName, at: Vector3, kilograms: float, edge: float = 1.0) -> CarryRigidBody:
 	var body: CarryRigidBody = CarryRigidBody.new()
 	body.name = label
 	body.stable_id = id
@@ -120,14 +120,15 @@ func _cube(label: String, id: StringName, at: Vector3, kilograms: float) -> Carr
 	body.collision_layer = 2
 	body.collision_mask = 7
 	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = Vector3.ONE * edge
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.name = "Collision"
 	collision.shape = shape
 	body.add_child(collision)
-	body.add_child(PuzzleDeviceNode.box_mesh(Vector3.ONE, Color(0.86, 0.85, 0.82)))
+	body.add_child(PuzzleDeviceNode.box_mesh(Vector3.ONE * edge, Color(0.86, 0.85, 0.82)))
 	var sign: Label3D = Label3D.new()
 	sign.text = "%.0f кг" % kilograms
-	sign.position = Vector3(0, 0, 0.51)
+	sign.position = Vector3(0, 0, edge * 0.5 + 0.01)
 	sign.pixel_size = 0.005
 	sign.font_size = 48
 	sign.modulate = Color(0.1, 0.1, 0.1)
