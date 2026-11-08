@@ -7,6 +7,7 @@ var _level: Node3D
 var _camera: LookCamera
 var _player: PlayerMotor
 var _carry: CarryController
+var _puzzle: AdvancePuzzle
 var _tick_id: int = 0
 
 
@@ -38,15 +39,37 @@ func open(scene: PackedScene, generation: int) -> bool:
 	var carry_world: CarryPhysicsAdapter = CarryPhysicsAdapter.new()
 	if not carry_world.configure(level, player, profile, generation):
 		carry_world.close()
-		remove_child(level)
-		level.queue_free()
-		_generation = -1
-		_level = null
-		_camera = null
-		_player = null
+		_abort_open()
 		return false
 	_carry = CarryController.new(carry_world, profile, generation)
+	var settings: PuzzleSettings = preload("res://content/definitions/default_puzzle.tres") as PuzzleSettings
+	var puzzle_world: PuzzleWorldAdapter = PuzzleWorldAdapter.new()
+	if settings == null or not puzzle_world.configure(level, player, settings.player_mass_kg):
+		puzzle_world.close()
+		_abort_open()
+		return false
+	_puzzle = AdvancePuzzle.new(puzzle_world, generation, settings.use_reach, Engine.physics_ticks_per_second)
+	if not _puzzle.ready():
+		push_error("Chamber device network rejected: " + "; ".join(_puzzle.errors))
+		_puzzle.close()
+		_abort_open()
+		return false
+	_puzzle.reset()
 	return true
+
+
+func _abort_open() -> void:
+	if _carry != null:
+		_carry.close()
+	_carry = null
+	_puzzle = null
+	if _level != null:
+		remove_child(_level)
+		_level.queue_free()
+	_generation = -1
+	_level = null
+	_camera = null
+	_player = null
 
 
 func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
@@ -69,9 +92,14 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.delta = delta
 	carry_input.view = _camera.global_transform
 	carry_input.carrier_velocity = _player.velocity
-	carry_input.interact = frame.interact_requested
+	var interact: bool = frame.interact_requested
+	# A free hand uses a wall button under the view first; otherwise E keeps its carry meaning.
+	if interact and _carry.state.held_id.is_empty() and _puzzle.use(_generation, _camera.global_transform):
+		interact = false
+	carry_input.interact = interact
 	carry_input.throw_requested = frame.throw_requested
 	_carry.step(carry_input)
+	_puzzle.step(_generation, _tick_id)
 
 
 func held_prop_id() -> StringName:
@@ -81,6 +109,12 @@ func held_prop_id() -> StringName:
 func suspend_carry() -> void:
 	if _carry != null:
 		_carry.suspend()
+	if _puzzle != null:
+		_puzzle.suspend()
+
+
+func puzzle() -> AdvancePuzzle:
+	return _puzzle
 
 
 func close() -> void:
@@ -88,6 +122,9 @@ func close() -> void:
 	if _carry != null:
 		_carry.close()
 	_carry = null
+	if _puzzle != null:
+		_puzzle.close()
+	_puzzle = null
 	_camera = null
 	_player = null
 	if get_parent() != null:

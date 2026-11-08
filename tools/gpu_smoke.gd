@@ -140,8 +140,32 @@ func _run() -> void:
 	await RenderingServer.frame_post_draw
 	if not _capture(capture):
 		return
+	# Devices (SKL-04/05): the fixture moves the player to the timed wall button, the press is a real E event.
+	var lab: Node3D = carry_scope.get_node("FoundationLab/PuzzleLab") as Node3D
+	var button: WallButtonDevice = lab.get_node("lab_button_timed") as WallButtonDevice
+	var door: DoorDevice = lab.get_node("lab_door_timed") as DoorDevice
+	if not _check(button != null and door != null, "device lab with wall button and door"):
+		return
+	var lab_player: PlayerMotor = carry_scope.get_node("FoundationLab/Player") as PlayerMotor
+	var front: Vector3 = button.global_basis.z.normalized()
+	lab_player.global_position = Vector3(button.global_position.x, 0.05, button.global_position.z) + front * 1.3
+	for _tick: int in range(20):
+		await physics_frame
+	carry_camera.look_at(button.global_position + Vector3(0, -0.05, 0) + front * 0.05)
+	TestInputEvents.key(KEY_E)
+	TestInputEvents.key(KEY_E, false)
+	for _tick: int in range(60):
+		await physics_frame
+	if not _check(door.is_open() and carry_scope.held_prop_id().is_empty(), "E on a wall button opens its door"):
+		return
+	carry_camera.look_at(door.global_position + Vector3(0, 1.3, 0))
+	for _tick: int in range(3):
+		await physics_frame
+	await RenderingServer.frame_post_draw
+	if not _capture(capture.get_basename() + "-devices.png"):
+		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.
