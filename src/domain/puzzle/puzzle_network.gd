@@ -178,8 +178,7 @@ func _sense(definition: DeviceDefinition, memory: DeviceMemory, observation: Puz
 			var wants: bool = supported >= (definition.release_threshold if memory.output else definition.press_threshold)
 			_debounce(definition, memory, wants)
 		DeviceDefinition.Kind.RECEIVER:
-			var hit: bool = observation.beam_hits.get(definition.id, false)
-			_debounce(definition, memory, hit)
+			_debounce(definition, memory, _accepts_beam(definition, observation.beams))
 		DeviceDefinition.Kind.WALL_BUTTON:
 			if definition.wall_mode == DeviceDefinition.WallMode.TOGGLE:
 				if pressed:
@@ -189,6 +188,21 @@ func _sense(definition: DeviceDefinition, memory: DeviceMemory, observation: Puz
 					memory.timer_ticks = hold_ticks(definition)
 				memory.output = memory.timer_ticks > 0
 				memory.timer_ticks = maxi(0, memory.timer_ticks - 1)
+
+
+## A hit counts only from a powered emitter of the same channel, within the receiver's acceptance cone.
+## Emitter power is the output published on the previous tick: the adapter traced with that same state.
+func _accepts_beam(receiver: DeviceDefinition, beams: Array[BeamHit]) -> bool:
+	var limit: float = cos(deg_to_rad(receiver.acceptance_degrees))
+	for hit: BeamHit in beams:
+		if hit == null or hit.receiver_id != receiver.id or not _devices.has(hit.emitter_id):
+			continue
+		var emitter: DeviceDefinition = _devices[hit.emitter_id]
+		if emitter.kind != DeviceDefinition.Kind.EMITTER or not _memory[hit.emitter_id].output:
+			continue
+		if emitter.channel == receiver.channel and is_finite(hit.incidence_cos) and hit.incidence_cos >= limit:
+			return true
+	return false
 
 
 func _debounce(definition: DeviceDefinition, memory: DeviceMemory, wants: bool) -> void:
@@ -260,6 +274,11 @@ static func _validate(definition: DeviceDefinition, devices: Dictionary[StringNa
 	if definition.kind in [DeviceDefinition.Kind.FLOOR_BUTTON, DeviceDefinition.Kind.RECEIVER] \
 			and (definition.settle_ticks < 1 or definition.settle_ticks > rate):
 		errors.append("sensor '%s' settle ticks must be in 1..%d" % [id, rate])
+	if definition.kind in [DeviceDefinition.Kind.EMITTER, DeviceDefinition.Kind.RECEIVER] and definition.channel < 0:
+		errors.append("optical device '%s' needs a channel >= 0" % id)
+	if definition.kind == DeviceDefinition.Kind.RECEIVER and (not is_finite(definition.acceptance_degrees)
+			or definition.acceptance_degrees <= 0.0 or definition.acceptance_degrees > 90.0):
+		errors.append("receiver '%s' acceptance must be in (0, 90] degrees" % id)
 	if definition.kind == DeviceDefinition.Kind.WALL_BUTTON and definition.wall_mode == DeviceDefinition.WallMode.TIMED \
 			and (not is_finite(definition.hold_seconds) or definition.hold_seconds <= 0.0 or definition.hold_seconds > MAX_HOLD_SECONDS):
 		errors.append("wall button '%s' hold must be in (0, %.0f] s" % [id, MAX_HOLD_SECONDS])

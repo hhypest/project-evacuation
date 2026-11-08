@@ -17,7 +17,7 @@ func _run() -> void:
 	var suites: Array[TestSuite] = [
 		SessionTests.new(), SessionControllerTests.new(), InputBufferTests.new(),
 		MovementRulesTests.new(), CarryTests.new(), PuzzleNetworkTests.new(), RuntimeTests.new(), CarryContentTests.new(), PhysicsTests.new(), ScopeLoadTests.new(),
-		PlayerMovementTests.new(), CarryPhysicsTests.new(), PuzzleDeviceTests.new(), ScopeTests.new(), CarrySessionTests.new(),
+		PlayerMovementTests.new(), CarryPhysicsTests.new(), PuzzleDeviceTests.new(), BeamDeviceTests.new(), ScopeTests.new(), CarrySessionTests.new(),
 	]
 	var count: int = 0
 	var failed: int = 0

@@ -1,8 +1,12 @@
 class_name PuzzleLabBuilder
 extends Node3D
-## Primitive device proving ground (SKL-04/05): every bay shows one device rule and opens one door.
+## Primitive device proving ground (SKL-04/05/06): every bay shows one device rule and opens one door.
 
 const WALL_Z: float = -9.0
+## Bay 5 (beam): partition along X with its own door; the beam runs in front of it.
+const PARTITION_Z: float = 3.0
+const BEAM_Z: float = 6.5
+const BEAM_HEIGHT: float = 0.6
 const WALL_COLOR: Color = Color(0.2, 0.23, 0.26)
 
 
@@ -32,6 +36,14 @@ func _ready() -> void:
 	_logic("lab.and", DeviceDefinition.Kind.AND, [&"lab.delay", &"lab.button.toggle"], Vector3(8.7, 2.1, WALL_Z + 0.2))
 	_door("lab.door.logic", Vector3(10.5, 0, WALL_Z), [&"lab.and"])
 	_sign("Логика: защёлка S/R → задержка 1 с\n→ И с кнопкой-переключателем", Vector3(9.0, 3.4, WALL_Z + 0.2))
+	# Bay 5: toggle powers an emitter; the receiver opens the partition door. A cube or the player blocks the beam.
+	_button("lab.button.beam", Vector3(13.8, 1.3, PARTITION_Z + 0.25), DeviceDefinition.WallMode.TOGGLE, 1.0)
+	_emitter("lab.emitter", Vector3(14.2, BEAM_HEIGHT, BEAM_Z), [&"lab.button.beam"])
+	_receiver("lab.receiver", Vector3(4.5, BEAM_HEIGHT, BEAM_Z))
+	_door("lab.door.beam", Vector3(11.0, 0, PARTITION_Z), [&"lab.receiver"])
+	_cube("CubeC", &"lab.cube.small_c", Vector3(9.0, 0.55, 9.0), 5.0)
+	_sign("Луч: переключатель питает эмиттер\nприёмник открывает дверь · куб перекрывает", Vector3(11.0, 3.4, PARTITION_Z + 0.2))
+	_partition()
 	_walls()
 	for x: float in [-9.0, -1.0, 7.0]:
 		var lamp: OmniLight3D = OmniLight3D.new()
@@ -40,6 +52,21 @@ func _ready() -> void:
 		lamp.light_energy = 1.6
 		lamp.light_color = Color(0.9, 0.93, 1.0)
 		add_child(lamp)
+	var beam_lamp: OmniLight3D = OmniLight3D.new()
+	beam_lamp.position = Vector3(10.0, 4.5, BEAM_Z)
+	beam_lamp.omni_range = 9.0
+	beam_lamp.light_energy = 1.2
+	beam_lamp.light_color = Color(0.9, 0.93, 1.0)
+	add_child(beam_lamp)
+
+
+func _partition() -> void:
+	# Door at x = 11: 2 m opening plus 0.3 m posts on each side.
+	for span: Vector2 in [Vector2(6.5, 9.7), Vector2(12.3, 15.0)]:
+		var width: float = span.y - span.x
+		var wall: StaticBody3D = PuzzleDeviceNode.static_box(Vector3(width, 3.4, 0.3), WALL_COLOR,
+			Vector3(span.x + width * 0.5, 1.7, PARTITION_Z))
+		add_child(wall)
 
 
 func _walls() -> void:
@@ -92,6 +119,35 @@ func _door(id: StringName, at: Vector3, sources: Array[StringName]) -> void:
 	door.inputs = sources
 	door.position = at
 	add_child(door)
+
+
+func _emitter(id: StringName, at: Vector3, sources: Array[StringName]) -> void:
+	_stand(at)
+	var emitter: EmitterDevice = EmitterDevice.new()
+	emitter.name = String(id).replace(".", "_")
+	emitter.stable_id = id
+	emitter.inputs = sources
+	emitter.range_m = 20.0
+	emitter.position = at
+	# Local -Z fires toward -X.
+	emitter.rotation_degrees = Vector3(0, 90, 0)
+	add_child(emitter)
+
+
+func _receiver(id: StringName, at: Vector3) -> void:
+	_stand(at)
+	var receiver: ReceiverDevice = ReceiverDevice.new()
+	receiver.name = String(id).replace(".", "_")
+	receiver.stable_id = id
+	receiver.position = at
+	# Local +Z front faces +X, toward the emitter.
+	receiver.rotation_degrees = Vector3(0, 90, 0)
+	add_child(receiver)
+
+
+func _stand(at: Vector3) -> void:
+	var height: float = at.y - 0.25
+	add_child(PuzzleDeviceNode.static_box(Vector3(0.3, height, 0.3), Color(0.3, 0.32, 0.34), Vector3(at.x, height * 0.5, at.z)))
 
 
 func _logic(id: StringName, kind: DeviceDefinition.Kind, sources: Array[StringName], at: Vector3, delay: float = 1.0) -> void:

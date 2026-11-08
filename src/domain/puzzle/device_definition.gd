@@ -22,6 +22,10 @@ var hold_seconds: float = 3.0
 var delay_seconds: float = 0.5
 ## SOURCE output; LATCH memory after build or reset.
 var initial: bool = false
+## EMITTER/RECEIVER: optical channel. A receiver accepts only beams of its own channel.
+var channel: int = 0
+## RECEIVER: widest accepted angle between the beam and the receiver's front normal, degrees.
+var acceptance_degrees: float = 30.0
 
 
 static func make(device_id: StringName, device_kind: Kind, device_inputs: Array[StringName] = []) -> DeviceDefinition:
@@ -50,4 +54,6 @@ func duplicate_definition() -> DeviceDefinition:
 	copy.hold_seconds = hold_seconds
 	copy.delay_seconds = delay_seconds
 	copy.initial = initial
+	copy.channel = channel
+	copy.acceptance_degrees = acceptance_degrees
 	return copy

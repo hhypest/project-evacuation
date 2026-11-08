@@ -16,6 +16,7 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	results.append_array(_logic())
 	results.append_array(_memory())
 	results.append_array(_determinism())
+	results.append_array(_beams())
 	return results
 
 
@@ -174,6 +175,67 @@ func _determinism() -> Array[TestOutcome]:
 	stale.tick_id = a.last_tick
 	results.append(TestOutcome.new("a repeated tick ID is rejected", a.step(stale) == null))
 	return results
+
+
+func _beams() -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	var receiver: DeviceDefinition = _d(&"rx", DeviceDefinition.Kind.RECEIVER)
+	receiver.settle_ticks = 2
+	var other: DeviceDefinition = _d(&"em1", DeviceDefinition.Kind.EMITTER, [&"on"])
+	other.channel = 1
+	var definitions: Array[DeviceDefinition] = [_src(&"on", true), _src(&"off", false),
+		_d(&"em", DeviceDefinition.Kind.EMITTER, [&"on"]), _d(&"dark", DeviceDefinition.Kind.EMITTER, [&"off"]), other,
+		receiver, _d(&"door", DeviceDefinition.Kind.DOOR, [&"rx"])]
+	var network: PuzzleNetwork = _net(definitions)
+	var head_on: Array[BeamHit] = [BeamHit.make(&"em", &"rx", 1.0)]
+	var first: bool = _beam(network, 1, head_on).output(&"rx")
+	var settled: bool = _beam(network, 1, head_on).output(&"door")
+	results.append(TestOutcome.new("a head-on beam from a powered emitter switches the receiver after its settle ticks",
+		not first and settled))
+	var flicker: bool = _beam(network, 1, []).output(&"rx")
+	var lost: bool = _beam(network, 2, []).output(&"rx")
+	results.append(TestOutcome.new("a one-tick occlusion is debounced; a sustained one releases the receiver", flicker and not lost))
+	var cases: Dictionary[String, BeamHit] = {
+		"60 degrees off a 30 degree cone": BeamHit.make(&"em", &"rx", 0.5),
+		"from behind": BeamHit.make(&"em", &"rx", -1.0),
+		"non-finite incidence": BeamHit.make(&"em", &"rx", NAN),
+		"an unpowered emitter": BeamHit.make(&"dark", &"rx", 1.0),
+		"another channel": BeamHit.make(&"em1", &"rx", 1.0),
+		"a non-emitter source": BeamHit.make(&"on", &"rx", 1.0),
+		"an unknown emitter": BeamHit.make(&"ghost", &"rx", 1.0),
+		"a hit addressed to another device": BeamHit.make(&"em", &"door", 1.0)}
+	var accepted: Array[String] = []
+	for label: String in cases.keys():
+		var probe: PuzzleNetwork = _net(definitions)
+		if _beam(probe, 5, [cases[label]]).output(&"rx"):
+			accepted.append(label)
+	results.append(TestOutcome.new("receiver rejects beams outside its rules", accepted.is_empty(), ", ".join(accepted)))
+	var inside: PuzzleNetwork = _net(definitions)
+	results.append(TestOutcome.new("a beam inside the acceptance cone is accepted",
+		_beam(inside, 2, [BeamHit.make(&"em", &"rx", cos(deg_to_rad(25.0)))]).output(&"rx")))
+	var channel: DeviceDefinition = _d(&"bad", DeviceDefinition.Kind.EMITTER, [&"on"])
+	channel.channel = -1
+	var cone: DeviceDefinition = _d(&"wide", DeviceDefinition.Kind.RECEIVER)
+	cone.acceptance_degrees = 120.0
+	var bad: PuzzleBuildResult = PuzzleNetwork.build([_src(&"on", true), channel, cone])
+	results.append(TestOutcome.new("validator rejects negative channels and acceptance outside (0, 90]",
+		_has(bad, "channel >= 0") and _has(bad, "acceptance"), ", ".join(bad.errors)))
+	var optical: PuzzleBuildResult = PuzzleNetwork.build([_d(&"rx", DeviceDefinition.Kind.RECEIVER),
+		_d(&"inv", DeviceDefinition.Kind.NOT, [&"rx"]), _d(&"em", DeviceDefinition.Kind.EMITTER, [&"inv"])])
+	results.append(TestOutcome.new("an emitter driven by its own receiver is legal: the beam passes a physics tick",
+		optical.ok(), ", ".join(optical.errors)))
+	return results
+
+
+func _beam(network: PuzzleNetwork, ticks: int, hits: Array[BeamHit]) -> PuzzleStepResult:
+	var last: PuzzleStepResult
+	for index: int in range(ticks):
+		_tick += 1
+		var observation: PuzzleObservation = PuzzleObservation.new()
+		observation.tick_id = _tick
+		observation.beams = hits
+		last = network.step(observation)
+	return last
 
 
 func _sample() -> Array[DeviceDefinition]:

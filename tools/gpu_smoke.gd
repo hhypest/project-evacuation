@@ -164,8 +164,32 @@ func _run() -> void:
 	await RenderingServer.frame_post_draw
 	if not _capture(capture.get_basename() + "-devices.png"):
 		return
+	# Beam (SKL-06): E on the toggle powers the emitter; the receiver must accept the traced beam.
+	var beam_button: WallButtonDevice = lab.get_node("lab_button_beam") as WallButtonDevice
+	var emitter: EmitterDevice = lab.get_node("lab_emitter") as EmitterDevice
+	var beam_door: DoorDevice = lab.get_node("lab_door_beam") as DoorDevice
+	if not _check(beam_button != null and emitter != null and beam_door != null, "beam bay"):
+		return
+	var beam_front: Vector3 = beam_button.global_basis.z.normalized()
+	lab_player.global_position = Vector3(beam_button.global_position.x, 0.05, beam_button.global_position.z) + beam_front * 1.3
+	for _tick: int in range(20):
+		await physics_frame
+	carry_camera.look_at(beam_button.global_position + Vector3(0, -0.05, 0) + beam_front * 0.05)
+	TestInputEvents.key(KEY_E)
+	TestInputEvents.key(KEY_E, false)
+	for _tick: int in range(90):
+		await physics_frame
+	if not _check(emitter.powered and beam_door.is_open(), "E on the beam toggle powers the emitter and the receiver opens its door"):
+		return
+	var beam_receiver: ReceiverDevice = lab.get_node("lab_receiver") as ReceiverDevice
+	carry_camera.look_at(beam_receiver.global_position + Vector3(0, 0.5, 0))
+	for _tick: int in range(3):
+		await physics_frame
+	await RenderingServer.frame_post_draw
+	if not _capture(capture.get_basename() + "-beam.png"):
+		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door/beam movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.
