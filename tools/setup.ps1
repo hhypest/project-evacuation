@@ -16,8 +16,22 @@ function Get-VerifiedAsset {
   if ([IO.Path]::GetFileName($Asset.filename) -ne $Asset.filename) { throw 'Unsafe artifact filename.' }
   $archivePath = Join-Path $workspace $Asset.filename
   if (-not (Test-Path -LiteralPath $archivePath)) {
-    Write-Host "Downloading $($Asset.filename)"
-    Invoke-WebRequest "$base/$($Asset.filename)" -OutFile $archivePath
+    # The release host answers 502/503/504 at times; retry with backoff and keep partial files out of the cache.
+    $partial = "$archivePath.part"
+    $delays = @(0, 10, 30, 60, 120)
+    for ($attempt = 1; $attempt -le $delays.Count; $attempt++) {
+      if ($delays[$attempt - 1] -gt 0) { Start-Sleep -Seconds $delays[$attempt - 1] }
+      Write-Host "Downloading $($Asset.filename) (attempt $attempt of $($delays.Count))"
+      try {
+        Invoke-WebRequest "$base/$($Asset.filename)" -OutFile $partial
+        Move-Item -LiteralPath $partial -Destination $archivePath -Force
+        break
+      } catch {
+        Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
+        if ($attempt -eq $delays.Count) { throw }
+        Write-Warning "Download failed: $($_.Exception.Message)"
+      }
+    }
   }
   if ((Get-FileHash -LiteralPath $archivePath -Algorithm SHA512).Hash.ToLowerInvariant() -ne $Asset.sha512) {
     throw "Checksum mismatch: $archivePath. Keep the file for diagnosis; replace it before retrying."
