@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://content/levels/trial_logic.tscn" id="3_jg408"]
 [ext_resource type="PackedScene" path="res://content/levels/trial_beam_gravity.tscn" id="4_jvbau"]
 [ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="5_2bktj"]
+[ext_resource type="PackedScene" path="res://content/levels/portal_lab.tscn" id="6_portal"]
 
 [sub_resource type="Resource" id="Resource_lh027"]
 script = ExtResource("1_cdh8c")
@@ -24,6 +25,12 @@ title = "Испытание 2: луч и гравитация"
 summary = "Три лёгкие комнаты: освободить луч, уронить куб полем, подняться по стене."
 scene = ExtResource("4_jvbau")
 
+[sub_resource type="Resource" id="Resource_portal"]
+script = ExtResource("1_cdh8c")
+title = "Эксперимент: порталы"
+summary = "SKL-08: вид через пару порталов и перенос кубов; игрок пока проходит проём без переноса."
+scene = ExtResource("6_portal")
+
 [resource]
 script = ExtResource("5_2bktj")
-entries = Array[ExtResource("1_cdh8c")]([SubResource("Resource_lh027"), SubResource("Resource_0tet8"), SubResource("Resource_2tiam")])
+entries = Array[ExtResource("1_cdh8c")]([SubResource("Resource_lh027"), SubResource("Resource_0tet8"), SubResource("Resource_2tiam"), SubResource("Resource_portal")])

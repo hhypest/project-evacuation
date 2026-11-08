@@ -25,8 +25,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		if await _open(CATALOG.scene(index)):
 			opened.append(CATALOG.entries[index].title)
 		await _close()
-	results.append(TestOutcome.new("every menu level opens with a valid device network and gravity fields",
-		opened.size() == 3, ", ".join(opened)))
+	results.append(TestOutcome.new("every menu level opens with a valid device network, gravity fields and portals",
+		opened.size() == CATALOG.entries.size() and opened.size() >= 4, ", ".join(opened)))
 	results.append_array(await _trial_logic())
 	results.append_array(await _trial_beam_gravity())
 	return results

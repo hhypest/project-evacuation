@@ -4,7 +4,7 @@
 
 **Одиночная 3D-головоломка от первого лица с элементами хоррора.** В далёком будущем человек оказывается внутри инопланетной мегаструктуры на агрессивной, чужой планете. Чтобы добраться до эвакуационного транспорта, он восстанавливает и перенастраивает системы сооружения, решая физические головоломки.
 
-**Состояние:** рабочая версия 0.0.8-dev, 0.1.0 ещё не выпущена. Что реализовано и чем подтверждено — [docs/status.md](docs/status.md); история изменений — [CHANGELOG.md](CHANGELOG.md). Репозиторий: [hhypest/project-evacuation](https://github.com/hhypest/project-evacuation).
+**Состояние:** рабочая версия 0.0.9-dev, 0.1.0 ещё не выпущена. Что реализовано и чем подтверждено — [docs/status.md](docs/status.md); история изменений — [CHANGELOG.md](CHANGELOG.md). Репозиторий: [hhypest/project-evacuation](https://github.com/hhypest/project-evacuation).
 
 ## Документация
 
@@ -122,7 +122,7 @@ $env:GODOT_BIN = ./tools/setup.ps1
 
 Экспорт обеих платформ: `./tools/export.ps1`; результаты находятся в `builds/` вместе с лицензиями. Windows-сборка запускается как `builds/evacuation.exe`. Linux-экспорт собран и запущен без графики в CI; Linux Vulkan ещё не проверен.
 
-GPU-проверка: `& $env:GODOT_BIN --path . --rendering-driver vulkan --script tools/gpu_smoke.gd`; кадры сохраняются в `work/gpu_smoke*.png`. Она проходит меню, движение, паузу и фокус, перезапуск, перенос и устройства реальными событиями ввода. Headless-проверки не подтверждают Vulkan и работу нативного оконного менеджера. Что и как проверять — в [docs/testing.md](docs/testing.md).
+GPU-проверка: `& $env:GODOT_BIN --path . --rendering-driver vulkan --script tools/gpu_smoke.gd`; кадры сохраняются в `work/gpu_smoke*.png`. Она проходит меню, движение, паузу и фокус, перезапуск, перенос и устройства реальными событиями ввода. Headless-проверки не подтверждают Vulkan и работу нативного оконного менеджера. Что и как проверять — в [docs/testing.md](docs/testing.md). Изображение через порталы проверяет `tools/portal_smoke.gd` (кадры `work/portal_smoke-*.png`).
 
 ## План разработки
 
