@@ -4,7 +4,7 @@
 
 ## Среда и область
 
-Godot 4.7.2 Standard (`ed1daf0bf`), встроенный Jolt, физика 60 Гц. Проверки выполнены в облачной Linux-среде: headless для тестов и Vulkan через программный llvmpipe для GPU-smoke. Реальный GPU для этой задачи пока не проверялся. Новых внешних зависимостей и ассетов нет. Решение и порядок тика — [ADR-0008](../adr/0008-device-network.md).
+Godot 4.7.2 Standard (`ed1daf0bf`), встроенный Jolt, физика 60 Гц. Проверки выполнены в облачной Linux-среде: headless для тестов и Vulkan через программный llvmpipe для GPU-smoke. Проверка на реальном GPU владельца — в разделе GPU-smoke. Новых внешних зависимостей и ассетов нет. Решение и порядок тика — [ADR-0008](../adr/0008-device-network.md).
 
 ## Полигон устройств
 
@@ -47,7 +47,7 @@ Integration suite повторён с `--fixed-fps 30` и `--fixed-fps 144` (ф�
 
 ### GPU-smoke
 
-`tools/gpu_smoke.gd` расширен шагом устройств: после переноса куба fixture ставит игрока перед кнопкой TIMED, реальное событие E проходит через SessionInput и открывает дверь; сохраняется кадр `work/gpu_smoke-devices.png`. В облаке на Vulkan/llvmpipe получен `GPU_SMOKE_PASSED ... devices=button/door`; кадр просмотрен. **Проверка на реальном GPU (Windows) ещё не выполнена** и запрашивается у владельца.
+`tools/gpu_smoke.gd` расширен шагом устройств: после переноса куба fixture ставит игрока перед кнопкой TIMED, реальное событие E проходит через SessionInput и открывает дверь; сохраняется кадр `work/gpu_smoke-devices.png`. В облаке на Vulkan/llvmpipe получен `GPU_SMOKE_PASSED ... devices=button/door`; кадр просмотрен. **Реальный GPU, 2026-11-08:** владелец запустил `tools/gpu_smoke.gd` на Windows, NVIDIA GeForce RTX 4070 Ti SUPER, Vulkan 1.4.351, Forward+, Jolt — получен `GPU_SMOKE_PASSED driver=vulkan gpu=NVIDIA GeForce RTX 4070 Ti SUPER carry=grab/hold/throw devices=button/door/beam gravity=field/wall-walk …`; кадры меню, двери, луча и поля просмотрены и совпадают с облачными. Владелец также прошёл оба испытания и полигон вручную.
 
 ## Ограничения
 
