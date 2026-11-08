@@ -8,6 +8,8 @@ var _camera: LookCamera
 var _player: PlayerMotor
 var _carry: CarryController
 var _puzzle: AdvancePuzzle
+var _gravity: SampleGravity
+var _gravity_world: GravityWorldAdapter
 var _tick_id: int = 0
 
 
@@ -54,6 +56,14 @@ func open(scene: PackedScene, generation: int) -> bool:
 		_puzzle.close()
 		_abort_open()
 		return false
+	_gravity_world = GravityWorldAdapter.new()
+	_gravity_world.configure(level)
+	_gravity = SampleGravity.new(_gravity_world)
+	if not _gravity.ready():
+		push_error("Chamber gravity fields rejected: " + "; ".join(_gravity.errors))
+		_puzzle.close()
+		_abort_open()
+		return false
 	_puzzle.reset()
 	return true
 
@@ -63,6 +73,10 @@ func _abort_open() -> void:
 		_carry.close()
 	_carry = null
 	_puzzle = null
+	_gravity = null
+	if _gravity_world != null:
+		_gravity_world.close()
+	_gravity_world = null
 	if _level != null:
 		remove_child(_level)
 		_level.queue_free()
@@ -83,7 +97,11 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	command.jump_held = frame.jump_held
 	command.crouching = frame.crouching
 	command.walking = frame.walking
+	# Field power comes from the previous puzzle tick, like every other device output.
+	var field: GravityZone = _gravity.at(_player.center())
+	_player.set_gravity(field.up(), field.strength / _gravity.base().strength)
 	_player.step(command, delta)
+	_camera.align_to(_player.up_direction, delta)
 	_camera.global_position = _player.eye_position()
 	_tick_id += 1
 	var carry_input: CarryInput = CarryInput.new()
@@ -117,6 +135,10 @@ func puzzle() -> AdvancePuzzle:
 	return _puzzle
 
 
+func gravity() -> SampleGravity:
+	return _gravity
+
+
 func close() -> void:
 	_generation = -1
 	if _carry != null:
@@ -125,6 +147,10 @@ func close() -> void:
 	if _puzzle != null:
 		_puzzle.close()
 	_puzzle = null
+	_gravity = null
+	if _gravity_world != null:
+		_gravity_world.close()
+	_gravity_world = null
 	_camera = null
 	_player = null
 	if get_parent() != null:
