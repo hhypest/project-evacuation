@@ -8,6 +8,7 @@ const WARMUP_FRAMES: int = 30
 const SCENES: Array[String] = [
 	"res://content/levels/material_showcase.tscn",
 	"res://content/levels/vitrine_showcase.tscn",
+	"res://content/levels/camp_showcase.tscn",
 ]
 const VIEWS: Array[Dictionary] = [
 	{"scene": 0, "name": "overview", "from": Vector3(0.0, 3.2, 10.5), "to": Vector3(0.0, 1.6, -2.0)},
@@ -20,6 +21,10 @@ const VIEWS: Array[Dictionary] = [
 	{"scene": 1, "name": "vitrine-hevs", "from": Vector3(9.0, 2.6, 11.0), "to": Vector3(0.0, 1.8, 0.0)},
 	{"scene": 1, "name": "vitrine-star", "from": Vector3(9.0, 1.4, -8.0), "to": Vector3(-6.0, 3.2, 60.0)},
 	{"scene": 1, "name": "vitrine-livery", "from": Vector3(-1.2, 1.9, 4.2), "to": Vector3(-1.2, 1.8, 0.0)},
+	{"scene": 2, "name": "camp-overview", "from": Vector3(0.0, 2.2, 7.5), "to": Vector3(0.0, 1.0, -3.0)},
+	{"scene": 2, "name": "camp-tents", "from": Vector3(-3.4, 1.6, 1.8), "to": Vector3(-3.4, 0.9, -5.0)},
+	{"scene": 2, "name": "camp-medbay", "from": Vector3(2.6, 1.7, 2.4), "to": Vector3(4.8, 1.3, -2.2)},
+	{"scene": 2, "name": "camp-crates", "from": Vector3(-1.2, 1.3, 1.9), "to": Vector3(-2.4, 0.6, -0.8)},
 ]
 
 

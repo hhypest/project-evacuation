@@ -1,0 +1,17 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas_burnt/camp_canvas_burnt_albedo.png" id="1_irv4v"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas_burnt/camp_canvas_burnt_normal.png" id="2_jwuym"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas_burnt/camp_canvas_burnt_orm.png" id="3_4j5y0"]
+
+[resource]
+resource_name = "camp_canvas_burnt"
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+cull_mode = 2
+albedo_texture = ExtResource("1_irv4v")
+orm_texture = ExtResource("3_4j5y0")
+normal_enabled = true
+normal_texture = ExtResource("2_jwuym")
+ao_enabled = true

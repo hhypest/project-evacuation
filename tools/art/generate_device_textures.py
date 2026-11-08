@@ -46,6 +46,10 @@ PALETTE = {
     "steel": "#8E9499",
     "glass": "#14191C",
     "stripe_dark": "#1E2124",
+    "canvas": "#B3AD9E",
+    "crate": "#4A5244",
+    "char": "#141210",
+    "first_aid": "#1F6B47",
 }
 
 EMISSION_SEMANTIC = {
@@ -55,6 +59,7 @@ EMISSION_SEMANTIC = {
     "white": "Нейтральный индикатор состояния (не несёт цветовой семантики)",
     "screen": "Экран человеческого терминала (нейтральный, не сигнал головоломки)",
     "alien": "Декоративный свет чужого слоя: холодный почти белый, не сигнал",
+    "lamp": "Рабочее освещение лагеря (прожекторы): тёплый белый, не сигнал головоломки",
 }
 
 
@@ -1228,6 +1233,255 @@ def pano_terminator_sky() -> Canvas:
     return c
 
 
+# --------------------------------------------------------------------------- лагерь экспедиции (выгорел на Д42)
+
+def scorch(c: Canvas, amount: np.ndarray, *, blister: float = 0.0) -> None:
+    """Пожар Д42: уголь и копоть, рыжий ореол перегрева по краю, вздутая краска без металлического блеска."""
+    a = np.clip(amount, 0.0, 1.0)
+    halo = np.clip(c.blur(a, 7.0) * 1.6 - a, 0.0, 1.0)
+    brown = rgb("#5B3B24")[None, None, :]
+    c.albedo = c.albedo * (1 - 0.55 * halo[..., None]) + brown * 0.55 * halo[..., None]
+    c.albedo = c.albedo * (1 - 0.93 * a[..., None]) + rgb("char")[None, None, :] * 0.93 * a[..., None]
+    c.rough = np.clip(c.rough * (1 - a) + 0.93 * a, 0.0, 1.0)
+    c.metal = c.metal * (1 - a)
+    c.paint_mask = c.paint_mask * (1 - np.clip(a + halo, 0.0, 1.0))
+    if blister > 0.0:
+        bubbles = smoothstep(0.62, 0.8, c.noise(48, 2)) * np.clip(halo + a * 0.6, 0.0, 1.0)
+        c.height = c.height + bubbles * blister
+
+
+def emblem_mask(c: Canvas, cx: float, cy: float, s: float) -> np.ndarray:
+    """Знак ФосТех: шестигранник с буквой «Ф» (собственный рисунок проекта, не чужой логотип)."""
+    pts_out = [(cx + s * math.cos(math.radians(90 + 60 * i)), cy - s * math.sin(math.radians(90 + 60 * i))) for i in range(6)]
+    k = 0.8
+    pts_in = [(cx + (x - cx) * k, cy + (y - cy) * k) for x, y in pts_out]
+    hex_ring = np.clip(c.shape(poly(pts_out)) - c.shape(poly(pts_in)), 0.0, 1.0)
+    stem = c.shape(rect(cx - s * 0.07, cy - s * 0.58, cx + s * 0.07, cy + s * 0.58))
+    bowl = ring(c, cx, cy, s * 0.24, s * 0.36)
+    bowl = np.clip(bowl * 1.0, 0.0, 1.0)
+    yy = np.mgrid[0:c.h, 0:c.w][0].astype(np.float32)
+    bowl = bowl * (np.abs(yy - cy) < s * 0.36)
+    return np.clip(hex_ring + stem + bowl, 0.0, 1.0)
+
+
+def canvas_base(c: Canvas, color: str) -> None:
+    """Тент экспедиции: плотная ткань с ПВХ-покрытием, мелкое плетение, складки, сварной шов, разводы и пыль."""
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    period = c.w / 256.0  # ~4 мм на нить при 1 м на тайл
+    weave = 0.5 + 0.25 * (np.sin(xx / period * 2 * math.pi) + np.sin(yy / period * 2 * math.pi))
+    c.fill(np.ones((c.h, c.w), np.float32), rgb(color), height=0.5, rough=0.86, metal=0.0, paint=False, color_var=0.05)
+    folds = c.noise(2, 3, aspect=(1.0, 0.35))
+    wrinkle = 1.0 - np.abs(c.noise(6, 3, aspect=(0.3, 1.0)) * 2.0 - 1.0)
+    wrinkle = smoothstep(0.75, 0.97, wrinkle)
+    c.height = (0.5 + 0.10 * (folds - 0.5) + 0.03 * wrinkle + 0.008 * weave).astype(np.float32)
+    # горизонтальный сварной шов полотнищ с двумя строчками
+    seam = smoothstep(0.0, 1.0, 1.0 - np.abs(yy - c.h * 0.5) / (c.h * 0.03))
+    c.height += 0.02 * seam
+    c.albedo *= (1 - 0.07 * seam[..., None])
+    for off in (-0.022, 0.022):
+        line = (np.abs(yy - c.h * (0.5 + off)) < 1.3) & (np.mod(xx, 12.0) < 7.0)
+        c.albedo *= (1 - 0.3 * line[..., None])
+        c.height -= 0.006 * line
+    shade = (folds - 0.5) * 0.18 - wrinkle * 0.06
+    c.albedo *= (1 + shade[..., None])
+    # разводы высохших капель и пыль из чужой кладки
+    stains = smoothstep(0.55, 0.62, c.noise(5, 4)) - smoothstep(0.62, 0.72, c.noise(5, 4))
+    c.albedo *= (1 - 0.08 * np.abs(stains)[..., None])
+    dust = smoothstep(0.45, 0.9, c.noise(3, 4))
+    c.albedo = c.albedo * (1 - 0.18 * dust[..., None]) + rgb("#5E5A52")[None, None, :] * 0.18 * dust[..., None]
+
+
+def camp_canvas() -> Canvas:
+    """Целое полотнище палатки, 1 м на тайл."""
+    c = Canvas(1024, 1024, True, True, seed=71)
+    canvas_base(c, "canvas")
+    return c
+
+
+def camp_canvas_burnt() -> Canvas:
+    """Обгоревшее полотнище: прогары насквозь (alpha scissor), обугленные кромки, копоть вверх по ткани."""
+    c = Canvas(1024, 1024, True, True, seed=72)
+    canvas_base(c, "canvas")
+    burn = c.noise(3, 5)
+    soot = smoothstep(0.35, 0.8, c.noise(4, 4, aspect=(1.0, 0.25)))
+    c.albedo *= (1 - 0.45 * soot[..., None])
+    char = smoothstep(0.55, 0.69, burn)
+    scorch(c, char)
+    hole = smoothstep(0.69, 0.72, burn)
+    c.alpha = 1.0 - hole
+    curl = np.clip(c.blur(hole, 3.0) * 2.0 - hole, 0.0, 1.0)
+    c.height += 0.05 * curl
+    return c
+
+
+def camp_supply_crate() -> Canvas:
+    """Лицевая грань ящика снабжения: рама, рёбра жёсткости, уголки, защёлки крышки, держатель накладной, серийник, знак ФосТех."""
+    c = Canvas(1024, 1024, seed=73)
+    full = np.ones((c.h, c.w), np.float32)
+    c.painted(full, "crate", height=0.55, rough=0.6)
+    inner = c.shape(rect(72, 72, 952, 952, 18))
+    c.painted(inner, "crate", height=0.5, bevel=5.0, rough=0.62)
+    for y0 in (330, 640):
+        c.painted(c.shape(union(rect(110, y0, 320, y0 + 54, 20), rect(704, y0, 914, y0 + 54, 20))), "crate", height_add=0.035, bevel=10.0)
+    # стальные уголки
+    for x0, y0, sx, sy in ((0, 0, 1, 1), (1024, 0, -1, 1), (0, 1024, 1, -1), (1024, 1024, -1, -1)):
+        pts = [(x0, y0), (x0 + sx * 190, y0), (x0 + sx * 190, y0 + sy * 70), (x0 + sx * 70, y0 + sy * 190), (x0, y0 + sy * 190)]
+        c.steel(c.shape(poly(pts)), height=0.7, bevel=4.0, rough=0.45)
+        c.bolts([(x0 + sx * 40, y0 + sy * 40), (x0 + sx * 130, y0 + sy * 35), (x0 + sx * 35, y0 + sy * 130)], 9.0, height=0.78)
+    # шов крышки и четыре стальных защёлки поперёк шва — светлый металл, без тёмных пятен-«глаз»
+    c.fill(c.shape(rect(72, 196, 952, 204)), rgb("dark"), height=0.42, rough=0.8, paint=False)
+    for x in (190, 400, 624, 834):
+        c.steel(c.shape(rect(x - 34, 160, x + 34, 248, 8)), height=0.68, bevel=3.0, rough=0.4)
+        c.steel(c.shape(rect(x - 20, 176, x + 20, 232, 6)), height=0.74, bevel=2.0, rough=0.32)
+        c.bolts([(x - 24, 170), (x + 24, 170), (x - 24, 238), (x + 24, 238)], 4.5, height=0.72)
+    # держатель накладной: стальная рамка и светлая карточка (содержимое — чистое, без текста)
+    c.steel(c.shape(rect(352, 430, 672, 590, 6)), height=0.6, bevel=2.0, rough=0.42)
+    c.fill(c.shape(rect(366, 444, 658, 576, 4)), rgb("#D9D3C2"), height=0.56, rough=0.75, metal=0.0, paint=False)
+    c.fill(c.shape(union(*[rect(386, 470 + i * 26, 600 - (i % 2) * 70, 478 + i * 26) for i in range(4)])),
+           rgb("#8D877A"), height_add=0.0, rough=0.8, metal=0.0, paint=False)
+    # маркировка: оранжевая полоса, знак ФосТех, трафаретный серийник
+    c.painted(c.shape(rect(110, 740, 914, 762)), "marking", height_add=0.001)
+    c.painted(emblem_mask(c, 220, 860, 58), "panel_light", height_add=0.001)
+    c.painted(c.shape(digits("08-417", 330, 815, 84, 13)), "panel_light", height_add=0.001)
+    dust = smoothstep(0.5, 0.95, c.noise(3, 4))
+    c.albedo = c.albedo * (1 - 0.2 * dust[..., None]) + rgb("#5E5A52")[None, None, :] * 0.2 * dust[..., None]
+    return c
+
+
+def camp_floodlight() -> Canvas:
+    """Лицевая панель переносного прожектора: корпус, стекло, 24 светодиода в отражателях, знак ФосТех."""
+    c = Canvas(512, 512, seed=74)
+    c.painted(np.ones((c.h, c.w), np.float32), "stripe_dark", height=0.6, rough=0.5)
+    c.painted(c.shape(rect(0, 0, 512, 26)), "marking", height=0.62)
+    c.steel(c.shape(rect(30, 46, 482, 470, 10)), height=0.5, bevel=4.0, rough=0.3)
+    leds: list[tuple[float, float]] = [(76 + i * 72, 120 + j * 93) for j in range(4) for i in range(6)]
+    for x, y in leds:
+        c.fill(disk(c, x, y, 28), rgb("steel") * 1.1, height_add=-0.06, bevel=6.0, rough=0.12, metal=1.0, paint=False)
+        c.fill(disk(c, x, y, 11), rgb("#F4F1E8"), height_add=0.02, rough=0.2, metal=0.0, paint=False)
+        c.emissive(disk(c, x, y, 13))
+    glass = c.shape(rect(30, 46, 482, 470, 10))
+    c.rough = c.rough * (1 - 0.5 * glass) + 0.08 * 0.5 * glass
+    c.bolts([(16, 46), (496, 46), (16, 470), (496, 470)], 6.0, height=0.66)
+    c.painted(emblem_mask(c, 256, 492, 14), "panel_light", height_add=0.002)
+    return c
+
+
+def habitat_panel_base(c: Canvas) -> None:
+    """Стена жилого модуля/медблока: композитные панели 1 м, швы, заклёпки, люк, решётка вентиляции, цоколь."""
+    full = np.ones((c.h, c.w), np.float32)
+    c.painted(full, "panel_light", height=0.55, rough=0.5)
+    seams = c.shape(union(rect(-3, 0, 3, 1024), rect(509, 0, 515, 1024), rect(0, 852, 1024, 858)))
+    c.fill(seams, rgb("dark"), height=0.4, bevel=1.5, rough=0.75, paint=False)
+    c.painted(c.shape(rect(0, 858, 1024, 1024)), "stripe_dark", height=0.6, rough=0.55)
+    c.painted(c.shape(rect(0, 862, 1024, 890)), "marking", height_add=0.002)
+    c.painted(c.shape(rect(0, 170, 1024, 196)), "marking", height_add=0.002)
+    rivets = [(x, y) for x in (16, 497, 527, 1008) for y in range(40, 840, 64)]
+    c.bolts(rivets, 3.5, height=0.62)
+    # сервисный люк на первой панели
+    c.painted(c.shape(rect(90, 520, 330, 790, 10)), "panel_light", height=0.52, bevel=3.0)
+    c.fill(c.shape(rect(90, 520, 330, 790, 10)) - c.shape(rect(96, 526, 324, 784, 8)), rgb("dark"), height=0.42, rough=0.8, paint=False)
+    c.rubber(c.shape(rect(290, 630, 312, 690, 6)), height=0.6, bevel=2.0)
+    c.painted(c.shape(digits("04", 120, 560, 40, 7)), "marking", height_add=0.002)
+    # решётка вентиляции на второй панели
+    c.fill(c.shape(rect(620, 600, 900, 760, 8)), rgb("dark"), height=0.4, bevel=2.0, rough=0.85, paint=False)
+    for i in range(9):
+        y = 612 + i * 16
+        c.painted(c.shape(rect(628, y, 892, y + 8, 3)), "metal_dark", height=0.5, bevel=1.5)
+    c.painted(emblem_mask(c, 760, 300, 46), "stripe_dark", height_add=0.001)
+    # потёки из-под крыши и пыль у цоколя
+    streaks = smoothstep(0.6, 0.9, c.noise(16, 3, aspect=(1.0, 0.06)))
+    yy = np.mgrid[0:c.h, 0:c.w][0].astype(np.float32)
+    c.albedo *= (1 - 0.12 * (streaks * (1 - yy / c.h))[..., None])
+    dust = smoothstep(0.55, 1.0, yy / c.h) * (0.5 + 0.5 * c.noise(6, 3))
+    c.albedo = c.albedo * (1 - 0.35 * dust[..., None]) + rgb("#5E5A52")[None, None, :] * 0.35 * dust[..., None]
+
+
+def camp_habitat_panel() -> Canvas:
+    """Стена модуля лагеря, 2 × 2 м; бесшовно по U."""
+    c = Canvas(1024, 1024, tile_x=True, seed=75)
+    habitat_panel_base(c)
+    return c
+
+
+def camp_habitat_panel_burnt() -> Canvas:
+    """Та же стена после пожара: языки копоти вверх, вздутая краска, обугленные участки."""
+    c = Canvas(1024, 1024, tile_x=True, seed=76)
+    habitat_panel_base(c)
+    yy = np.mgrid[0:c.h, 0:c.w][0].astype(np.float32)
+    up = 1.0 - yy / c.h
+    tongues = c.noise(3, 4, aspect=(1.0, 0.15))
+    soot = np.clip(smoothstep(0.35, 0.75, tongues) * (0.4 + 0.8 * up), 0.0, 1.0)
+    c.albedo *= (1 - 0.7 * soot[..., None])
+    c.rough = np.clip(c.rough + 0.3 * soot, 0.0, 1.0)
+    char = smoothstep(0.66, 0.8, tongues * (0.6 + 0.6 * up) + 0.25 * c.noise(12, 3))
+    scorch(c, char, blister=0.05)
+    return c
+
+
+def camp_medbay_sign() -> Canvas:
+    """Табличка медблока: белый крест на зелёном (знак первой помощи), опалённый угол; вне таблички — прозрачно."""
+    c = Canvas(512, 512, seed=77)
+    plate = c.shape(rect(16, 16, 496, 496, 28))
+    c.painted(plate, "panel_light", height=0.55, bevel=4.0)
+    c.painted(c.shape(rect(46, 46, 466, 466, 16)), "first_aid", height_add=0.002)
+    c.painted(c.shape(union(rect(206, 106, 306, 406), rect(106, 206, 406, 306))), "panel_light", height_add=0.003)
+    c.bolts([(36, 36), (476, 36), (36, 476), (476, 476)], 7.0, height=0.66)
+    xx = np.mgrid[0:c.h, 0:c.w][1].astype(np.float32)
+    corner = smoothstep(0.4, 0.85, c.noise(4, 4) * 0.6 + (xx / c.w) * 0.5) * smoothstep(0.55, 0.9, xx / c.w)
+    scorch(c, smoothstep(0.45, 0.7, corner), blister=0.04)
+    c.alpha = smoothstep(0.3, 0.7, plate)
+    return c
+
+
+def camp_banner() -> Canvas:
+    """Вымпел экспедиции ФосТех «Исход-8»: оранжевая ткань, знак, подшив с люверсами, обгоревший край снизу."""
+    c = Canvas(512, 1024, seed=78)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    c.fill(np.ones((c.h, c.w), np.float32), rgb("marking") * 0.92, height=0.5, rough=0.85, metal=0.0, paint=False, color_var=0.05)
+    c.fill(c.shape(rect(0, 0, 512, 70)), rgb("stripe_dark"), height=0.56, rough=0.8, paint=False)
+    for x in (64, 256, 448):
+        c.steel(ring(c, x, 35, 9, 17), height=0.7)
+        c.fill(disk(c, x, 35, 9), rgb("dark"), height=0.3, paint=False)
+    c.fill(emblem_mask(c, 256, 380, 150), rgb("panel_light"), height_add=0.004, rough=0.75, paint=False)
+    c.fill(c.shape(rect(0, 700, 512, 760)), rgb("stripe_dark"), height_add=0.004, rough=0.8, paint=False)
+    c.fill(c.shape(rect(0, 772, 512, 784)), rgb("panel_light"), height_add=0.004, rough=0.8, paint=False)
+    folds = np.sin(xx / c.w * 2 * math.pi * 3.0 + c.noise(2, 2) * 2.0)
+    c.height = (c.height + 0.05 * folds).astype(np.float32)
+    c.albedo *= (1 + 0.1 * folds[..., None])
+    edge = 900 + (c.noise(6, 4)[0] - 0.5) * 160  # рваный край по X
+    burn_line = np.clip((yy - edge[None, :]) / 40.0, 0.0, 1.0)
+    scorch(c, smoothstep(0.0, 0.6, burn_line + (c.noise(10, 3) - 0.5) * 0.4))
+    hole = smoothstep(0.75, 0.8, burn_line + (c.noise(10, 3) - 0.5) * 0.3)
+    c.alpha = 1.0 - hole
+    soot = smoothstep(0.3, 0.9, c.noise(4, 3, aspect=(1.0, 0.3))) * smoothstep(500, 1000, yy)
+    c.albedo *= (1 - 0.5 * soot[..., None])
+    return c
+
+
+def trefoil(c: Canvas, cx: float, cy: float, s: float) -> np.ndarray:
+    """Знак радиационной опасности: центральный круг и три лепестка по 60°."""
+    a = np.degrees(angle(c, cx, cy))  # 0° — вправо, 90° — вниз (ось Y изображения)
+    blades = np.zeros((c.h, c.w), np.float32)
+    for centre in (90.0, 210.0, 330.0):
+        d = np.abs((a - centre + 180.0) % 360.0 - 180.0)
+        blades = np.maximum(blades, smoothstep(31.0, 29.0, d))
+    blades = blades * ring(c, cx, cy, s * 0.3, s)
+    return np.clip(blades + disk(c, cx, cy, s * 0.2), 0.0, 1.0)
+
+
+def camp_radiation_sign() -> Canvas:
+    """Табличка радиационной опасности: чёрный трилистник на кислотно-зелёном (палитра опасности среды)."""
+    c = Canvas(512, 512, seed=79)
+    plate = c.shape(rect(16, 16, 496, 496, 28))
+    c.painted(plate, "hazard", height=0.55, bevel=4.0)
+    border = c.shape(rect(40, 40, 472, 472, 18)) - c.shape(rect(58, 58, 454, 454, 12))
+    c.painted(np.clip(border, 0, 1), "dark", height_add=0.002)
+    c.painted(trefoil(c, 256, 256, 170), "dark", height_add=0.003)
+    c.bolts([(30, 30), (482, 30), (30, 482), (482, 482)], 7.0, height=0.66)
+    c.alpha = smoothstep(0.3, 0.7, plate)
+    return c
+
+
 @dataclass(frozen=True)
 class Asset:
     name: str
@@ -1272,6 +1526,15 @@ ASSETS: list[Asset] = [
     Asset("hevs_livery", "vehicle", mat_hevs_livery, "amber", "Лента ливреи HEVS-02: оранжевая полоса, «02», шевроны, янтарные маяки; бесшовно вдоль U"),
     Asset("planet_ground", "planet", mat_planet_ground, None, "Грунт у подножия сооружения: обсидиан, пепел, плёнки матов; 2 м на тайл"),
     Asset("terminator_sky", "planet", pano_terminator_sky, None, "Панорама неба терминатора для Sky/витрин: неподвижный красный карлик, дымка, шторм, шпили", kind="panorama"),
+    Asset("camp_canvas", "camp", camp_canvas, None, "Полотнище палатки лагеря: ткань с покрытием, складки, сварной шов; 1 м на тайл"),
+    Asset("camp_canvas_burnt", "camp", camp_canvas_burnt, None, "Обгоревшее полотнище: прогары насквозь, обугленные кромки, копоть; 1 м на тайл", alpha=True),
+    Asset("supply_crate", "camp", camp_supply_crate, None, "Лицевая грань ящика снабжения экспедиции: уголки, защёлки, держатель накладной, серийник, знак ФосТех"),
+    Asset("floodlight", "camp", camp_floodlight, "lamp", "Лицевая панель переносного прожектора лагеря; 24 светодиода — тёплый рабочий свет, не сигнал"),
+    Asset("habitat_panel", "camp", camp_habitat_panel, None, "Стена жилого модуля/медблока, 2 × 2 м; бесшовно по U"),
+    Asset("habitat_panel_burnt", "camp", camp_habitat_panel_burnt, None, "Стена модуля после пожара Д42: копоть, уголь, вздутая краска; бесшовно по U"),
+    Asset("medbay_sign", "camp", camp_medbay_sign, None, "Табличка медблока: белый крест на зелёном, опалённый угол; прозрачный фон", alpha=True),
+    Asset("expedition_banner", "camp", camp_banner, None, "Вымпел экспедиции: знак ФосТех, люверсы, обгоревший нижний край; прозрачный фон", alpha=True),
+    Asset("radiation_sign", "camp", camp_radiation_sign, None, "Табличка радиационной опасности для переходов и спуска к лагерю; прозрачный фон", alpha=True),
 ] + [
     Asset(f"junction_{k}", "devices", dev_junction_box(k), "amber",
           f"Распределительная коробка цепи: {label}; 4 индикатора входов/выхода")
@@ -1311,7 +1574,7 @@ def save_maps(asset: Asset, maps: dict[str, np.ndarray], out_dir: Path) -> list[
 
 EMISSION_PREVIEW = {"cyan": rgb("cyan"), "amber": rgb("amber"), "gravity": rgb("gravity"),
                     "white": np.array([0.92, 0.95, 1.0], np.float32), "screen": rgb("#C9DCE0"),
-                    "alien": rgb("#DCE6F2")}
+                    "alien": rgb("#DCE6F2"), "lamp": rgb("#FFE2B8")}
 
 
 def shade(maps: dict[str, np.ndarray], emission: str | None) -> np.ndarray:
@@ -1384,7 +1647,7 @@ def main() -> None:
     ap.add_argument("--only", nargs="*", default=None, help="имена ассетов")
     args = ap.parse_args()
     manifest: list[dict[str, object]] = []
-    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": [], "alien": [], "suit": [], "vehicle": [], "planet": []}
+    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": [], "alien": [], "suit": [], "vehicle": [], "planet": [], "camp": []}
     for asset in ASSETS:
         if args.only and asset.name not in args.only:
             continue

@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/habitat_panel/habitat_panel_albedo.png" id="1_8qt4g"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/habitat_panel/habitat_panel_normal.png" id="2_0c65t"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/habitat_panel/habitat_panel_orm.png" id="3_m7atl"]
+
+[resource]
+resource_name = "habitat_panel"
+albedo_texture = ExtResource("1_8qt4g")
+orm_texture = ExtResource("3_m7atl")
+normal_enabled = true
+normal_texture = ExtResource("2_0c65t")
+ao_enabled = true

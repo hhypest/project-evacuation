@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas/camp_canvas_albedo.png" id="1_s7w58"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas/camp_canvas_normal.png" id="2_ypshm"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/camp_canvas/camp_canvas_orm.png" id="3_muwal"]
+
+[resource]
+resource_name = "camp_canvas"
+albedo_texture = ExtResource("1_s7w58")
+orm_texture = ExtResource("3_muwal")
+normal_enabled = true
+normal_texture = ExtResource("2_ypshm")
+ao_enabled = true
