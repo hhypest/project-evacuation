@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="520" viewBox="0 0 680 520" role="img">
+<title>Камера «Петля», вид сбоку</title>
+<desc>У левой стены поле, тянущее к стене. Вдоль стены снизу вверх идёт луч от эмиттера в полу к приёмнику под потолком. На стене постамент с кнопкой. На полу куб, справа дверь выхода. Приёмник через НЕ питает поле, кнопка открывает дверь.</desc>
+<style>
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.th{font-size:14px;font-weight:600}
+.ts{font-size:12px}
+.c-gray rect,rect.c-gray{fill:#F1EFE8;stroke:#5F5E5A}.c-gray text{fill:#444441}
+.c-teal rect,rect.c-teal{fill:#E1F5EE;stroke:#0F6E56}.c-teal text{fill:#085041}
+.c-amber rect,rect.c-amber{fill:#FAEEDA;stroke:#854F0B}.c-amber text{fill:#633806}
+.c-purple rect,rect.c-purple{fill:#EEEDFE;stroke:#534AB7}.c-purple text{fill:#3C3489}
+.plain{fill:#444441}
+.arr{stroke:#5F5E5A;stroke-width:1.5;fill:none}
+</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect width="680" height="520" fill="#FFFFFF"/>
+<g class="c-purple">
+<rect x="84" y="60" width="200" height="300" stroke-width="0.5" stroke-dasharray="5 4"/>
+<text class="ts" x="140" y="72" dominant-baseline="central">Приёмник</text>
+<text class="ts" x="160" y="112" dominant-baseline="central">Поле к стене</text>
+<text class="ts" x="150" y="185" dominant-baseline="central">Кнопка на постаменте</text>
+<text class="ts" x="150" y="262" dominant-baseline="central">Луч вдоль стены</text>
+<text class="ts" x="140" y="352" dominant-baseline="central">Эмиттер в полу</text>
+</g>
+<line x1="270" y1="150" x2="226" y2="150" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="270" y1="310" x2="226" y2="310" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect class="c-gray" x="70" y="50" width="14" height="320" stroke-width="0.5"/>
+<rect class="c-gray" x="84" y="50" width="456" height="10" stroke-width="0.5"/>
+<rect class="c-gray" x="84" y="360" width="456" height="10" stroke-width="0.5"/>
+<rect class="c-gray" x="526" y="60" width="14" height="170" stroke-width="0.5"/>
+<rect class="c-amber" x="528" y="230" width="10" height="130" stroke-width="0.5"/>
+<rect class="c-gray" x="84" y="150" width="20" height="70" stroke-width="0.5"/>
+<rect class="c-amber" x="104" y="155" width="5" height="60" stroke-width="0.5"/>
+<line x1="126" y1="358" x2="126" y2="78" stroke="#1D9E75" stroke-width="3"/>
+<rect class="c-teal" x="116" y="360" width="20" height="8" stroke-width="0.5"/>
+<rect class="c-teal" x="116" y="60" width="20" height="18" stroke-width="0.5"/>
+<rect class="c-gray" x="380" y="310" width="50" height="50" stroke-width="0.5"/>
+<text class="ts plain" x="405" y="296" text-anchor="middle">Куб</text>
+<text class="ts plain" x="478" y="218">Выход</text>
+<g class="c-teal"><rect x="60" y="400" width="110" height="40" rx="6" stroke-width="0.5"/><text class="th" x="115" y="420" text-anchor="middle" dominant-baseline="central">Приёмник</text></g>
+<line x1="172" y1="420" x2="206" y2="420" class="arr" marker-end="url(#arrow)"/>
+<g class="c-gray"><rect x="210" y="400" width="60" height="40" rx="6" stroke-width="0.5"/><text class="th" x="240" y="420" text-anchor="middle" dominant-baseline="central">НЕ</text></g>
+<line x1="272" y1="420" x2="306" y2="420" class="arr" marker-end="url(#arrow)"/>
+<g class="c-purple"><rect x="310" y="400" width="140" height="40" rx="6" stroke-width="0.5"/><text class="th" x="380" y="420" text-anchor="middle" dominant-baseline="central">Поле к стене</text></g>
+<g class="c-amber"><rect x="60" y="460" width="150" height="40" rx="6" stroke-width="0.5"/><text class="th" x="135" y="480" text-anchor="middle" dominant-baseline="central">Кнопка на стене</text></g>
+<line x1="212" y1="480" x2="246" y2="480" class="arr" marker-end="url(#arrow)"/>
+<g class="c-amber"><rect x="250" y="460" width="130" height="40" rx="6" stroke-width="0.5"/><text class="th" x="315" y="480" text-anchor="middle" dominant-baseline="central">Дверь выхода</text></g>
+</svg>
