@@ -1,0 +1,34 @@
+# История изменений
+
+Записи по рабочим версиям 0.0.x до выпуска 0.1.0. Новые записи — сверху. Текущее состояние задач — в [docs/status.md](docs/status.md).
+
+## 0.0.7-dev — 2026-11-08
+
+- **SKL-07, гравитационные зоны** ([PR №16](https://github.com/hhypest/project-evacuation/pull/16)). Поля с приоритетом и разрешением ничьей по ID, один источник гравитации на тело, пробуждение спящих тел, поворот капсулы игрока с проверкой места, ходьба по стене, плавный поворот камеры. Отсек «Гравитация» на полигоне. [ADR-0009](docs/adr/0009-gravity-zones.md), [QA](docs/qa/gravity-2026-11-08.md). 186 тестов.
+
+## 0.0.6-dev — 2026-11-08
+
+- **SKL-06, луч** ([PR №15](https://github.com/hhypest/project-evacuation/pull/15)). Эмиттер, трассировка до первой преграды, перекрытие кубом и игроком, приёмник с каналом, конусом приёма и антидребезгом. Отсек «Луч» на полигоне. Дополнение к [ADR-0008](docs/adr/0008-device-network.md), [QA](docs/qa/beam-2026-11-08.md). 169 тестов.
+
+## 0.0.5-dev — 2026-11-08
+
+- **SKL-04/05, устройства и логика** ([PR №14](https://github.com/hhypest/project-evacuation/pull/14)). Сеть устройств с единым порядком тика, напольная плита со стопками и игроком, настенные кнопки (таймер и переключатель), двери с защитой проёма, AND/OR/NOT, задержка, защёлка, запрет мгновенных петель. Полигон устройств. [ADR-0008](docs/adr/0008-device-network.md), [QA](docs/qa/devices-circuits-2026-11-08.md). 154 теста.
+- **Художественные заготовки** ([PR №9–11](https://github.com/hhypest/project-evacuation/pull/11), [№13](https://github.com/hhypest/project-evacuation/pull/13)). Процедурные PBR-текстуры устройств, чужого слоя, скафандра, транспорта и лагеря, сцены-витрины. PR №12 (процедурные модели) закрыт без слияния.
+- **Мир** ([PR №6–8](https://github.com/hhypest/project-evacuation/pull/8)). Черновик лора, чек-лист R1, лор редакции 3 и библия мира (ART-01).
+
+## 0.0.4-dev — 2026-11-07
+
+- **SKL-03, перенос кубов** ([PR №5](https://github.com/hhypest/project-evacuation/pull/5)). Захват, удержание, бросок ограниченными силами Jolt, влияние массы, защита от стен и потолка. [ADR-0007](docs/adr/0007-physics-carry.md), [QA](docs/qa/physics-carry-2026-11-07.md). 119 тестов.
+- **Визуальное направление** ([PR №3–4](https://github.com/hhypest/project-evacuation/pull/4)). «Два слоя мира», имена Abandoned/Клетус/TOI-700 d, носители интерфейса. [ADR-0006](docs/adr/0006-art-direction.md).
+
+## 0.0.3-dev — 2026-11-07
+
+- **SKL-02, мувсет** ([PR №2](https://github.com/hhypest/project-evacuation/pull/2)). Движение в духе HL1: разгон, стрейф, прыжок, air control, приседание, duck-jump, ступени, лестницы, вода; полигон движения. [ADR-0005](docs/adr/0005-player-locomotion.md), [QA](docs/qa/player-movement-2026-11-07.md).
+
+## 0.0.2-dev — 2026-11-07
+
+- **SKL-01, сессия** ([PR №1](https://github.com/hhypest/project-evacuation/pull/1)). Главное меню, пауза, потеря фокуса, перезапуск, типизированный ввод. [ADR-0002](docs/adr/0002-session-input-lifecycle.md), [QA](docs/qa/session-flow-2026-11-07.md).
+
+## 0.0.1-dev — 2026-11-07
+
+- **Подготовка FND-01…05.** Закреплённый Godot 4.7.2, MIT и notices, слои и composition root, тестовый runner и CI, ADR-0001/0003/0004, реестр рисков. [QA](docs/qa/foundation-2026-11-07.md).
