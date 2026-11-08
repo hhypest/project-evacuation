@@ -23,6 +23,9 @@ func configure(profile: CarryProfile, scope_id: int) -> bool:
 	_profile = profile
 	_scope_id = scope_id
 	continuous_cd = true
+	# Floor buttons read resting contacts to count supported load, including stacks.
+	contact_monitor = true
+	max_contacts_reported = 8
 	var material: PhysicsMaterial = PhysicsMaterial.new()
 	material.friction = profile.friction
 	material.bounce = profile.bounce
