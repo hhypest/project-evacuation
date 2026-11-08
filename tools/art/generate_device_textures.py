@@ -107,6 +107,7 @@ class Canvas:
     rough: np.ndarray = field(init=False)
     metal: np.ndarray = field(init=False)
     emis: np.ndarray = field(init=False)
+    alpha: np.ndarray = field(init=False)
     paint_mask: np.ndarray = field(init=False)
     rng: np.random.Generator = field(init=False)
 
@@ -117,6 +118,7 @@ class Canvas:
         self.rough = np.full(shape, 0.5, np.float32)
         self.metal = np.zeros(shape, np.float32)
         self.emis = np.zeros(shape, np.float32)
+        self.alpha = np.ones(shape, np.float32)
         self.paint_mask = np.zeros(shape, np.float32)
         self.rng = np.random.default_rng(self.seed)
 
@@ -263,6 +265,7 @@ class Canvas:
             "normal": normal * 0.5 + 0.5,
             "orm": np.stack([ao, np.clip(self.rough, 0.04, 1), np.clip(self.metal, 0, 1)], -1),
             "emission": np.clip(self.emis, 0, 1),
+            "alpha": np.clip(self.alpha, 0, 1),
             "height": h,
         }
 
@@ -1020,6 +1023,211 @@ def mat_biomass() -> Canvas:
     return c
 
 
+# --------------------------------------------------------------------------- скафандр, транспорт, планета
+
+def mat_suit_fabric() -> Canvas:
+    """Ткань инженерного скафандра: саржа, стёганые панели, строчка; 0,5 м на тайл."""
+    c = Canvas(1024, 1024, True, True, seed=61)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    twill = 0.5 + 0.5 * np.sin((xx + yy) / 8.0 * 2 * math.pi)
+    c.fill(np.ones((c.h, c.w), np.float32), rgb("#D6D2C8"), height=0.5, rough=0.86, metal=0.0, paint=False, color_var=0.04)
+    cell = 256.0
+    u = np.mod(xx, cell) / cell
+    v = np.mod(yy, cell) / cell
+    puff = np.sin(u * math.pi) * np.sin(v * math.pi)
+    c.height = (0.35 + 0.3 * puff ** 0.6 + 0.02 * twill).astype(np.float32)
+    seam = np.minimum(np.minimum(u, 1 - u), np.minimum(v, 1 - v)) * cell
+    stitch_line = (np.abs(seam - 10.0) < 1.6).astype(np.float32)
+    dashes = ((np.mod(xx + yy * 0.0, 14.0) < 8.0) | (np.mod(yy, 14.0) < 8.0)).astype(np.float32)
+    stitch = stitch_line * dashes
+    c.albedo = c.albedo * (1 - stitch[..., None] * 0.25)
+    c.height -= ndimage.gaussian_filter(stitch, 0.8, mode="wrap") * 0.04
+    grime = smoothstep(0.7, 0.95, c.noise(12, 4)) * 0.1
+    c.albedo *= (1 - grime[..., None])
+    return c
+
+
+def dev_chest_indicator() -> Canvas:
+    """Нагрудный индикатор скафандра (блок жизнеобеспечения): экран состояния, номер «08»."""
+    c = Canvas(512, 512, seed=62)
+    S = 512.0
+    c.painted(np.ones((c.h, c.w), np.float32), "panel_light", height=0.6, rough=0.6)
+    c.fill(1 - c.shape(rect(10, 10, S - 10, S - 10, 40)), None, height=0.4, bevel=6)
+    bezel = c.shape(rect(96, 70, S - 96, 300, 20))
+    c.painted(bezel, "metal_dark", height=0.72, bevel=4)
+    screen = c.shape(rect(116, 90, S - 116, 280, 12))
+    c.glass(screen, height=0.6)
+    # силуэт человека и две шкалы — без текста
+    figure = c.shape(union(ellipse(180, 130, 16), rect(166, 150, 194, 215, 6), lines([(168, 160, 150, 205), (192, 160, 210, 205),
+                                                                                       (172, 214, 166, 262), (188, 214, 194, 262)], 9)))
+    bars = c.shape(union(rect(250, 120, 380, 140, 4), rect(250, 180, 360, 200, 4)))
+    frames = c.shape(union(rect(246, 116, 384, 144, 4), rect(246, 176, 384, 204, 4)))
+    c.emissive(screen * 0.08 + figure * 0.9 + bars * 0.9 + (frames - bars).clip(0, 1) * 0.3)
+    c.painted(c.shape(rect(96, 330, S - 96, 352)), "marking", height_add=0.003)
+    c.painted(c.shape(digits("08", 190, 380, 64, 11)), "stripe_dark", height_add=0.003)
+    for x in (120, 392):
+        c.rubber(disk(c, x, 412, 22), height=0.7, bevel=3)
+    c.bolts([(40, 40), (S - 40, 40), (40, S - 40), (S - 40, S - 40)], 8)
+    return c
+
+
+def dev_wrist_terminal() -> Canvas:
+    """Наручный терминал: верхняя панель корпуса. Изображение экрана рисует игра (диегетический UI), здесь — только маска стекла."""
+    c = Canvas(1024, 512, seed=63)
+    W, H = 1024.0, 512.0
+    c.rubber(np.ones((c.h, c.w), np.float32), height=0.45)
+    yy = np.mgrid[0:c.h, 0:c.w][0].astype(np.float32)
+    c.height += (np.mod(yy, 24.0) < 12.0) * 0.03
+    housing = c.shape(rect(180, 40, W - 180, H - 40, 46))
+    c.painted(housing, "#C9C5BC", height=0.75, bevel=6, rough=0.55)
+    bezel = c.shape(rect(260, 80, W - 260, H - 80, 24))
+    c.painted(bezel, "metal_dark", height=0.8, bevel=4)
+    screen = c.shape(rect(284, 104, W - 284, H - 104, 14))
+    c.glass(screen, height=0.66)
+    c.emissive(screen * 0.15)
+    for y in (140, 256, 372):
+        c.rubber(c.shape(rect(204, y - 26, 244, y + 26, 10)), height=0.85, bevel=3)
+    c.painted(c.shape(rect(W - 240, 120, W - 210, H - 120, 8)), "marking", height=0.8, bevel=2)
+    c.painted(c.shape(digits("2", W - 236, 60, 40, 7)), "stripe_dark", height_add=0.003)
+    c.bolts([(220, 70), (W - 220, 70), (220, H - 70), (W - 220, H - 70)], 7)
+    return c
+
+
+def mat_grating() -> Canvas:
+    """Решётчатый настил: несущие полосы и поперечины, просветы прозрачны (alpha scissor). 0,5 м на тайл."""
+    c = Canvas(512, 512, True, True, seed=64)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    bearing = (np.mod(xx, 32.0) < 7.0).astype(np.float32)
+    cross = (np.mod(yy, 128.0) < 6.0).astype(np.float32)
+    solid = np.clip(bearing + cross, 0, 1)
+    solid = np.clip(ndimage.gaussian_filter(solid, 0.6, mode="wrap") * 1.6, 0, 1)
+    c.painted(np.ones((c.h, c.w), np.float32), "metal_dark", height=0.5, rough=0.55)
+    c.height = (0.2 + 0.5 * solid + 0.06 * cross * (np.mod(xx, 8.0) < 4.0)).astype(np.float32)
+    c.alpha = smoothstep(0.35, 0.6, solid)
+    return c
+
+
+def mat_railing_tube() -> Canvas:
+    """Окрашенная труба ограждения: U — вдоль трубы, V — по окружности; затёртость там, где берутся руками."""
+    c = Canvas(512, 128, True, True, seed=65)
+    xx = np.mgrid[0:c.h, 0:c.w][1].astype(np.float32)
+    c.painted(np.ones((c.h, c.w), np.float32), "marking", height=0.5, rough=0.5)
+    sleeve = (np.mod(xx, 512.0) < 64.0).astype(np.float32)
+    c.painted(sleeve, "stripe_dark", height=0.52)
+    worn = smoothstep(0.55, 0.8, c.noise(8, 4, aspect=(1.0, 0.25)))
+    c.fill(worn * (1 - sleeve), rgb("steel") * 0.8, rough=0.35, metal=1.0, paint=False)
+    return c
+
+
+def mat_hevs_hull() -> Canvas:
+    """Обшивка челнока HEVS: светлая краска, швы панелей, заклёпки, следы нагрева и копоть; 2 м на тайл."""
+    c = Canvas(1024, 1024, True, True, seed=66)
+    c.painted(np.ones((c.h, c.w), np.float32), "panel_light", height=0.55, rough=0.48)
+    seams = c.shape(union(rect(0, -2, 1024, 2), rect(0, 510, 1024, 514), rect(-2, 0, 2, 512), rect(382, 512, 386, 1024),
+                          rect(700, 0, 704, 512)))
+    c.fill(seams, rgb("dark"), height=0.4, bevel=1.5, rough=0.7, paint=False)
+    rivets = [(x, y) for y in (12, 500, 524, 1012) for x in range(16, 1024, 32)]
+    c.bolts(rivets, 3.2, height=0.6)
+    soot = smoothstep(0.5, 0.95, c.noise(4, 4, aspect=(1.0, 0.5)))
+    heat = smoothstep(0.7, 0.95, c.noise(2, 3))
+    c.albedo = c.albedo * (1 - 0.22 * soot[..., None]) * (1 - 0.12 * heat[..., None]) + \
+        rgb("#6B4A2E")[None, None, :] * 0.08 * heat[..., None]
+    chips = smoothstep(0.82, 0.9, c.noise(20, 5)) * smoothstep(0.3, 0.6, c.noise(3, 2))
+    c.fill(chips, rgb("#3A3530"), rough=0.7, paint=False, height_add=-0.01)
+    return c
+
+
+def mat_hevs_livery() -> Canvas:
+    """Лента ливреи HEVS-02: оранжевая полоса, бортовой номер «02», шевроны, янтарные маяки (бесшовно вдоль U)."""
+    c = Canvas(1024, 256, tile_x=True, seed=67)
+    c.painted(np.ones((c.h, c.w), np.float32), "panel_light", height=0.55)
+    band = c.shape(rect(0, 40, 1024, 216))
+    c.painted(band, "marking", height_add=0.002)
+    c.painted(c.shape(union(rect(0, 30, 1024, 40), rect(0, 216, 1024, 226))), "stripe_dark", height_add=0.002)
+    for x0 in (90, 602):
+        c.painted(c.shape(digits("02", x0, 70, 116, 20)), "panel_light", height_add=0.003)
+    for i in range(4):
+        x = 330 + i * 40
+        c.painted(c.shape(chevron(x, 128, 50, 0.0, 0.3)), "stripe_dark", height_add=0.003)
+        c.painted(c.shape(chevron(x + 512, 128, 50, 0.0, 0.3)), "stripe_dark", height_add=0.003)
+    for x in (470, 982):
+        c.steel(ring(c, x, 128, 26, 34), height=0.7)
+        c.glass(disk(c, x, 128, 26), height=0.6)
+        c.emissive(disk(c, x, 128, 22))
+    return c
+
+
+def mat_planet_ground() -> Canvas:
+    """Грунт у подножия сооружения: обсидиановая крошка, пепел, плёнки матов; 2 м на тайл."""
+    c = Canvas(1024, 1024, True, True, seed=68)
+    n = c.noise(6, 5)
+    pebbles = smoothstep(0.62, 0.78, c.noise(40, 3))
+    ash = smoothstep(0.45, 0.75, c.noise(4, 4))
+    c.albedo = (rgb("#16181A")[None, None, :] * (1 - ash[..., None]) + rgb("#4A4642")[None, None, :] * ash[..., None]) * \
+        (0.8 + 0.4 * c.noise(48, 2)[..., None])
+    mats = smoothstep(0.66, 0.8, c.noise(5, 5)) * (1 - ash)
+    c.albedo = c.albedo * (1 - mats[..., None]) + rgb("#2A0E0C")[None, None, :] * mats[..., None]
+    c.height = (0.4 + 0.15 * n + 0.12 * pebbles - 0.05 * ash).astype(np.float32)
+    glassy = pebbles * (1 - ash)
+    c.rough = np.clip(0.85 - 0.6 * glassy, 0.15, 1).astype(np.float32)
+    return c
+
+
+def pano_terminator_sky() -> Canvas:
+    """Небо терминатора TOI-700 d (равнопромежуточная панорама): неподвижный красный карлик у горизонта,
+    оливково-бурая токсичная дымка, штормовые облака, силуэты обсидиановых шпилей. Бесшовно по долготе."""
+    c = Canvas(2048, 1024, tile_x=True, seed=69)
+    yy, xx = np.mgrid[0:c.h, 0:c.w].astype(np.float32)
+    lon = (xx + 0.5) / c.w * 2 * math.pi - math.pi          # 0 — направление на звезду
+    lat = math.pi / 2 - (yy + 0.5) / c.h * math.pi
+    sun_lon, sun_lat = 0.0, math.radians(4.0)
+    cosd = np.sin(lat) * math.sin(sun_lat) + np.cos(lat) * math.cos(sun_lat) * np.cos(lon - sun_lon)
+    ang = np.degrees(np.arccos(np.clip(cosd, -1, 1)))
+    elev = np.degrees(lat)
+    top = rgb("#2A1D19")
+    haze = rgb("#5C5F2E")    # оливковая токсичная дымка
+    glow = rgb("#C8602F")    # зарево
+    t_h = smoothstep(-2.0, 55.0, elev)
+    sky = haze[None, None, :] * (1 - t_h[..., None]) + top[None, None, :] * t_h[..., None]
+    toward = np.exp(-(ang / 70.0) ** 2) * (1 - smoothstep(0.0, 40.0, elev)) * 0.95
+    sky = sky * (1 - toward[..., None]) + glow[None, None, :] * toward[..., None]
+    clouds = c.noise(6, 6, aspect=(2.0, 1.0))
+    band = np.exp(-((elev - 12.0) / 12.0) ** 2) + 0.5 * np.exp(-((elev - 32.0) / 10.0) ** 2)
+    cl = smoothstep(0.45, 0.7, clouds) * np.clip(band, 0, 1)
+    lit = np.exp(-(ang / 40.0) ** 2)
+    cloud_col = rgb("#2E2620")[None, None, :] * (1 - lit[..., None]) + rgb("#D0703C")[None, None, :] * lit[..., None]
+    sky = sky * (1 - cl[..., None] * 0.85) + cloud_col * cl[..., None] * 0.85
+    disk_m = 1 - smoothstep(2.0, 2.4, ang)
+    halo = np.exp(-(ang / 6.0) ** 2) * 0.6
+    sun = rgb("#FFB27A")
+    sky = sky + sun[None, None, :] * (disk_m[..., None] * 1.2 + halo[..., None])
+    # горизонт со шпилями: высота силуэта по долготе (бесшовно)
+    prof = ndimage.zoom(np.random.default_rng(70).random(96).astype(np.float32), c.w / 96, order=3, mode="grid-wrap")[:c.w]
+    spikes = np.zeros(c.w, np.float32)
+    rr = np.random.default_rng(71)
+    # обсидиановые рифы: узкие наклонные шпили с изломанным профилем
+    for _ in range(70):
+        x0 = int(rr.integers(0, c.w))
+        wdt = int(rr.integers(3, 14))
+        hgt = 1.0 + float(rr.random()) ** 2.5 * 11.0
+        lean = (float(rr.random()) - 0.5) * 0.8
+        for dx in range(-wdt, wdt + 1):
+            k = 1 - abs(dx + lean * wdt) / (wdt + 1)
+            if k <= 0:
+                continue
+            jag = 0.85 + 0.3 * float(rr.random())
+            spikes[(x0 + dx) % c.w] = max(spikes[(x0 + dx) % c.w], hgt * k ** 1.6 * jag)
+    ridge = (prof - 0.5) * 3.0 + 1.0 + spikes
+    # мягкий край силуэта: ширина перехода ~0,2° вместо ступеньки в пиксель
+    ground = smoothstep(0.12, -0.12, elev - ridge[None, :])
+    rim = np.exp(-((elev - ridge[None, :]) / 0.25) ** 2) * lit * 0.6
+    ground_col = rgb("#100E0C") * (1 + 1.2 * np.exp(elev / 6.0).clip(0, 1))[..., None]
+    sky = sky * (1 - ground[..., None]) + ground_col * (1 + 0.8 * toward[..., None]) * ground[..., None]
+    sky = sky + rgb("#E07A40")[None, None, :] * rim[..., None]
+    c.albedo = np.clip(sky, 0, 1).astype(np.float32)
+    return c
+
+
 @dataclass(frozen=True)
 class Asset:
     name: str
@@ -1027,6 +1235,8 @@ class Asset:
     build: Callable[[], Canvas]
     emission: str | None
     usage: str
+    alpha: bool = False
+    kind: str = "pbr"  # "pbr" — набор карт материала; "panorama" — одно изображение неба
 
 
 ASSETS: list[Asset] = [
@@ -1053,6 +1263,15 @@ ASSETS: list[Asset] = [
     Asset("power_channel", "alien", mat_power_channel, "amber", "Канал кладки с человеческим кабелем и скобами; горит янтарём под питанием, бесшовно вдоль U"),
     Asset("portal_frame", "alien", mat_portal_frame, "alien", "Рама портала: профиль поперёк V, мотивы вдоль U (бесшовно); холодная кромка"),
     Asset("biomass", "alien", mat_biomass, None, "Микробные маты и осадки в нижних ярусах; не светятся, не влияют на сигналы"),
+    Asset("suit_fabric", "suit", mat_suit_fabric, None, "Ткань инженерного скафандра Клетуса: саржа, стёганые панели, строчка; 0,5 м на тайл"),
+    Asset("chest_indicator", "suit", dev_chest_indicator, "screen", "Нагрудный индикатор (блок жизнеобеспечения): экран состояния — дублирующий канал UI (ADR-0006)"),
+    Asset("wrist_terminal", "suit", dev_wrist_terminal, "screen", "Корпус наручного терминала; изображение экрана рисует игра, здесь — маска стекла"),
+    Asset("grating", "surfaces", mat_grating, None, "Решётчатый настил с прозрачными просветами (alpha scissor), 0,5 м на тайл", alpha=True),
+    Asset("railing_tube", "surfaces", mat_railing_tube, None, "Труба ограждения: U вдоль трубы, V по окружности; бесшовно"),
+    Asset("hevs_hull", "vehicle", mat_hevs_hull, None, "Обшивка челнока HEVS: светлая краска, швы, заклёпки, нагрев и копоть; 2 м на тайл"),
+    Asset("hevs_livery", "vehicle", mat_hevs_livery, "amber", "Лента ливреи HEVS-02: оранжевая полоса, «02», шевроны, янтарные маяки; бесшовно вдоль U"),
+    Asset("planet_ground", "planet", mat_planet_ground, None, "Грунт у подножия сооружения: обсидиан, пепел, плёнки матов; 2 м на тайл"),
+    Asset("terminator_sky", "planet", pano_terminator_sky, None, "Панорама неба терминатора для Sky/витрин: неподвижный красный карлик, дымка, шторм, шпили", kind="panorama"),
 ] + [
     Asset(f"junction_{k}", "devices", dev_junction_box(k), "amber",
           f"Распределительная коробка цепи: {label}; 4 индикатора входов/выхода")
@@ -1071,9 +1290,17 @@ def save_maps(asset: Asset, maps: dict[str, np.ndarray], out_dir: Path) -> list[
     target = out_dir / asset.group / asset.name
     target.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
+    if asset.kind == "panorama":
+        path = target / f"{asset.name}_panorama.png"
+        Image.fromarray(to_u8(maps["albedo"]), "RGB").save(path, optimize=True)
+        return [path.name]
     for key in ("albedo", "normal", "orm"):
         path = target / f"{asset.name}_{key}.png"
-        Image.fromarray(to_u8(maps[key]), "RGB").save(path, optimize=True)
+        if key == "albedo" and asset.alpha:
+            rgba = np.concatenate([maps["albedo"], maps["alpha"][..., None]], -1)
+            Image.fromarray(to_u8(rgba), "RGBA").save(path, optimize=True)
+        else:
+            Image.fromarray(to_u8(maps[key]), "RGB").save(path, optimize=True)
         written.append(path.name)
     if asset.emission is not None and float(maps["emission"].max()) > 0.0:
         path = target / f"{asset.name}_emission.png"
@@ -1157,19 +1384,30 @@ def main() -> None:
     ap.add_argument("--only", nargs="*", default=None, help="имена ассетов")
     args = ap.parse_args()
     manifest: list[dict[str, object]] = []
-    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": [], "alien": []}
+    rows: dict[str, list[tuple[Asset, dict[str, np.ndarray]]]] = {"surfaces": [], "devices": [], "alien": [], "suit": [], "vehicle": [], "planet": []}
     for asset in ASSETS:
         if args.only and asset.name not in args.only:
             continue
         canvas = asset.build()
-        alien = asset.group == "alien"
+        alien = asset.group in ("alien", "planet")
+        if asset.kind == "panorama":
+            maps = {"albedo": np.clip(canvas.albedo, 0, 1), "normal": np.zeros_like(canvas.albedo) + 0.5,
+                    "orm": np.ones_like(canvas.albedo), "emission": canvas.emis, "alpha": canvas.alpha,
+                    "height": canvas.height}
+            files = save_maps(asset, maps, args.out)
+            manifest.append({"name": asset.name, "group": asset.group, "kind": asset.kind, "size": [canvas.w, canvas.h],
+                             "tile": [canvas.tile_x, canvas.tile_y], "emission": None, "alpha": False,
+                             "files": files, "usage": asset.usage})
+            rows[asset.group].append((asset, maps))
+            print(f"{asset.group}/{asset.name}: {', '.join(files)}")
+            continue
         maps = canvas.finish(wear=0.55 if asset.group == "devices" else (0.0 if alien else 0.35),
                              grime=0.55, scratches=0 if alien else (50 if asset.group == "devices" else 120),
                              normal_strength=4.0 if alien else 6.0)
         files = save_maps(asset, maps, args.out)
-        manifest.append({"name": asset.name, "group": asset.group, "size": [canvas.w, canvas.h],
+        manifest.append({"name": asset.name, "group": asset.group, "kind": asset.kind, "size": [canvas.w, canvas.h],
                          "tile": [canvas.tile_x, canvas.tile_y], "emission": asset.emission,
-                         "files": files, "usage": asset.usage})
+                         "alpha": asset.alpha, "files": files, "usage": asset.usage})
         rows[asset.group].append((asset, maps))
         print(f"{asset.group}/{asset.name}: {', '.join(files)}")
     manifest_path = args.out / "textures_manifest.json"

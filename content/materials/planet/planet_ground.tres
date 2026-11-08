@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/planet/planet_ground/planet_ground_albedo.png" id="1_iokvl"]
+[ext_resource type="Texture2D" path="res://content/textures/planet/planet_ground/planet_ground_normal.png" id="2_w0cwl"]
+[ext_resource type="Texture2D" path="res://content/textures/planet/planet_ground/planet_ground_orm.png" id="3_f6kis"]
+
+[resource]
+resource_name = "planet_ground"
+albedo_texture = ExtResource("1_iokvl")
+orm_texture = ExtResource("3_f6kis")
+normal_enabled = true
+normal_texture = ExtResource("2_w0cwl")
+ao_enabled = true

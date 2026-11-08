@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/suit/suit_fabric/suit_fabric_albedo.png" id="1_sxrph"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/suit_fabric/suit_fabric_normal.png" id="2_nlnec"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/suit_fabric/suit_fabric_orm.png" id="3_nx4tu"]
+
+[resource]
+resource_name = "suit_fabric"
+albedo_texture = ExtResource("1_sxrph")
+orm_texture = ExtResource("3_nx4tu")
+normal_enabled = true
+normal_texture = ExtResource("2_nlnec")
+ao_enabled = true

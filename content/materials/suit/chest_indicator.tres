@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/suit/chest_indicator/chest_indicator_albedo.png" id="1_vajqc"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/chest_indicator/chest_indicator_emission.png" id="2_coxta"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/chest_indicator/chest_indicator_normal.png" id="3_w7huh"]
+[ext_resource type="Texture2D" path="res://content/textures/suit/chest_indicator/chest_indicator_orm.png" id="4_opsib"]
+
+[resource]
+resource_name = "chest_indicator"
+albedo_texture = ExtResource("1_vajqc")
+orm_texture = ExtResource("4_opsib")
+emission_enabled = true
+emission = Color(0.7882353, 0.8627451, 0.8784314, 1)
+emission_energy_multiplier = 1.4
+emission_operator = 1
+emission_texture = ExtResource("2_coxta")
+normal_enabled = true
+normal_texture = ExtResource("3_w7huh")
+ao_enabled = true

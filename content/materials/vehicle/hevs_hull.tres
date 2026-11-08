@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_hull/hevs_hull_albedo.png" id="1_qh171"]
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_hull/hevs_hull_normal.png" id="2_n337v"]
+[ext_resource type="Texture2D" path="res://content/textures/vehicle/hevs_hull/hevs_hull_orm.png" id="3_jwfj4"]
+
+[resource]
+resource_name = "hevs_hull"
+albedo_texture = ExtResource("1_qh171")
+orm_texture = ExtResource("3_jwfj4")
+normal_enabled = true
+normal_texture = ExtResource("2_n337v")
+ao_enabled = true
