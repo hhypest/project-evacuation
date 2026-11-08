@@ -1,7 +1,7 @@
 class_name TrialChamberTests
 extends TestSuite
-## Both easy trials are solved with the real mechanics and walked through to the exit; every catalog
-## level opens with a valid device network and gravity setup.
+## Both easy trials and the example chamber «Петля» are solved with the real mechanics and walked through to
+## the exit; every catalog level opens with a valid device network and gravity setup.
 
 const CATALOG: LevelCatalog = preload("res://content/definitions/level_catalog.tres")
 const GENERATION: int = 24
@@ -29,6 +29,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		opened.size() == CATALOG.entries.size() and opened.size() >= 4, ", ".join(opened)))
 	results.append_array(await _trial_logic())
 	results.append_array(await _trial_beam_gravity())
+	results.append_array(await _trial_loop())
 	return results
 
 
@@ -112,6 +113,87 @@ func _trial_beam_gravity() -> Array[TestOutcome]:
 		"wall %s, climbed to %.2f, now %s up %s" % [on_wall, height, _player.global_position, _player.up_direction]))
 	await _close()
 	return results
+
+
+func _trial_loop() -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	await _open(CATALOG.scene(4))
+	await _ticks(30)
+	var idle: bool = _output(&"loop.receiver") and not _output(&"loop.field") and not _output(&"loop.door")
+	results.append(TestOutcome.new("loop: at rest the beam reaches the receiver, the field is off and the door shut",
+		idle, "receiver %s, field %s, door %s" % [_output(&"loop.receiver"), _output(&"loop.field"), _output(&"loop.door")]))
+	var beam: Vector3 = Vector3(TrialLoopBuilder.BEAM_X, 0.05, TrialLoopBuilder.BEAM_Z)
+	# False solution: the player alone switches the field on, climbs and stands on the plate, but the door
+	# closes as soon as they leave it.
+	_player.global_position = beam
+	await _ticks(60)
+	var turned: bool = _on_wall() and _output(&"loop.field") and not _output(&"loop.receiver")
+	_camera.look_at(_camera.global_position + Vector3.UP, _player.up_direction)
+	var held: bool = true
+	for _tick: int in range(150):
+		if _player.global_position.y >= 2.6:
+			break
+		await _ticks(1, Vector2(0, -1))
+		held = held and _on_wall()
+	var climbed: float = _player.global_position.y
+	await _ticks(10)
+	_player.global_position = _plate_surface() + Vector3(0.02, 0, 0)
+	await _ticks(40)
+	var standing: bool = _output(&"loop.plate") and _output(&"loop.door")
+	await _leave_field()
+	var left_closed: bool = not _output(&"loop.plate") and not _output(&"loop.door") and not _output(&"loop.field")
+	results.append(TestOutcome.new("loop false solution: the body turns the field on and holds it while climbing; standing on the plate opens the door only while standing",
+		turned and held and climbed >= 2.6 and standing and left_closed,
+		"turned %s, held %s to %.2f m, on plate %s, after leaving closed %s" % [turned, held, climbed, standing, left_closed]))
+	# Real solution: carry the cube into the beam, leave it on the plate, walk out.
+	var cube: CarryRigidBody = _node("CubeA") as CarryRigidBody
+	_player.global_position = beam + Vector3(0, 0, 2.2)
+	_place(cube, beam + Vector3(0, TrialLoopBuilder.CUBE_EDGE * 0.5, 3.8))
+	await _ticks(20)
+	_camera.look_at(cube.global_position, Vector3.UP)
+	await _ticks(1)
+	await _ticks(30, Vector2.ZERO, true)
+	var picked: bool = cube.is_carried()
+	# Raise the cube to a level gaze and step next to the beam so it catches up. Looking down at the floor
+	# while entering the field would leave no room for the cube once the eye drops to ~0.86 m above the
+	# floor, and the carry rules release it (docs/design/puzzles/loop.md).
+	_camera.look_at(_camera.global_position + Vector3.BACK, Vector3.UP)
+	_player.global_position = beam + Vector3(0, 0, 0.6)
+	await _ticks(40)
+	_player.global_position = beam
+	await _ticks(90)
+	var carried_up: bool = _on_wall() and cube.is_carried() and _output(&"loop.field")
+	await _ticks(1, Vector2.ZERO, true)
+	await _ticks(5)
+	_place(cube, _plate_surface() + Vector3(TrialLoopBuilder.CUBE_EDGE * 0.5 + 0.01, 0, 0))
+	await _ticks(40)
+	await _leave_field()
+	await _ticks(120)
+	var resting: Vector3 = cube.global_position - _plate_surface()
+	var loop_holds: bool = _output(&"loop.field") and _output(&"loop.plate") and _output(&"loop.door") \
+		and not _output(&"loop.receiver") and resting.length() < 0.5
+	var through: bool = await _walk_to(Vector3(TrialLoopBuilder.DOOR_X, 0.05, -11.0), -14.0)
+	results.append(TestOutcome.new("loop solution: carried into the beam, the cube on the wall plate keeps the field, the plate and the door on; the exit is reached",
+		picked and carried_up and loop_holds and through,
+		"picked %s, on wall with cube %s, loop %s (cube offset %s), z %.2f" % [
+			picked, carried_up, loop_holds, resting, _player.global_position.z]))
+	await _close()
+	return results
+
+
+func _plate_surface() -> Vector3:
+	var plate: Node3D = _node("loop_plate")
+	return plate.global_position + plate.global_basis.y.normalized() * 0.1
+
+
+func _on_wall() -> bool:
+	return _player.up_direction.distance_to(Vector3.RIGHT) < 0.001
+
+
+## Puts the player back on the floor outside the field and waits for the turn upright.
+func _leave_field() -> void:
+	_player.global_position = Vector3(1.0, 1.0, -1.5)
+	await _ticks(60)
 
 
 func _open(scene: PackedScene) -> bool:
