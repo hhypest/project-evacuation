@@ -1,12 +1,15 @@
 class_name PuzzleLabBuilder
 extends Node3D
-## Primitive device proving ground (SKL-04/05/06): every bay shows one device rule and opens one door.
+## Primitive device proving ground (SKL-04/05/06/07): every bay shows one device rule.
 
 const WALL_Z: float = -9.0
 ## Bay 5 (beam): partition along X with its own door; the beam runs in front of it.
 const PARTITION_Z: float = 3.0
 const BEAM_Z: float = 6.5
 const BEAM_HEIGHT: float = 0.6
+## Bay 6 (gravity): a 4.2 m wall at the left edge; the powered field pulls toward it (-X).
+const GRAVITY_WALL_X: float = -14.7
+const GRAVITY_Z: float = 8.0
 const WALL_COLOR: Color = Color(0.2, 0.23, 0.26)
 
 
@@ -43,6 +46,35 @@ func _ready() -> void:
 	_door("lab.door.beam", Vector3(11.0, 0, PARTITION_Z), [&"lab.receiver"])
 	_cube("CubeC", &"lab.cube.small_c", Vector3(9.0, 0.55, 9.0), 5.0)
 	_sign("Луч: переключатель питает эмиттер\nприёмник открывает дверь · куб перекрывает", Vector3(11.0, 3.4, PARTITION_Z + 0.2))
+	# Bay 6: toggle powers a field toward the wall; the cube falls onto a plate mounted on the wall,
+	# the player walks on the wall. Leaving the field along the wall returns base gravity.
+	var gravity_wall: StaticBody3D = PuzzleDeviceNode.static_box(Vector3(0.3, 4.2, 10.0), WALL_COLOR,
+		Vector3(GRAVITY_WALL_X - 0.15, 2.1, GRAVITY_Z - 1.0))
+	gravity_wall.name = "GravityWall"
+	add_child(gravity_wall)
+	var gravity_button: Vector3 = Vector3(GRAVITY_WALL_X + 0.1, 1.3, GRAVITY_Z - 5.0)
+	_button("lab.button.gravity", gravity_button, DeviceDefinition.WallMode.TOGGLE, 1.0)
+	(get_node("lab_button_gravity") as Node3D).rotation_degrees = Vector3(0, 90, 0)
+	var field: GravityFieldDevice = GravityFieldDevice.new()
+	field.name = "lab_field"
+	field.stable_id = &"lab.field"
+	field.inputs = [&"lab.button.gravity"]
+	# Local -Y aims at -X; local axes: X spans world height, Y spans the depth from the wall, Z the length.
+	field.size = Vector3(4.0, 5.0, 8.0)
+	field.position = Vector3(GRAVITY_WALL_X + 2.5, 2.0, GRAVITY_Z)
+	field.rotation_degrees = Vector3(0, 0, -90)
+	add_child(field)
+	var wall_plate: FloorButtonDevice = FloorButtonDevice.new()
+	wall_plate.name = "lab_plate_wall"
+	wall_plate.stable_id = &"lab.plate.wall"
+	wall_plate.press_threshold_kg = 4.0
+	wall_plate.release_threshold_kg = 3.0
+	wall_plate.position = Vector3(GRAVITY_WALL_X, 0.75, GRAVITY_Z)
+	wall_plate.rotation_degrees = Vector3(0, 0, -90)
+	add_child(wall_plate)
+	_cube("CubeD", &"lab.cube.small_d", Vector3(GRAVITY_WALL_X + 3.2, 0.55, GRAVITY_Z), 5.0)
+	_sign("Гравитация: переключатель включает поле к стене\nкуб падает на кнопку на стене · можно ходить по стене",
+		Vector3(GRAVITY_WALL_X + 0.05, 3.7, GRAVITY_Z - 1.0), 90.0)
 	_partition()
 	_walls()
 	for x: float in [-9.0, -1.0, 7.0]:
@@ -58,6 +90,12 @@ func _ready() -> void:
 	beam_lamp.light_energy = 1.2
 	beam_lamp.light_color = Color(0.9, 0.93, 1.0)
 	add_child(beam_lamp)
+	var gravity_lamp: OmniLight3D = OmniLight3D.new()
+	gravity_lamp.position = Vector3(GRAVITY_WALL_X + 4.0, 4.5, GRAVITY_Z)
+	gravity_lamp.omni_range = 9.0
+	gravity_lamp.light_energy = 1.2
+	gravity_lamp.light_color = Color(0.9, 0.93, 1.0)
+	add_child(gravity_lamp)
 
 
 func _partition() -> void:
@@ -185,10 +223,11 @@ func _cube(label: String, id: StringName, at: Vector3, kilograms: float) -> void
 	add_child(body)
 
 
-func _sign(text: String, at: Vector3) -> void:
+func _sign(text: String, at: Vector3, yaw_degrees: float = 0.0) -> void:
 	var sign: Label3D = Label3D.new()
 	sign.text = text
 	sign.position = at
+	sign.rotation_degrees = Vector3(0, yaw_degrees, 0)
 	sign.pixel_size = 0.007
 	sign.font_size = 36
 	add_child(sign)

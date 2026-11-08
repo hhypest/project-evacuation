@@ -12,6 +12,12 @@ var _collision: CollisionShape3D
 var _movement: ComputeMovement = ComputeMovement.new()
 var _ladder_lock: float = 0.0
 var _step_ray: RayCast3D
+## Field requested by the scope for the next step: up direction and gravity relative to the base.
+var _wanted_up: Vector3 = Vector3.UP
+var _wanted_scale: float = 1.0
+var _gravity_scale: float = 1.0
+## True while a new field direction waits for free space to turn the capsule.
+var reorientation_blocked: bool = false
 
 
 func _ready() -> void:
@@ -39,7 +45,19 @@ func eye_position() -> Vector3:
 	return global_position + up_direction * (profile.crouched_eye_height if crouched else profile.standing_eye_height)
 
 
+## Requests the effective field for the next step. Applied at the start of step() if the capsule fits.
+func set_gravity(up: Vector3, relative_strength: float) -> void:
+	if up.is_finite() and not up.is_zero_approx() and is_finite(relative_strength) and relative_strength > 0.0:
+		_wanted_up = up.normalized()
+		_wanted_scale = relative_strength
+
+
+func center() -> Vector3:
+	return global_position + up_direction * (_shape.height * 0.5)
+
+
 func step(command: MovementCommand, delta: float) -> void:
+	_apply_field()
 	_ladder_lock = maxf(0.0, _ladder_lock - delta)
 	_update_stance(command.crouching)
 	var observation: MovementObservation = _observe()
@@ -56,6 +74,48 @@ func step(command: MovementCommand, delta: float) -> void:
 	var desired_velocity: Vector3 = velocity
 	move_and_slide()
 	_push_props(desired_velocity, delta)
+
+
+## Turns the capsule about its centre so local +Y matches the field's up. Velocity is kept as is: the new
+## field accelerates it from here, no momentum is lost. If the turned capsule would overlap geometry the
+## old field stays in force and the turn is retried next step.
+func _apply_field() -> void:
+	if _wanted_up.dot(up_direction) > 0.99999:
+		up_direction = _wanted_up
+		_gravity_scale = _wanted_scale
+		reorientation_blocked = false
+		return
+	var half: float = _shape.height * 0.5
+	var middle: Vector3 = center()
+	var turn: Basis = _shortest_turn(up_direction, _wanted_up, global_basis.x)
+	var turned: Basis = (turn * global_basis).orthonormalized()
+	var destination: Vector3 = middle - _wanted_up * half
+	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+	query.shape = _shape
+	query.transform = Transform3D(turned, middle)
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid()]
+	if not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+		reorientation_blocked = true
+		return
+	global_basis = turned
+	global_position = destination
+	up_direction = _wanted_up
+	_gravity_scale = _wanted_scale
+	reorientation_blocked = false
+	if mode == MovementStep.Mode.LADDER:
+		mode = MovementStep.Mode.AIR
+
+
+## Smallest rotation taking from -> to; a half turn uses the given perpendicular hint as its axis.
+static func _shortest_turn(from: Vector3, to: Vector3, hint: Vector3) -> Basis:
+	var axis: Vector3 = from.cross(to)
+	var angle: float = from.angle_to(to)
+	if axis.length() < 0.000001:
+		axis = hint.slide(from)
+		if axis.is_zero_approx():
+			axis = from.cross(Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD)
+	return Basis(axis.normalized(), angle)
 
 
 func _update_stance(wants_crouch: bool) -> void:
@@ -89,6 +149,7 @@ func _observe() -> MovementObservation:
 	observation.grounded = is_on_floor()
 	observation.crouched = crouched
 	observation.up = up_direction
+	observation.gravity_scale = _gravity_scale
 	var query: PhysicsPointQueryParameters3D = PhysicsPointQueryParameters3D.new()
 	query.position = global_position + up_direction * (_shape.height * 0.5)
 	query.collision_mask = 8

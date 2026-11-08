@@ -188,8 +188,37 @@ func _run() -> void:
 	await RenderingServer.frame_post_draw
 	if not _capture(capture.get_basename() + "-beam.png"):
 		return
+	# Gravity (SKL-07): E powers the wall field; the player stepping in turns and stands on the wall.
+	var gravity_button: WallButtonDevice = lab.get_node("lab_button_gravity") as WallButtonDevice
+	var field: GravityFieldDevice = lab.get_node("lab_field") as GravityFieldDevice
+	if not _check(gravity_button != null and field != null, "gravity bay"):
+		return
+	var gravity_front: Vector3 = gravity_button.global_basis.z.normalized()
+	lab_player.global_position = Vector3(gravity_button.global_position.x, 0.05, gravity_button.global_position.z) + gravity_front * 1.3
+	for _tick: int in range(20):
+		await physics_frame
+	carry_camera.look_at(gravity_button.global_position + Vector3(0, -0.05, 0) + gravity_front * 0.05)
+	TestInputEvents.key(KEY_E)
+	TestInputEvents.key(KEY_E, false)
+	for _tick: int in range(5):
+		await physics_frame
+	var down: Vector3 = field.zone().direction
+	var along: Vector3 = field.global_basis.z.normalized()
+	var entry: Vector3 = field.global_position + down * 1.2 - along * 2.0
+	lab_player.global_position = Vector3(entry.x, 0.05, entry.z)
+	for _tick: int in range(100):
+		await physics_frame
+	if not _check(field.powered and lab_player.up_direction.distance_to(-down) < 0.001 and lab_player.is_on_floor(),
+			"powered field turns the player onto the wall"):
+		return
+	carry_camera.look_at(carry_camera.global_position + along * 2.0 - down * 0.6, lab_player.up_direction)
+	for _tick: int in range(3):
+		await physics_frame
+	await RenderingServer.frame_post_draw
+	if not _capture(capture.get_basename() + "-gravity.png"):
+		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door/beam movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door/beam gravity=field/wall-walk movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.

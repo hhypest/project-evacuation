@@ -61,6 +61,6 @@ func execute(
 		planar = MovementRules.accelerate(planar, wish.normalized(),
 			minf(speed, profile.air_control_speed) * axis.length(), profile.air_acceleration, delta)
 		planar = planar.limit_length(profile.run_speed)
-		vertical -= profile.gravity * delta
+		vertical -= profile.gravity * observation.gravity_scale * delta
 	result.velocity = planar + up * vertical
 	return result
