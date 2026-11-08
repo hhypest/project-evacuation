@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://content/models/devices/floor_button_base.obj" id="1_ff5ye"]
+[ext_resource type="Material" path="res://content/materials/surfaces/hazard_stripes.tres" id="2_jhtfc"]
+[ext_resource type="Material" path="res://content/materials/surfaces/metal_dark.tres" id="3_bhp2v"]
+[ext_resource type="ArrayMesh" path="res://content/models/devices/floor_button_plate.obj" id="4_0ky6v"]
+[ext_resource type="Material" path="res://content/materials/devices/floor_button_top.tres" id="5_lrl7v"]
+
+[node name="FloorButton" type="Node3D" unique_id=1068998226]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=281571915]
+mesh = ExtResource("1_ff5ye")
+surface_material_override/0 = ExtResource("2_jhtfc")
+surface_material_override/1 = ExtResource("3_bhp2v")
+
+[node name="Plate" type="MeshInstance3D" parent="." unique_id=280630793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("4_0ky6v")
+surface_material_override/0 = ExtResource("5_lrl7v")
+surface_material_override/1 = ExtResource("3_bhp2v")

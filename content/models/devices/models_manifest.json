@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "file": "utility_cube.obj",
+      "triangles": 7252,
+      "materials": [
+        "devices__cube_face"
+      ],
+      "name": "utility_cube",
+      "size_m": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "pivot": "центр"
+    },
+    {
+      "file": "floor_button_base.obj",
+      "triangles": 876,
+      "materials": [
+        "surfaces__hazard_stripes",
+        "surfaces__metal_dark"
+      ],
+      "name": "floor_button_base",
+      "pivot": "низ, центр",
+      "top_m": 0.08
+    },
+    {
+      "file": "floor_button_plate.obj",
+      "triangles": 1148,
+      "materials": [
+        "devices__floor_button_top",
+        "surfaces__metal_dark"
+      ],
+      "name": "floor_button_plate",
+      "pivot": "низ плиты",
+      "rest_offset_m": 0.03,
+      "travel_m": 0.02
+    }
+  ]
+}

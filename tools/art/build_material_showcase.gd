@@ -15,6 +15,10 @@ const SUIT: String = "res://content/materials/suit/"
 const VEHICLE: String = "res://content/materials/vehicle/"
 const PLANET: String = "res://content/materials/planet/"
 const SEGMENTS: int = 40
+const MODELS: String = "res://content/models/devices/"
+## Положение плиты напольной кнопки — из content/models/devices/models_manifest.json (rest_offset_m, travel_m).
+const PLATE_REST: float = 0.03
+const PLATE_TRAVEL: float = 0.02
 const CYAN: Color = Color("#38C8DC")
 const GRAVITY: Color = Color("#8B4FC4")
 
@@ -230,6 +234,26 @@ func _instance(mesh: Mesh, node_name: String, position: Vector3, rotation_deg: V
 	return instance
 
 
+## Процедурная модель устройства: поверхности «группа__ассет» получают материалы content/materials.
+func _model(model: String, node_name: String, position: Vector3, rotation_deg: Vector3, active: bool) -> void:
+	var path: String = MODELS + model + ".obj"
+	var resource: Resource = load(path) if ResourceLoader.exists(path) else null
+	if resource is not ArrayMesh:
+		push_error("Нет модели %s" % path)
+		_failed = true
+		return
+	var mesh: ArrayMesh = resource
+	var instance: MeshInstance3D = _instance(mesh, node_name, position, rotation_deg)
+	for surface: int in mesh.get_surface_count():
+		var parts: PackedStringArray = mesh.surface_get_name(surface).split("__")
+		if parts.size() != 2:
+			push_error("Поверхность без материала: %s" % mesh.surface_get_name(surface))
+			_failed = true
+			return
+		var material: Material = _material("res://content/materials/%s/%s.tres" % [parts[0], parts[1]])
+		instance.set_surface_override_material(surface, material if active else _off(material))
+
+
 func _label(text: String, position: Vector3, size: int = 40) -> void:
 	var label: Label3D = Label3D.new()
 	label.name = "Label_%s" % text.validate_node_name()
@@ -287,27 +311,25 @@ func _build_room() -> void:
 	_instance(_box(Vector3(20.0, 7.0, 0.6), basalt, basalt, Vector2(0.5, 0.5)), "AlienWall", Vector3(0.0, 3.0, -4.3))
 	_instance(_box(Vector3(13.0, 0.1, 4.8), plate, dark, Vector2(1.0, 1.0)), "HumanPlatform", Vector3(0.0, 0.0, -0.2))
 	_instance(_box(Vector3(13.0, 0.12, 0.2), hazard, hazard, Vector2(2.0, 2.0)), "PlatformEdge", Vector3(0.0, 0.01, 2.3))
-	_label("ВКЛ — сигнал активен", Vector3(-5.9, 0.9, -1.2), 30)
-	_label("ВЫКЛ", Vector3(-5.9, 0.9, 0.9), 30)
+	_label("ВКЛ — сигнал активен", Vector3(-5.5, 0.95, -1.2), 30)
+	_label("ВЫКЛ", Vector3(-5.5, 0.95, 0.9), 30)
 
 
 func _build_device_row(z: float, active: bool) -> void:
 	var state: String = "On" if active else "Off"
 	var dark: Material = _material(SURFACES + "metal_dark.tres")
-	var hazard: Material = _material(SURFACES + "hazard_stripes.tres")
 	var panel: Material = _material(SURFACES + "panel_light.tres")
-	# куб 0,5 м — штатный BoxMesh блокаута, материал задаёт uv1_scale 3×2
-	var cube_material: Material = _material(DEVICES + "cube_face.tres")
+	# куб 0,5 м — процедурная модель (tools/art/models), рядом для сравнения штатный BoxMesh блокаута
+	_model("utility_cube", "Cube" + state, Vector3(-5.0, 0.3, z), Vector3(0.0, 25.0, 0.0), active)
+	var cube_material: Material = _material(DEVICES + "cube_face_boxmesh.tres")
 	var cube_mesh: BoxMesh = BoxMesh.new()
 	cube_mesh.size = Vector3(0.5, 0.5, 0.5)
 	cube_mesh.material = cube_material if active else _off(cube_material)
-	_instance(cube_mesh, "Cube" + state, Vector3(-5.0, 0.3, z), Vector3(0.0, 25.0, 0.0))
-	# напольная кнопка: юбка + плита; во включённом состоянии плита утоплена
-	var top: Material = _material(DEVICES + "floor_button_top.tres")
-	_instance(_cylinder(0.52, 0.1, hazard, dark, 6.0, 0.1), "FloorButtonSkirt" + state, Vector3(-3.3, 0.1, z))
-	var plate_y: float = 0.15 if active else 0.19
-	_instance(_cylinder(0.48, 0.06, dark, top if active else _off(top), 6.0, 0.06), "FloorButtonPlate" + state,
-		Vector3(-3.3, plate_y, z))
+	_instance(cube_mesh, "BlockoutCube" + state, Vector3(-5.9, 0.3, z), Vector3(0.0, 25.0, 0.0))
+	# напольная кнопка — модель: юбка и подвижная плита; во включённом состоянии плита опущена на ход
+	_model("floor_button_base", "FloorButtonBase" + state, Vector3(-3.3, 0.05, z), Vector3.ZERO, active)
+	var plate_y: float = 0.05 + PLATE_REST - (PLATE_TRAVEL if active else 0.0)
+	_model("floor_button_plate", "FloorButtonPlate" + state, Vector3(-3.3, plate_y, z), Vector3.ZERO, active)
 	# эмиттер → приёмник
 	var body: Material = _material(DEVICES + "emitter_body.tres")
 	var lens: Material = _material(DEVICES + "emitter_lens.tres")

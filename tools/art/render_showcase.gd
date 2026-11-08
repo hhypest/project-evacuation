@@ -14,6 +14,8 @@ const VIEWS: Array[Dictionary] = [
 	{"scene": 0, "name": "alien-left", "from": Vector3(-6.4, 1.9, 1.6), "to": Vector3(-6.4, 1.4, -4.0)},
 	{"scene": 0, "name": "portal", "from": Vector3(5.4, 1.9, 3.0), "to": Vector3(7.0, 1.5, -3.0)},
 	{"scene": 0, "name": "floor-devices", "from": Vector3(-2.2, 1.5, 3.4), "to": Vector3(-2.2, 0.3, -0.2)},
+	{"scene": 0, "name": "models-closeup", "from": Vector3(-4.3, 1.05, 2.3), "to": Vector3(-4.3, 0.2, -0.2)},
+	{"scene": 0, "name": "models-cube", "from": Vector3(-4.55, 0.75, 1.75), "to": Vector3(-5.0, 0.3, 0.9)},
 	{"scene": 0, "name": "beam-gravity", "from": Vector3(1.6, 1.4, 3.2), "to": Vector3(1.6, 0.5, -0.4)},
 	{"scene": 0, "name": "wall", "from": Vector3(1.2, 2.2, 0.8), "to": Vector3(1.2, 1.9, -4.0)},
 	{"scene": 0, "name": "suit-catwalk", "from": Vector3(-6.4, 2.0, 3.2), "to": Vector3(-8.3, 1.2, 0.2)},

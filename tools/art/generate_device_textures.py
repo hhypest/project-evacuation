@@ -527,8 +527,10 @@ def dev_floor_button_top() -> Canvas:
                          chevron(C - 90, C + 30, 46, math.pi / 2, 0.3), chevron(C + 90, C + 30, 46, math.pi / 2, 0.3)))
     c.painted(icon * inner, "panel_light", height_add=0.004)
     # сильный износ в центре от нагрузки
-    centre_wear = (1 - smoothstep(60, 330, r)) * smoothstep(0.45, 0.75, c.noise(10, 4))
-    c.fill(centre_wear * inner, rgb("steel") * 0.85, rough=0.35, metal=1.0, paint=False)
+    # износ от нагрузки — по рифлёному полю, но не поверх пиктограммы: она должна читаться всегда
+    centre_wear = (1 - smoothstep(120, 360, r)) * smoothstep(0.55, 0.8, c.noise(10, 4)) * 0.6
+    c.fill(centre_wear * inner * (1 - ndimage.gaussian_filter(icon, 6.0)), rgb("steel") * 0.85, rough=0.35,
+           metal=1.0, paint=False)
     return c
 
 

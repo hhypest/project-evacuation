@@ -104,14 +104,20 @@ func _build_material(asset_name: String, group: String, emission: String, alpha:
 		material.emission_energy_multiplier = EMISSION_ENERGY[emission]
 		material.emission_texture = mask
 		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
-	if asset_name == "cube_face":
-		material.uv1_scale = BOX_FACE_UV_SCALE
 	if alpha:
 		# Просветы решётки — жёсткий отрез без сортировки прозрачности; решётку видно с обеих сторон.
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 		material.alpha_scissor_threshold = 0.5
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	return _save(material, group, asset_name)
+	var error: Error = _save(material, group, asset_name)
+	if error == OK and asset_name == "cube_face":
+		# Вариант для штатного BoxMesh блокаута: его UV раскладывает грани сеткой 3×2.
+		# Модели (content/models) используют основной материал с развёрткой 0..1 на грань.
+		var boxmesh: ORMMaterial3D = material.duplicate()
+		boxmesh.resource_name = asset_name + "_boxmesh"
+		boxmesh.uv1_scale = BOX_FACE_UV_SCALE
+		error = _save(boxmesh, group, asset_name + "_boxmesh")
+	return error
 
 
 ## Небо из равнопромежуточной панорамы: Sky с PanoramaSkyMaterial для WorldEnvironment и витрин.

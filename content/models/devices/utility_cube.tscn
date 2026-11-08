@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://content/models/devices/utility_cube.obj" id="1_px7kp"]
+[ext_resource type="Material" path="res://content/materials/devices/cube_face.tres" id="2_wlj8b"]
+
+[node name="UtilityCube" type="Node3D" unique_id=435870663]
+
+[node name="Body" type="MeshInstance3D" parent="." unique_id=1571644613]
+mesh = ExtResource("1_px7kp")
+surface_material_override/0 = ExtResource("2_wlj8b")
