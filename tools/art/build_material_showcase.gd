@@ -8,12 +8,14 @@ extends SceneTree
 
 const SCENE_PATH: String = "res://content/levels/material_showcase.tscn"
 const VITRINE_PATH: String = "res://content/levels/vitrine_showcase.tscn"
+const CAMP_PATH: String = "res://content/levels/camp_showcase.tscn"
 const DEVICES: String = "res://content/materials/devices/"
 const SURFACES: String = "res://content/materials/surfaces/"
 const ALIEN: String = "res://content/materials/alien/"
 const SUIT: String = "res://content/materials/suit/"
 const VEHICLE: String = "res://content/materials/vehicle/"
 const PLANET: String = "res://content/materials/planet/"
+const CAMP: String = "res://content/materials/camp/"
 const SEGMENTS: int = 40
 const CYAN: Color = Color("#38C8DC")
 const GRAVITY: Color = Color("#8B4FC4")
@@ -53,6 +55,12 @@ func _initialize() -> void:
 	_root.name = "VitrineShowcase"
 	_build_vitrine()
 	if not _save_scene(VITRINE_PATH):
+		quit(1)
+		return
+	_root = Node3D.new()
+	_root.name = "CampShowcase"
+	_build_camp()
+	if not _save_scene(CAMP_PATH):
 		quit(1)
 		return
 	quit(0)
@@ -525,6 +533,130 @@ func _build_vitrine() -> void:
 	for leg: Vector2 in [Vector2(-2.6, -1.4), Vector2(2.6, -1.4), Vector2(-2.6, 1.4), Vector2(2.6, 1.4)]:
 		_instance(_cylinder(0.12, 1.0, dark, dark), "HevsLeg", Vector3(leg.x, 0.5, leg.y))
 	_build_camera(Vector3(9.0, 2.6, 11.0), Vector3(0.0, 1.8, 0.0))
+
+
+## Брошенный лагерь у подножия сооружения после пожара Д42: палатки, модули, ящики, прожекторы, знаки.
+func _build_camp() -> void:
+	var environment: Environment = Environment.new()
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = Color("#07090A")
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_color = Color("#3A4650")
+	environment.ambient_light_energy = 0.6
+	environment.tonemap_mode = Environment.TONE_MAPPER_AGX
+	environment.glow_enabled = true
+	environment.glow_intensity = 0.7
+	environment.ssao_enabled = true
+	environment.fog_enabled = true
+	environment.fog_light_color = Color("#2E3438")
+	environment.fog_density = 0.02
+	var world: WorldEnvironment = WorldEnvironment.new()
+	world.name = "WorldEnvironment"
+	world.environment = environment
+	_root.add_child(world)
+	var shaft: DirectionalLight3D = DirectionalLight3D.new()
+	shaft.name = "ColdShaft"
+	shaft.light_color = Color(0.62, 0.72, 0.86)
+	shaft.light_energy = 0.35
+	shaft.shadow_enabled = true
+	shaft.rotation_degrees = Vector3(-62.0, -25.0, 0.0)
+	_root.add_child(shaft)
+	var floor_material: Material = _material(ALIEN + "basalt_floor.tres")
+	var basalt: Material = _material(ALIEN + "basalt_wall.tres")
+	_instance(_box(Vector3(24.0, 0.4, 20.0), floor_material, floor_material, Vector2(0.5, 0.5)), "AlienFloor", Vector3(0.0, -0.2, -2.0))
+	_instance(_box(Vector3(24.0, 12.0, 0.8), basalt, basalt, Vector2(0.5, 0.5)), "AlienWall", Vector3(0.0, 6.0, -10.0))
+	var dark: Material = _material(SURFACES + "metal_dark.tres")
+	var canvas: Material = _material(CAMP + "camp_canvas.tres")
+	var canvas_burnt: Material = _material(CAMP + "camp_canvas_burnt.tres")
+	_build_tent(canvas, dark, Vector3(-5.2, 0.0, -3.5), 18.0, "TentIntact")
+	_build_tent(canvas_burnt, dark, Vector3(-1.4, 0.0, -5.6), -8.0, "TentBurnt")
+	var habitat: Material = _material(CAMP + "habitat_panel.tres")
+	var habitat_burnt: Material = _material(CAMP + "habitat_panel_burnt.tres")
+	# стена модуля — один тайл по высоте (2 м текстуры на 2,4 м стены), 2 м на тайл по длине
+	_instance(_box(Vector3(4.0, 2.4, 2.4), habitat, habitat, Vector2(0.5, 1.0 / 2.4)), "HabitatModule", Vector3(1.6, 1.2, -7.6))
+	_instance(_box(Vector3(4.0, 2.4, 2.4), habitat_burnt, habitat_burnt, Vector2(0.5, 1.0 / 2.4)), "Medbay", Vector3(5.2, 1.2, -2.2),
+		Vector3(0.0, -24.0, 0.0))
+	var medbay: Material = _material(CAMP + "medbay_sign.tres")
+	_instance(_box(Vector3(0.6, 0.6, 0.01), medbay, medbay), "MedbaySign", Vector3(4.66, 1.7, -1.0), Vector3(0.0, -24.0, 0.0))
+	var crate: Material = _material(CAMP + "supply_crate.tres")
+	var crates: Array[Vector3] = [Vector3(-3.0, 0.4, -0.6), Vector3(-2.15, 0.4, -0.9), Vector3(-2.6, 1.2, -0.75),
+		Vector3(1.4, 0.4, -2.6), Vector3(0.6, 0.4, 0.4)]
+	var crate_yaw: Array[float] = [6.0, -10.0, 22.0, 35.0, -4.0]
+	for index: int in crates.size():
+		_instance(_box(Vector3(0.8, 0.8, 0.8), crate, crate), "SupplyCrate%d" % index, crates[index], Vector3(0.0, crate_yaw[index], 0.0))
+	_instance(_box(Vector3(1.4, 0.6, 0.7), crate, crate), "LongCrate", Vector3(2.3, 0.3, 0.9), Vector3(0.0, 80.0, 0.0))
+	var lamp: Material = _material(CAMP + "floodlight.tres")
+	var target: Vector3 = Vector3(0.0, 0.0, -3.5)
+	for lamp_position: Vector3 in [Vector3(-6.8, 0.0, 0.6), Vector3(6.6, 0.0, 1.4), Vector3(-1.0, 0.0, -9.0)]:
+		# лицевая грань (+Z) прожектора повёрнута к центру лагеря
+		var to_target: Vector3 = target - lamp_position
+		_build_floodlight(lamp, dark, lamp_position, rad_to_deg(atan2(to_target.x, to_target.z)), 24.0, true,
+			"Floodlight%d" % int(lamp_position.x))
+	_build_floodlight(_off(lamp), dark, Vector3(-0.4, 0.45, -1.6), 160.0, 0.0, false, "FloodlightFallen")
+	var banner: Material = _material(CAMP + "expedition_banner.tres")
+	_instance(_cylinder(0.035, 3.4, dark, dark), "BannerPole", Vector3(-3.8, 1.7, -7.2))
+	_instance(_box(Vector3(0.8, 1.6, 0.01), banner, banner), "ExpeditionBanner", Vector3(-3.36, 2.55, -7.2))
+	var radiation: Material = _material(CAMP + "radiation_sign.tres")
+	_instance(_cylinder(0.03, 1.6, dark, dark), "SignPost", Vector3(0.9, 0.8, 2.6))
+	_instance(_box(Vector3(0.5, 0.5, 0.01), radiation, radiation), "RadiationSign", Vector3(0.9, 1.45, 2.63), Vector3(0.0, 12.0, 0.0))
+	_build_camera(Vector3(0.0, 2.2, 7.5), Vector3(0.0, 1.0, -3.0))
+
+
+## Двускатная палатка: два ската ткани на каркасе из труб.
+func _build_tent(fabric: Material, frame: Material, origin: Vector3, yaw: float, node_name: String) -> void:
+	var tent: Node3D = Node3D.new()
+	tent.name = node_name
+	tent.position = origin
+	tent.rotation_degrees = Vector3(0.0, yaw, 0.0)
+	_root.add_child(tent)
+	var slope: float = 1.75
+	var tilt: float = 52.0
+	var half_width: float = cos(deg_to_rad(tilt)) * slope * 0.5
+	var ridge: float = sin(deg_to_rad(tilt)) * slope
+	for side: float in [-1.0, 1.0]:
+		_instance(_box(Vector3(3.2, 0.02, slope), fabric, fabric, Vector2(1.0, 1.0)), "Slope%s" % ("L" if side < 0.0 else "R"), Vector3(0.0, ridge * 0.5, side * half_width),
+			Vector3(side * tilt, 0.0, 0.0), tent)
+	for x: float in [-1.55, 1.55]:
+		_instance(_cylinder(0.025, ridge, frame, frame), "Pole%s" % ("L" if x < 0.0 else "R"), Vector3(x, ridge * 0.5, 0.0), Vector3.ZERO, tent)
+	_instance(_cylinder(0.02, 3.2, frame, frame), "Ridge", Vector3(0.0, ridge, 0.0), Vector3(0.0, 0.0, 90.0), tent)
+
+
+## Переносной прожектор на треноге; включённый даёт тёплый конус света, упавший погашен.
+func _build_floodlight(face: Material, body: Material, origin: Vector3, yaw: float, pitch: float, standing: bool,
+		node_name: String) -> void:
+	var stand: Node3D = Node3D.new()
+	stand.name = node_name
+	stand.position = origin
+	stand.rotation_degrees = Vector3(0.0, yaw, 0.0 if standing else 78.0)
+	_root.add_child(stand)
+	var mast: float = 2.2
+	for leg: int in 3:
+		var angle_rad: float = TAU * float(leg) / 3.0
+		var foot: Vector3 = Vector3(cos(angle_rad) * 0.55, 0.0, sin(angle_rad) * 0.55)
+		var mid: Vector3 = (foot + Vector3(0.0, 1.0, 0.0)) * 0.5
+		var length: float = foot.distance_to(Vector3(0.0, 1.0, 0.0))
+		var leg_node: MeshInstance3D = _instance(_cylinder(0.018, length, body, body), "Leg%d" % leg, mid, Vector3.ZERO, stand)
+		leg_node.basis = Basis(Quaternion(Vector3.UP, (Vector3(0.0, 1.0, 0.0) - foot).normalized()))
+	_instance(_cylinder(0.022, mast - 1.0, body, body), "Mast", Vector3(0.0, 1.0 + (mast - 1.0) * 0.5, 0.0), Vector3.ZERO, stand)
+	var head: Node3D = Node3D.new()
+	head.name = "Head"
+	head.position = Vector3(0.0, mast + 0.12, 0.0)
+	# положительный наклон опускает лицевую грань (+Z) вниз
+	head.rotation_degrees = Vector3(pitch, 0.0, 0.0)
+	stand.add_child(head)
+	_instance(_box(Vector3(0.42, 0.42, 0.14), face, body), "LampHead", Vector3.ZERO, Vector3.ZERO, head)
+	if standing:
+		var spot: SpotLight3D = SpotLight3D.new()
+		spot.name = "Beam"
+		spot.light_color = Color("#FFE2B8")
+		spot.light_energy = 6.0
+		spot.spot_range = 16.0
+		spot.spot_angle = 48.0
+		spot.shadow_enabled = true
+		# SpotLight3D светит вдоль −Z; лицевая грань ящика смотрит в +Z, поэтому разворот на 180°.
+		spot.position = Vector3(0.0, 0.0, 0.12)
+		spot.rotation_degrees = Vector3(0.0, 180.0, 0.0)
+		head.add_child(spot)
 
 
 func _assign_owner(node: Node) -> void:

@@ -1,0 +1,19 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/floodlight/floodlight_albedo.png" id="1_wscia"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/floodlight/floodlight_emission.png" id="2_bvmu4"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/floodlight/floodlight_normal.png" id="3_rnwm7"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/floodlight/floodlight_orm.png" id="4_d4lh7"]
+
+[resource]
+resource_name = "floodlight"
+albedo_texture = ExtResource("1_wscia")
+orm_texture = ExtResource("4_d4lh7")
+emission_enabled = true
+emission = Color(1, 0.8862745, 0.72156864, 1)
+emission_energy_multiplier = 3.0
+emission_operator = 1
+emission_texture = ExtResource("2_bvmu4")
+normal_enabled = true
+normal_texture = ExtResource("3_rnwm7")
+ao_enabled = true

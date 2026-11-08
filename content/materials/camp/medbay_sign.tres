@@ -1,0 +1,17 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/medbay_sign/medbay_sign_albedo.png" id="1_hgs2x"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/medbay_sign/medbay_sign_normal.png" id="2_bfwh6"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/medbay_sign/medbay_sign_orm.png" id="3_4wl8h"]
+
+[resource]
+resource_name = "medbay_sign"
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+cull_mode = 2
+albedo_texture = ExtResource("1_hgs2x")
+orm_texture = ExtResource("3_4wl8h")
+normal_enabled = true
+normal_texture = ExtResource("2_bfwh6")
+ao_enabled = true

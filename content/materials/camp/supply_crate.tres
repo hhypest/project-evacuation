@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/camp/supply_crate/supply_crate_albedo.png" id="1_ab4rd"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/supply_crate/supply_crate_normal.png" id="2_s11m5"]
+[ext_resource type="Texture2D" path="res://content/textures/camp/supply_crate/supply_crate_orm.png" id="3_7hnlo"]
+
+[resource]
+resource_name = "supply_crate"
+albedo_texture = ExtResource("1_ab4rd")
+orm_texture = ExtResource("3_7hnlo")
+normal_enabled = true
+normal_texture = ExtResource("2_s11m5")
+ao_enabled = true

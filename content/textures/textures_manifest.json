@@ -687,6 +687,196 @@
     "usage": "Панорама неба терминатора для Sky/витрин: неподвижный красный карлик, дымка, шторм, шпили"
   },
   {
+    "name": "camp_canvas",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "camp_canvas_albedo.png",
+      "camp_canvas_normal.png",
+      "camp_canvas_orm.png"
+    ],
+    "usage": "Полотнище палатки лагеря: ткань с покрытием, складки, сварной шов; 1 м на тайл"
+  },
+  {
+    "name": "camp_canvas_burnt",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      true
+    ],
+    "emission": null,
+    "alpha": true,
+    "files": [
+      "camp_canvas_burnt_albedo.png",
+      "camp_canvas_burnt_normal.png",
+      "camp_canvas_burnt_orm.png"
+    ],
+    "usage": "Обгоревшее полотнище: прогары насквозь, обугленные кромки, копоть; 1 м на тайл"
+  },
+  {
+    "name": "supply_crate",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "supply_crate_albedo.png",
+      "supply_crate_normal.png",
+      "supply_crate_orm.png"
+    ],
+    "usage": "Лицевая грань ящика снабжения экспедиции: уголки, защёлки, держатель накладной, серийник, знак ФосТех"
+  },
+  {
+    "name": "floodlight",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": "lamp",
+    "alpha": false,
+    "files": [
+      "floodlight_albedo.png",
+      "floodlight_normal.png",
+      "floodlight_orm.png",
+      "floodlight_emission.png"
+    ],
+    "usage": "Лицевая панель переносного прожектора лагеря; 24 светодиода — тёплый рабочий свет, не сигнал"
+  },
+  {
+    "name": "habitat_panel",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "habitat_panel_albedo.png",
+      "habitat_panel_normal.png",
+      "habitat_panel_orm.png"
+    ],
+    "usage": "Стена жилого модуля/медблока, 2 × 2 м; бесшовно по U"
+  },
+  {
+    "name": "habitat_panel_burnt",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      1024,
+      1024
+    ],
+    "tile": [
+      true,
+      false
+    ],
+    "emission": null,
+    "alpha": false,
+    "files": [
+      "habitat_panel_burnt_albedo.png",
+      "habitat_panel_burnt_normal.png",
+      "habitat_panel_burnt_orm.png"
+    ],
+    "usage": "Стена модуля после пожара Д42: копоть, уголь, вздутая краска; бесшовно по U"
+  },
+  {
+    "name": "medbay_sign",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": null,
+    "alpha": true,
+    "files": [
+      "medbay_sign_albedo.png",
+      "medbay_sign_normal.png",
+      "medbay_sign_orm.png"
+    ],
+    "usage": "Табличка медблока: белый крест на зелёном, опалённый угол; прозрачный фон"
+  },
+  {
+    "name": "expedition_banner",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      512,
+      1024
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": null,
+    "alpha": true,
+    "files": [
+      "expedition_banner_albedo.png",
+      "expedition_banner_normal.png",
+      "expedition_banner_orm.png"
+    ],
+    "usage": "Вымпел экспедиции: знак ФосТех, люверсы, обгоревший нижний край; прозрачный фон"
+  },
+  {
+    "name": "radiation_sign",
+    "group": "camp",
+    "kind": "pbr",
+    "size": [
+      512,
+      512
+    ],
+    "tile": [
+      false,
+      false
+    ],
+    "emission": null,
+    "alpha": true,
+    "files": [
+      "radiation_sign_albedo.png",
+      "radiation_sign_normal.png",
+      "radiation_sign_orm.png"
+    ],
+    "usage": "Табличка радиационной опасности для переходов и спуска к лагерю; прозрачный фон"
+  },
+  {
     "name": "junction_relay",
     "group": "devices",
     "kind": "pbr",

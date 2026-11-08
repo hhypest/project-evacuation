@@ -16,6 +16,7 @@ const EMISSION_COLORS: Dictionary[String, Color] = {
 	"white": Color("#EAF2FF"),
 	"screen": Color("#C9DCE0"),
 	"alien": Color("#DCE6F2"),
+	"lamp": Color("#FFE2B8"),
 }
 const EMISSION_ENERGY: Dictionary[String, float] = {
 	"cyan": 2.0,
@@ -24,6 +25,7 @@ const EMISSION_ENERGY: Dictionary[String, float] = {
 	"white": 1.2,
 	"screen": 1.4,
 	"alien": 0.6,
+	"lamp": 3.0,
 }
 ## BoxMesh раскладывает грани сеткой 3×2; одна текстура на все грани требует такого масштаба UV.
 const BOX_FACE_UV_SCALE: Vector3 = Vector3(3.0, 2.0, 1.0)
