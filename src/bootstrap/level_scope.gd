@@ -10,6 +10,8 @@ var _carry: CarryController
 var _puzzle: AdvancePuzzle
 var _gravity: SampleGravity
 var _gravity_world: GravityWorldAdapter
+var _portals: AdvancePortals
+var _portal_world: PortalWorldAdapter
 var _tick_id: int = 0
 
 
@@ -64,6 +66,14 @@ func open(scene: PackedScene, generation: int) -> bool:
 		_puzzle.close()
 		_abort_open()
 		return false
+	_portal_world = PortalWorldAdapter.new()
+	_portal_world.configure(level)
+	_portals = AdvancePortals.new(_portal_world, generation)
+	if not _portals.ready():
+		push_error("Chamber portals rejected: " + "; ".join(_portals.errors))
+		_puzzle.close()
+		_abort_open()
+		return false
 	_puzzle.reset()
 	return true
 
@@ -77,6 +87,7 @@ func _abort_open() -> void:
 	if _gravity_world != null:
 		_gravity_world.close()
 	_gravity_world = null
+	_close_portals()
 	if _level != null:
 		remove_child(_level)
 		_level.queue_free()
@@ -118,6 +129,7 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.throw_requested = frame.throw_requested
 	_carry.step(carry_input)
 	_puzzle.step(_generation, _tick_id)
+	_portals.step(_generation, _tick_id)
 
 
 func held_prop_id() -> StringName:
@@ -139,6 +151,17 @@ func gravity() -> SampleGravity:
 	return _gravity
 
 
+func portals() -> AdvancePortals:
+	return _portals
+
+
+func _close_portals() -> void:
+	_portals = null
+	if _portal_world != null:
+		_portal_world.close()
+	_portal_world = null
+
+
 func close() -> void:
 	_generation = -1
 	if _carry != null:
@@ -151,6 +174,7 @@ func close() -> void:
 	if _gravity_world != null:
 		_gravity_world.close()
 	_gravity_world = null
+	_close_portals()
 	_camera = null
 	_player = null
 	if get_parent() != null:
