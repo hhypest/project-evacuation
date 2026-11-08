@@ -31,7 +31,7 @@
 | SKL-05 Цепи, логика, задержка, защёлка | Слита, PR №14 | [ADR-0008](adr/0008-device-network.md) | CI, облако-Vulkan, GPU владельца, ручной проход — [QA](qa/devices-circuits-2026-11-08.md) |
 | SKL-06 Эмиттер, луч, приёмник | Слита, PR №15 | [ADR-0008](adr/0008-device-network.md), дополнение SKL-06 | CI, облако-Vulkan, GPU владельца, ручной проход — [QA](qa/beam-2026-11-08.md) |
 | SKL-07 Гравитационные зоны | Слита, PR №16 | [ADR-0009](adr/0009-gravity-zones.md) | CI, облако-Vulkan, GPU владельца, ручной проход — [QA](qa/gravity-2026-11-08.md) |
-| SKL-08 Ранний эксперимент порталов | Реализована, на ревью | [ADR-0010](adr/0010-portal-experiment.md) | CI, облако-Vulkan, GPU владельца (portal_smoke) — [QA](qa/portal-experiment-2026-11-08.md) |
+| SKL-08 Ранний эксперимент порталов | Слита, PR №20 | [ADR-0010](adr/0010-portal-experiment.md) | CI, облако-Vulkan, GPU владельца (portal_smoke) — [QA](qa/portal-experiment-2026-11-08.md) |
 | SKL-09 Пара порталов и интеграция | Не начата | — | — |
 | SKL-10 Контрольная точка JSON, смерть, reset | Не начата | [ADR-0003](adr/0003-json-save-format.md) (формат) | — |
 | SKL-11 Атмосфера и тестовая опасность | Не начата | — | — |
@@ -54,3 +54,4 @@
 | Библия мира (ART-01) | Версия 1.0, чек-лист R1 подтверждён владельцем | [библия](design/lore/world-bible.md), [лор ред. 3](design/lore/outline-v3.md) |
 | Процедурные PBR-текстуры (заготовка ART-04) | Слиты, PR №9–11, 13; художественная приёмка впереди | [content/textures](../content/textures/README.md) |
 | Процедурные модели устройств | PR №12 закрыт по решению владельца | — |
+| Структура уровней: переход, камера, станция авангарда | Принята владельцем; пример камеры «Петля» | [ADR-0011](adr/0011-level-rhythm.md), [структура](design/level-structure.md), [«Петля»](design/puzzles/loop.md) |

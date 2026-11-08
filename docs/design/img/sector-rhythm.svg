@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="280" viewBox="0 0 680 280" role="img">
+<title>Ритм сектора: напряжение по режимам</title>
+<desc>Станция авангарда, переход, камера, переход, камера, станция. Напряжение растёт в переходах, в камерах ровное, на станциях спадает.</desc>
+<style>
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.th{font-size:14px;font-weight:600}
+.ts{font-size:12px;fill:#5F5E5A}
+.st{fill:#E1F5EE;stroke:#0F6E56}.st-t{fill:#085041}
+.tr{fill:#FAECE7;stroke:#993C1D}.tr-t{fill:#712B13}
+.ch{fill:#F1EFE8;stroke:#5F5E5A}.ch-t{fill:#444441}
+</style>
+<rect width="680" height="280" fill="#FFFFFF"/>
+<g stroke-width="0.6">
+<rect class="st" x="20" y="40" width="90" height="180"/>
+<rect class="tr" x="110" y="40" width="130" height="180"/>
+<rect class="ch" x="240" y="40" width="100" height="180"/>
+<rect class="tr" x="340" y="40" width="130" height="180"/>
+<rect class="ch" x="470" y="40" width="100" height="180"/>
+<rect class="st" x="570" y="40" width="90" height="180"/>
+</g>
+<text class="th st-t" x="65" y="30" text-anchor="middle">Станция</text>
+<text class="th tr-t" x="175" y="30" text-anchor="middle">Переход</text>
+<text class="th ch-t" x="290" y="30" text-anchor="middle">Камера</text>
+<text class="th tr-t" x="405" y="30" text-anchor="middle">Переход</text>
+<text class="th ch-t" x="520" y="30" text-anchor="middle">Камера</text>
+<text class="th st-t" x="615" y="30" text-anchor="middle">Станция</text>
+<path d="M20,192 C60,192 90,190 110,182 C150,160 170,92 200,82 C222,76 232,112 240,140 L340,140 C362,128 382,96 410,66 C440,54 456,92 470,140 L570,140 C590,170 610,192 660,194" fill="none" stroke="#2C2C2A" stroke-width="2.5"/>
+<text class="ts" x="65" y="242" text-anchor="middle">сброс</text>
+<text class="ts" x="175" y="242" text-anchor="middle">тревога, лор</text>
+<text class="ts" x="290" y="242" text-anchor="middle">только мысль</text>
+<text class="ts" x="405" y="242" text-anchor="middle">тревога, удар</text>
+<text class="ts" x="520" y="242" text-anchor="middle">только мысль</text>
+<text class="ts" x="615" y="242" text-anchor="middle">сброс</text>
+<text class="ts" x="20" y="266">Линия — напряжение игрока. Камера не снимает и не добавляет его: она переключает на мышление.</text>
+</svg>
