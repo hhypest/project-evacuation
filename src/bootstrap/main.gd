@@ -2,6 +2,8 @@ class_name SessionBootstrap
 extends Node
 ## Composition root. Session policy stays in Application; scene lifetime stays here.
 
+@export var catalog: LevelCatalog = preload("res://content/definitions/level_catalog.tres")
+## Chamber loaded by start/restart; selecting a level in the menu replaces it.
 @export var chamber_scene: PackedScene = preload("res://content/levels/foundation_lab.tscn")
 
 @onready var _hud: FoundationHud = $FoundationHud
@@ -17,6 +19,9 @@ var _problem: String = ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_hud.start_requested.connect(_on_start_requested)
+	_hud.level_requested.connect(_on_level_requested)
+	if catalog != null:
+		_hud.set_levels(catalog.titles())
 	_hud.pause_requested.connect(_on_pause_requested)
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.menu_requested.connect(_on_menu_requested)
@@ -52,6 +57,14 @@ func _on_start_requested() -> void:
 	if _session.start():
 		_replace_scope()
 		_sync_session()
+
+
+func _on_level_requested(index: int) -> void:
+	var scene: PackedScene = catalog.scene(index) if catalog != null else null
+	if scene == null:
+		return
+	chamber_scene = scene
+	_on_start_requested()
 
 
 func _on_pause_requested() -> void:
@@ -98,7 +111,7 @@ func _replace_scope() -> void:
 	if not _scope.open(chamber_scene, _session.get_status().generation):
 		_drop_scope()
 		_session.return_to_menu()
-		_problem = "Не удалось загрузить тестовую камеру. Попробуйте начать сессию ещё раз."
+		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
 	else:
 		_problem = ""
 
