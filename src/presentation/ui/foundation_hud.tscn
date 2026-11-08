@@ -53,7 +53,7 @@ text = "Проверка среды…"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-text = "Начать тестовую сессию"
+text = "Полигон: все механики"
 
 [node name="ResumeButton" type="Button" parent="Center/Menu/Margin/Stack"]
 unique_name_in_owner = true

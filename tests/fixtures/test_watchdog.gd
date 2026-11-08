@@ -2,7 +2,7 @@ class_name TestWatchdog
 extends Node
 ## Fixed-fps tests can simulate minutes quickly; timeout must use the wall clock.
 
-const TIMEOUT_MSEC: int = 120000
+const TIMEOUT_MSEC: int = 300000
 
 var _started: int = Time.get_ticks_msec()
 

@@ -1,5 +1,5 @@
 class_name PuzzleLabBuilder
-extends Node3D
+extends ChamberBuilder
 ## Primitive device proving ground (SKL-04/05/06/07): every bay shows one device rule.
 
 const WALL_Z: float = -9.0
@@ -10,7 +10,8 @@ const BEAM_HEIGHT: float = 0.6
 ## Bay 6 (gravity): a 4.2 m wall at the left edge; the powered field pulls toward it (-X).
 const GRAVITY_WALL_X: float = -14.7
 const GRAVITY_Z: float = 8.0
-const WALL_COLOR: Color = Color(0.2, 0.23, 0.26)
+## Bench 7 (logic kinds): a free-standing panel near the entrance from the movement lab.
+const BENCH_Z: float = 12.6
 
 
 func _ready() -> void:
@@ -75,7 +76,16 @@ func _ready() -> void:
 	_cube("CubeD", &"lab.cube.small_d", Vector3(GRAVITY_WALL_X + 3.2, 0.55, GRAVITY_Z), 5.0)
 	_sign("Гравитация: переключатель включает поле к стене\nкуб падает на кнопку на стене · можно ходить по стене",
 		Vector3(GRAVITY_WALL_X + 0.05, 3.7, GRAVITY_Z - 1.0), 90.0)
-	_partition()
+	# Bench 7: the remaining logic kinds. Two toggles feed OR and NOT; a source is always on.
+	_box(Vector3(3.6, 2.6, 0.2), Vector3(-5.2, 1.3, BENCH_Z - 0.1), WALL_COLOR, "LogicBench")
+	_button(&"lab.button.a", Vector3(-6.4, 1.2, BENCH_Z + 0.08), DeviceDefinition.WallMode.TOGGLE, 1.0, "A")
+	_button(&"lab.button.b", Vector3(-5.6, 1.2, BENCH_Z + 0.08), DeviceDefinition.WallMode.TOGGLE, 1.0, "B")
+	_logic(&"lab.or", DeviceDefinition.Kind.OR, [&"lab.button.a", &"lab.button.b"], Vector3(-6.0, 2.1, BENCH_Z + 0.05))
+	_logic(&"lab.not", DeviceDefinition.Kind.NOT, [&"lab.button.a"], Vector3(-5.2, 2.1, BENCH_Z + 0.05))
+	_logic(&"lab.source", DeviceDefinition.Kind.SOURCE, [], Vector3(-4.2, 2.1, BENCH_Z + 0.05), 1.0, 0.0, true)
+	_sign("Логика: ИЛИ (A, B) · НЕ (A) · источник", Vector3(-5.2, 2.85, BENCH_Z + 0.02))
+	_lamp(Vector3(-5.2, 2.8, BENCH_Z + 2.0), 6.0, 1.2)
+	_beam_partition()
 	_walls()
 	for x: float in [-9.0, -1.0, 7.0]:
 		var lamp: OmniLight3D = OmniLight3D.new()
@@ -98,7 +108,7 @@ func _ready() -> void:
 	add_child(gravity_lamp)
 
 
-func _partition() -> void:
+func _beam_partition() -> void:
 	# Door at x = 11: 2 m opening plus 0.3 m posts on each side.
 	for span: Vector2 in [Vector2(6.5, 9.7), Vector2(12.3, 15.0)]:
 		var width: float = span.y - span.x
@@ -127,107 +137,3 @@ func _wall(from_x: float, to_x: float) -> void:
 	var wall: StaticBody3D = PuzzleDeviceNode.static_box(Vector3(width, 3.4, 0.3), WALL_COLOR,
 		Vector3(from_x + width * 0.5, 1.7, WALL_Z))
 	add_child(wall)
-
-
-func _plate(id: StringName, at: Vector3, press: float, release: float) -> void:
-	var plate: FloorButtonDevice = FloorButtonDevice.new()
-	plate.name = String(id).replace(".", "_")
-	plate.stable_id = id
-	plate.press_threshold_kg = press
-	plate.release_threshold_kg = release
-	plate.position = at
-	add_child(plate)
-
-
-func _button(id: StringName, at: Vector3, mode: DeviceDefinition.WallMode, hold: float, caption: String = "") -> void:
-	var button: WallButtonDevice = WallButtonDevice.new()
-	button.name = String(id).replace(".", "_")
-	button.stable_id = id
-	button.mode = mode
-	button.hold_seconds = hold
-	button.caption = caption
-	button.position = at
-	add_child(button)
-
-
-func _door(id: StringName, at: Vector3, sources: Array[StringName]) -> void:
-	var door: DoorDevice = DoorDevice.new()
-	door.name = String(id).replace(".", "_")
-	door.stable_id = id
-	door.inputs = sources
-	door.position = at
-	add_child(door)
-
-
-func _emitter(id: StringName, at: Vector3, sources: Array[StringName]) -> void:
-	_stand(at)
-	var emitter: EmitterDevice = EmitterDevice.new()
-	emitter.name = String(id).replace(".", "_")
-	emitter.stable_id = id
-	emitter.inputs = sources
-	emitter.range_m = 20.0
-	emitter.position = at
-	# Local -Z fires toward -X.
-	emitter.rotation_degrees = Vector3(0, 90, 0)
-	add_child(emitter)
-
-
-func _receiver(id: StringName, at: Vector3) -> void:
-	_stand(at)
-	var receiver: ReceiverDevice = ReceiverDevice.new()
-	receiver.name = String(id).replace(".", "_")
-	receiver.stable_id = id
-	receiver.position = at
-	# Local +Z front faces +X, toward the emitter.
-	receiver.rotation_degrees = Vector3(0, 90, 0)
-	add_child(receiver)
-
-
-func _stand(at: Vector3) -> void:
-	var height: float = at.y - 0.25
-	add_child(PuzzleDeviceNode.static_box(Vector3(0.3, height, 0.3), Color(0.3, 0.32, 0.34), Vector3(at.x, height * 0.5, at.z)))
-
-
-func _logic(id: StringName, kind: DeviceDefinition.Kind, sources: Array[StringName], at: Vector3, delay: float = 1.0) -> void:
-	var logic: LogicDevice = LogicDevice.new()
-	logic.name = String(id).replace(".", "_")
-	logic.stable_id = id
-	logic.kind = kind
-	logic.inputs = sources
-	logic.delay_seconds = delay
-	logic.position = at
-	add_child(logic)
-
-
-func _cube(label: String, id: StringName, at: Vector3, kilograms: float) -> void:
-	var body: CarryRigidBody = CarryRigidBody.new()
-	body.name = label
-	body.stable_id = id
-	body.position = at
-	body.mass = kilograms
-	body.collision_layer = 2
-	body.collision_mask = 7
-	var shape: BoxShape3D = BoxShape3D.new()
-	var collision: CollisionShape3D = CollisionShape3D.new()
-	collision.name = "Collision"
-	collision.shape = shape
-	body.add_child(collision)
-	body.add_child(PuzzleDeviceNode.box_mesh(Vector3.ONE, Color(0.86, 0.85, 0.82)))
-	var sign: Label3D = Label3D.new()
-	sign.text = "%.0f кг" % kilograms
-	sign.position = Vector3(0, 0, 0.51)
-	sign.pixel_size = 0.005
-	sign.font_size = 48
-	sign.modulate = Color(0.1, 0.1, 0.1)
-	body.add_child(sign)
-	add_child(body)
-
-
-func _sign(text: String, at: Vector3, yaw_degrees: float = 0.0) -> void:
-	var sign: Label3D = Label3D.new()
-	sign.text = text
-	sign.position = at
-	sign.rotation_degrees = Vector3(0, yaw_degrees, 0)
-	sign.pixel_size = 0.007
-	sign.font_size = 36
-	add_child(sign)
