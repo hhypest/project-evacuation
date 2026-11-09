@@ -11,6 +11,13 @@ cube   — centred on the origin and scaled per axis to exactly 1 x 1 x 1 m (the
 button — bottom at y = 0, plate top at y = 0.1 m, plate edge at ±0.7 m (the 1.4 x 0.1 x 1.4 m plate
          collision of FloorButtonDevice). The upper surfaces inside the plate edge are clipped out into
          a node "Plate", everything else stays in "Frame".
+wall_button_body / wall_switch_body — scaled per axis to the housing size of WallButtonDevice, front
+         towards +Z, back face at z = -0.08 m (the back of its 0.36 x 0.5 x 0.16 m collision box).
+wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the housing recess), its back at z = 0.
+wall_switch_lever — the lever turned so the arm points up (+Y) from its pivot hub; the hub centre is
+         the origin and the axle runs along Z, so the device turns it about Z.
+emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
+         ReceiverDevice plate (dish towards +Z), centred on the node.
 
 The raw GLBs are not in the repository; their Meshy task IDs are listed in content/models/README.md.
 """
@@ -29,6 +36,56 @@ FLOAT, UINT32 = 5126, 5125
 PLATE_EDGE_RAW = 0.80  # rusty rim of the diamond plate in the texture
 PLATE_EDGE_GAME = 0.70
 PLATE_TOP_GAME = 0.10
+
+
+# Wall devices (game metres; WallButtonDevice collision box is 0.36 x 0.5 x 0.16 m centred on the node).
+FITS: dict[str, dict] = {
+    "wall_button_body": {"node": "Body", "size": (0.34, 0.56, 0.18), "origin": "back", "back": -0.08, "lift": 0.02},
+    "wall_switch_body": {"node": "Body", "size": (0.32, 0.5, 0.12), "origin": "back", "back": -0.08},
+    "wall_button_key": {"node": "Key", "rotate": (-90.0, 0.0, 0.0), "uniform": (0, 0.1), "origin": "back", "back": 0.0},
+    "wall_switch_lever": {"node": "Lever", "uniform": (1, 0.22), "origin": "hub"},
+    # Optics: EmitterDevice housing 0.5 x 0.5 x 0.7 m firing along -Z; ReceiverDevice plate 0.6 x 0.6 x 0.25 m
+    # facing +Z. "shift" moves the model so its lens or dish sits on the device axis.
+    "emitter_body": {"node": "Body", "rotate": (0.0, -90.0, 0.0), "size": (0.5, 0.5, 0.7), "origin": "center", "shift": (0.037, -0.08, 0.0)},
+    "receiver_body": {"node": "Body", "size": (0.6, 0.6, 0.25), "origin": "center", "shift": (0.0, 0.02, 0.0)},
+}
+
+
+def rotation_matrix(degrees: tuple[float, float, float]) -> np.ndarray:
+    x, y, z = np.radians(degrees)
+    rx = np.array([[1, 0, 0], [0, np.cos(x), -np.sin(x)], [0, np.sin(x), np.cos(x)]])
+    ry = np.array([[np.cos(y), 0, np.sin(y)], [0, 1, 0], [-np.sin(y), 0, np.cos(y)]])
+    rz = np.array([[np.cos(z), -np.sin(z), 0], [np.sin(z), np.cos(z), 0], [0, 0, 1]])
+    return rz @ ry @ rx
+
+
+def lever_frame(position: np.ndarray, normal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Puts the pivot hub at the origin and the arm along +Y. The raw lever lies along its longest axis;
+    the hub is the end whose cross-section is widest, its axle the hub's thinnest direction."""
+    long_axis = int(np.argmax(position.max(axis=0) - position.min(axis=0)))
+    low, high = position[:, long_axis].min(), position[:, long_axis].max()
+    span = high - low
+    def end(near_high: bool) -> np.ndarray:
+        mask = position[:, long_axis] > high - span * 0.15 if near_high else position[:, long_axis] < low + span * 0.15
+        return position[mask]
+    ends = [end(False), end(True)]
+    others = [axis for axis in range(3) if axis != long_axis]
+    widths = [np.ptp(e[:, others], axis=0).sum() for e in ends]
+    hub_index = int(np.argmax(widths))
+    hub = ends[hub_index]
+    grip_sign = -1.0 if hub_index == 1 else 1.0
+    hub_extent = np.ptp(hub, axis=0)
+    axle = others[int(np.argmin(hub_extent[others]))]
+    third = [axis for axis in others if axis != axle][0]
+    centre = (hub.min(axis=0) + hub.max(axis=0)) * 0.5
+    # New basis: X = third axis, Y = towards the grip along the long axis, Z = axle.
+    basis = np.zeros((3, 3))
+    basis[0, third] = 1.0
+    basis[1, long_axis] = grip_sign
+    basis[2, axle] = 1.0
+    if np.linalg.det(basis) < 0:
+        basis[0] *= -1.0
+    return (position - centre) @ basis.T, normal @ basis.T
 
 
 def read_glb(path: Path) -> tuple[dict, bytes]:
@@ -184,6 +241,32 @@ def main() -> None:
             flat[:, 3:6] = scale_normals(flat[:, 3:6], scale)
             parts[part] = flat.reshape(-1, 3, 8)
         print(f"plate top {top:.4f} raw, frame {len(frame)} tris, plate {len(plate)} tris, scale {scale.round(4).tolist()}")
+    elif mode in FITS:
+        name = mode
+        fit = FITS[mode]
+        rotation = rotation_matrix(fit.get("rotate", (0.0, 0.0, 0.0)))
+        position = position @ rotation.T
+        normal = normal @ rotation.T
+        if mode == "wall_switch_lever":
+            position, normal = lever_frame(position, normal)
+        low, high = position.min(axis=0), position.max(axis=0)
+        if "size" in fit:
+            scale = np.array(fit["size"]) / (high - low)
+        else:
+            axis, length = fit["uniform"]
+            scale = np.full(3, length / (high - low)[axis])
+        position = position * scale
+        normal = scale_normals(normal, scale)
+        low, high = position.min(axis=0), position.max(axis=0)
+        centre = (low + high) * 0.5
+        if fit["origin"] == "back":
+            offset = np.array([-centre[0], -centre[1] + fit.get("lift", 0.0), fit["back"] - low[2]])
+        elif fit["origin"] == "center":
+            offset = -centre + np.array(fit.get("shift", (0.0, 0.0, 0.0)))
+        else:  # "hub": lever_frame already put the hub at the origin
+            offset = np.zeros(3)
+        vertices = np.hstack([position + offset, normal, uv])
+        parts = {fit["node"]: vertices[triangles]}
     else:
         raise SystemExit(f"unknown mode {mode}")
 

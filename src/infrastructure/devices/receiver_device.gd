@@ -4,6 +4,12 @@ extends PuzzleDeviceNode
 ## around that normal, of the same channel, from a powered emitter.
 
 const PLATE: Vector3 = Vector3(0.6, 0.6, 0.25)
+## Art model (content/models/devices/receiver): a dark dish centred on the front. The cyan guide frame around
+## it, the hit disc in the dish and the lamp stay code, so only optics turn cyan (ADR-0006).
+const MODEL: PackedScene = preload("res://content/models/devices/receiver/receiver_body.gltf")
+const FRAME_HALF: float = 0.2
+const FRAME_Z: float = 0.128
+const DISH_Z: float = 0.109
 
 @export var channel: int = 0
 @export_range(1.0, 90.0) var acceptance_degrees: float = 30.0
@@ -25,23 +31,25 @@ func _ready() -> void:
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = shape
 	body.add_child(collision)
-	body.add_child(box_mesh(PLATE, Color(0.88, 0.86, 0.82)))
 	add_child(body)
-	# Receiving ring on the front face: cyan frame around a dark target.
-	var front: float = PLATE.z * 0.5 + 0.01
-	for offset: Vector3 in [Vector3(0, 0.2, 0), Vector3(0, -0.2, 0)]:
-		var bar: MeshInstance3D = box_mesh(Vector3(0.44, 0.04, 0.02), EmitterDevice.CYAN, 1.0)
-		bar.position = offset + Vector3(0, 0, front)
+	var model: Node3D = MODEL.instantiate() as Node3D
+	model.name = "Model"
+	add_child(model)
+	# Receiving frame on the front face: a thin cyan square around the dark dish.
+	for offset: Vector3 in [Vector3(0, FRAME_HALF, 0), Vector3(0, -FRAME_HALF, 0)]:
+		var bar: MeshInstance3D = box_mesh(Vector3(FRAME_HALF * 2.0 + 0.02, 0.02, 0.01), EmitterDevice.CYAN, 1.0)
+		bar.position = offset + Vector3(0, 0, FRAME_Z)
 		add_child(bar)
-	for offset: Vector3 in [Vector3(0.2, 0, 0), Vector3(-0.2, 0, 0)]:
-		var bar: MeshInstance3D = box_mesh(Vector3(0.04, 0.44, 0.02), EmitterDevice.CYAN, 1.0)
-		bar.position = offset + Vector3(0, 0, front)
+	for offset: Vector3 in [Vector3(FRAME_HALF, 0, 0), Vector3(-FRAME_HALF, 0, 0)]:
+		var bar: MeshInstance3D = box_mesh(Vector3(0.02, FRAME_HALF * 2.0 + 0.02, 0.01), EmitterDevice.CYAN, 1.0)
+		bar.position = offset + Vector3(0, 0, FRAME_Z)
 		add_child(bar)
-	_ring = box_mesh(Vector3(0.3, 0.3, 0.02), DARK)
-	_ring.position = Vector3(0, 0, front)
+	_ring = disc_mesh(0.07, DARK)
+	_ring.rotation.x = PI * 0.5
+	_ring.position = Vector3(0, 0, DISH_Z)
 	add_child(_ring)
-	_lamp = box_mesh(Vector3(0.08, 0.08, 0.02), DARK)
-	_lamp.position = Vector3(0, 0.34, 0)
+	_lamp = box_mesh(Vector3(0.05, 0.05, 0.01), DARK)
+	_lamp.position = Vector3(0, 0.26, FRAME_Z)
 	add_child(_lamp)
 
 
