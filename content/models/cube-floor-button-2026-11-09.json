@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-09",
+  "source_commit": "065534170c539161ec88ac5079def2d3fc8da26e",
+  "source_archive_sha256": "f5a9dd5b9757a86d3a33a6e97cc0fb4165968eb49aeac4b9b7397eec12f4681e",
+  "source_pdf_sha256": "bcd314f00aa22df5a60e8412ed6c0d994e74d6f6cd3740c4cf0d5598e28d6878",
+  "license": "MIT; existing owner decision for content/models/devices; 2D references not redistributed in repository",
+  "generated_ai_content": true,
+  "art_acceptance": "pending owner review",
+  "assets": [
+    {
+      "concept_id": "DEV-01",
+      "reference": "Abandoned_Meshy_Concepts/images/DEV-01.png",
+      "reference_sha256": "0c35b499f913d038fc91cb898d1b03899ba5d69436047c95cc58045b1890c74a",
+      "image_to_3d_task_id": "01a1c0c7-e776-709c-bda1-a76ff839dd5d",
+      "image_to_3d_settings": {
+        "ai_model": "meshy-7.1",
+        "geometry_resolution": "2k",
+        "image_enhancement": false,
+        "should_texture": true,
+        "texture_resolution": "4k",
+        "enable_pbr": true,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 25000,
+        "texture_prompt": "Match the reference design and material colors precisely: ivory light grey painted steel, small matte safety orange markings, dark graphite corner guards, restrained wear and crisp fasteners. No letters, no numbers, no logos, no baked shadows, no glowing paint. Recessed carrying handles; clean coherent industrial surfaces.",
+        "target_formats": [
+          "glb"
+        ],
+        "multi_view_thumbnails": true
+      },
+      "consumed_credits": 35,
+      "normalizer_mode": "cube",
+      "files": [
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube.bin",
+          "bytes": 1373664,
+          "sha256": "5a9a4bbe2bb89bee1006955e5ec6be95fa6de414ddecb9b38d361c274c6307c2"
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube.gltf",
+          "bytes": 2281,
+          "sha256": "8149f89c44113bfd90c6ca9096cbe2bebb721510884a83af596e6571fbacd9d6"
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_base_color.jpg",
+          "bytes": 10758223,
+          "sha256": "4f855bad2a138c953dedbe3a8ab237bc292d0e100c89a48a9247634a611a7c2f",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_metallic_roughness.jpg",
+          "bytes": 2374641,
+          "sha256": "d3c4b8bae0b72d51aa84ba25e12e751ee4f3b3cd35dce8cd4514b62846bc1ad7",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_normal.jpg",
+          "bytes": 8383067,
+          "sha256": "3188e43994c31debe42c93cb5b0fc7296e4824c434cb312206edd9506f175167",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "DEV-02",
+      "reference": "Abandoned_Meshy_Concepts/images/DEV-02.png",
+      "reference_sha256": "310362cb72450ed17d84dd7d58b2b31b5bb4477f7e6d141679d8d1817825cd7a",
+      "image_to_3d_task_id": "01a1c0c7-fcd7-7364-a1e7-751510d51d4f",
+      "image_to_3d_settings": {
+        "ai_model": "meshy-7.1",
+        "geometry_resolution": "2k",
+        "image_enhancement": false,
+        "should_texture": true,
+        "texture_resolution": "4k",
+        "enable_pbr": true,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 25000,
+        "texture_prompt": "Match the reference design and material colors precisely: ivory light grey painted steel, small matte safety orange markings, dark graphite corner guards, restrained wear and crisp fasteners. No letters, no numbers, no logos, no baked shadows, no glowing paint. Steel diamond tread on the central movable pressure plate; dark unlit recessed perimeter light channels, ivory outer frame and orange painted plate markings. All lamps unlit, no amber glow.",
+        "target_formats": [
+          "glb"
+        ],
+        "multi_view_thumbnails": true
+      },
+      "consumed_credits": 35,
+      "normalizer_mode": "button_concept",
+      "files": [
+        {
+          "path": "content/models/devices/floor_button/floor_button.bin",
+          "bytes": 1240716,
+          "sha256": "7563afb462980162695b0506a525ea55c958b3f902d3abada4457423eb6cefa0"
+        },
+        {
+          "path": "content/models/devices/floor_button/floor_button.gltf",
+          "bytes": 3558,
+          "sha256": "fb20adc1e0bf5795f89f877fa0e3ce11b74841869f63ca21b16c18ca2d551c41"
+        },
+        {
+          "path": "content/models/devices/floor_button/floor_button_base_color.jpg",
+          "bytes": 9954236,
+          "sha256": "62c55390e6bd9cbe2913febf328e1da683277e581414547ccea650b427477df3",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/floor_button/floor_button_metallic_roughness.jpg",
+          "bytes": 2012211,
+          "sha256": "f6df6019d6138048254686b833d1af57bfe821c5b71f0e0faa9855504139a22e",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/floor_button/floor_button_normal.png",
+          "bytes": 14635292,
+          "sha256": "7009c3a0fa36f69a186357b61478c9b9d4ca35df40872117d2e6f238f5125d2d",
+          "format": "PNG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "cube_texture_revision": {
+    "image_to_image_task_id": "01a1c0cc-355c-71f6-8ace-a53dc8d87403",
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Edit only the surface printing of this exact industrial cube. REMOVE every letter, word and number on ALL visible faces: BALLAST, MASS, 12.5T, 2391 and the small writing on top. Replace only those ink marks with matching clean ivory paint and identical restrained wear. Preserve the exact geometry, recessed handles, bolts, graphite corner guards, orange markings, stripe icons, framing, perspective and lighting. Do not add any object, text, logo, badge or light. Identical design with NO typography anywhere.",
+    "reference_sha256": "4415c90cd3651fbde09c4a6d72d1b7ca416143ec99ca2dff5bc2340248f72ec4",
+    "image_credits": 4,
+    "retexture_task_id": "01a1c0cc-9c11-76cc-bc4b-f680a3aedea5",
+    "input_task_id": "01a1c0c7-e776-709c-bda1-a76ff839dd5d",
+    "ai_texture_model": "meshy-7",
+    "enable_original_uv": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "target_formats": [
+      "glb"
+    ],
+    "retexture_credits": 10,
+    "reason": "Remove fictional mass and all typography"
+  },
+  "total_consumed_credits": 84
+}

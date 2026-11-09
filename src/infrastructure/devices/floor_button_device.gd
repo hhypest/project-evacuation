@@ -14,9 +14,10 @@ const STACK_HEIGHT: float = 3.0
 ## stays put and a "Plate" that sinks when pressed. Other plate sizes scale it; the collision stays the box.
 const MODEL: PackedScene = preload("res://content/models/devices/floor_button/floor_button.gltf")
 const MODEL_PLATE: Vector3 = Vector3(1.4, 0.1, 1.4)
-## Lamp strip along the plate edge; it also walls the recess that the pressed plate leaves.
-const LAMP_WIDTH: float = 0.025
+## Four light bars sit inside DEV-02's dark channel, clear of the moving plate and the ivory rim.
+const LAMP_WIDTH: float = 0.018
 const LAMP_DEPTH: float = 0.05
+const LAMP_CHANNEL_OFFSET: float = 0.08
 
 var plate: StaticBody3D
 var last_load: float = 0.0
@@ -32,11 +33,11 @@ func _ready() -> void:
 	_model.scale = plate_size / MODEL_PLATE
 	add_child(_model)
 	_plate_visual = _model.get_node("Plate") as Node3D
-	var half: Vector2 = Vector2(plate_size.x, plate_size.z) * 0.5 + Vector2.ONE * LAMP_WIDTH * 0.5
-	var lamp_y: float = plate_size.y - LAMP_DEPTH * 0.5 + 0.004
+	var half: Vector2 = Vector2(plate_size.x, plate_size.z) * (0.5 + LAMP_CHANNEL_OFFSET / MODEL_PLATE.x)
+	var lamp_y: float = plate_size.y * 0.96 - LAMP_DEPTH * 0.5
 	for side: float in [-1.0, 1.0]:
-		_lamp_strip(Vector3(LAMP_WIDTH, LAMP_DEPTH, half.y * 2.0 + LAMP_WIDTH), Vector3(side * half.x, lamp_y, 0))
-		_lamp_strip(Vector3(half.x * 2.0 - LAMP_WIDTH, LAMP_DEPTH, LAMP_WIDTH), Vector3(0, lamp_y, side * half.y))
+		_lamp_strip(Vector3(LAMP_WIDTH, LAMP_DEPTH, plate_size.z * 0.7), Vector3(side * half.x, lamp_y, 0))
+		_lamp_strip(Vector3(plate_size.x * 0.7, LAMP_DEPTH, LAMP_WIDTH), Vector3(0, lamp_y, side * half.y))
 	plate = StaticBody3D.new()
 	plate.name = "Plate"
 	plate.collision_layer = 1

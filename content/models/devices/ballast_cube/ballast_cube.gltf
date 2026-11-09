@@ -89,32 +89,32 @@
  "buffers": [
   {
    "uri": "ballast_cube.bin",
-   "byteLength": 837028
+   "byteLength": 1373664
   }
  ],
  "bufferViews": [
   {
    "buffer": 0,
    "byteOffset": 0,
-   "byteLength": 203316,
+   "byteLength": 408240,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 203316,
-   "byteLength": 203316,
+   "byteOffset": 408240,
+   "byteLength": 408240,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 406632,
-   "byteLength": 135544,
+   "byteOffset": 816480,
+   "byteLength": 272160,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 542176,
-   "byteLength": 294852,
+   "byteOffset": 1088640,
+   "byteLength": 285024,
    "target": 34963
   }
  ],
@@ -122,7 +122,7 @@
   {
    "bufferView": 0,
    "componentType": 5126,
-   "count": 16943,
+   "count": 34020,
    "type": "VEC3",
    "min": [
     -0.5,
@@ -138,19 +138,19 @@
   {
    "bufferView": 1,
    "componentType": 5126,
-   "count": 16943,
+   "count": 34020,
    "type": "VEC3"
   },
   {
    "bufferView": 2,
    "componentType": 5126,
-   "count": 16943,
+   "count": 34020,
    "type": "VEC2"
   },
   {
    "bufferView": 3,
    "componentType": 5125,
-   "count": 73713,
+   "count": 71256,
    "type": "SCALAR"
   }
  ]

@@ -29,6 +29,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	var parked: Vector3 = cube.global_position
 	results.append(TestOutcome.new("an unpowered emitter shows no beam and the receiver stays dark",
 		not emitter.powered and not _output(&"lab.receiver") and not door.is_open()))
+	results.append(TestOutcome.new("unpowered optical surfaces do not emit light",
+		not _emits(emitter, "Lens") and not _emits(receiver, "HitLens") and not _emits(receiver, "OpticalRim")))
 	await _stand_facing(button)
 	await _ticks(1, true)
 	await _ticks(90)
@@ -37,6 +39,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		emitter.powered and absf(emitter.beam_length - face) < 0.05, "length %.3f, face %.3f" % [emitter.beam_length, face]))
 	results.append(TestOutcome.new("an accepted beam switches the receiver and opens its door",
 		_output(&"lab.receiver") and door.is_open()))
+	results.append(TestOutcome.new("an accepted beam lights the emitter lens and the receiver aperture",
+		_emits(emitter, "Lens") and _emits(receiver, "HitLens") and _emits(receiver, "OpticalRim")))
 	var middle: Vector3 = (emitter.muzzle() + receiver.global_position) * 0.5
 	_place(cube, Vector3(middle.x, 0.55, middle.z))
 	await _ticks(10)
@@ -45,6 +49,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("a cube in the path stops the beam at the cube and releases the receiver",
 		blocked_length < face * 0.6 and not _output(&"lab.receiver") and not door.is_open(),
 		"length %.3f, receiver %s, door %.2f" % [blocked_length, _output(&"lab.receiver"), door.openness]))
+	results.append(TestOutcome.new("occlusion darkens the receiver optics while the powered emitter stays lit",
+		_emits(emitter, "Lens") and not _emits(receiver, "HitLens") and not _emits(receiver, "OpticalRim")))
 	_place(cube, parked)
 	await _ticks(20)
 	results.append(TestOutcome.new("removing the cube restores the hit", _output(&"lab.receiver")))
@@ -116,6 +122,14 @@ func _stand_facing(device: Node3D) -> void:
 func _output(id: StringName) -> bool:
 	var result: PuzzleStepResult = _scope.puzzle().last_result
 	return result != null and result.output(id)
+
+
+func _emits(device: Node3D, label: String) -> bool:
+	var visual: MeshInstance3D = device.get_node(label) as MeshInstance3D
+	if visual == null:
+		return false
+	var material: StandardMaterial3D = visual.material_override as StandardMaterial3D
+	return material != null and material.emission_enabled
 
 
 func _ticks(count: int, interact: bool = false) -> void:

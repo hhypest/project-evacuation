@@ -56,9 +56,7 @@
  "samplers": [
   {
    "magFilter": 9729,
-   "minFilter": 9987,
-   "wrapS": 10497,
-   "wrapT": 10497
+   "minFilter": 9987
   }
  ],
  "images": [
@@ -69,7 +67,7 @@
    "uri": "emitter_body_metallic_roughness.jpg"
   },
   {
-   "uri": "emitter_body_normal.jpg"
+   "uri": "emitter_body_normal.png"
   }
  ],
  "textures": [
@@ -89,32 +87,32 @@
  "buffers": [
   {
    "uri": "emitter_body.bin",
-   "byteLength": 845000
+   "byteLength": 1468116
   }
  ],
  "bufferViews": [
   {
    "buffer": 0,
    "byteOffset": 0,
-   "byteLength": 219900,
+   "byteLength": 442836,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 219900,
-   "byteLength": 219900,
+   "byteOffset": 442836,
+   "byteLength": 442836,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 439800,
-   "byteLength": 146600,
+   "byteOffset": 885672,
+   "byteLength": 295224,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 586400,
-   "byteLength": 258600,
+   "byteOffset": 1180896,
+   "byteLength": 287220,
    "target": 34963
   }
  ],
@@ -122,35 +120,35 @@
   {
    "bufferView": 0,
    "componentType": 5126,
-   "count": 18325,
+   "count": 36903,
    "type": "VEC3",
    "min": [
-    -0.21299999952316284,
-    -0.33000001311302185,
+    -0.25,
+    -0.24150000512599945,
     -0.3499999940395355
    ],
    "max": [
-    0.28700000047683716,
-    0.17000000178813934,
+    0.25,
+    0.1914999932050705,
     0.3499999940395355
    ]
   },
   {
    "bufferView": 1,
    "componentType": 5126,
-   "count": 18325,
+   "count": 36903,
    "type": "VEC3"
   },
   {
    "bufferView": 2,
    "componentType": 5126,
-   "count": 18325,
+   "count": 36903,
    "type": "VEC2"
   },
   {
    "bufferView": 3,
    "componentType": 5125,
-   "count": 64650,
+   "count": 71805,
    "type": "SCALAR"
   }
  ]
