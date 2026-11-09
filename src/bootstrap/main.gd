@@ -14,6 +14,8 @@ var _runtime: RuntimeInfo
 var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
+var _profiler: RuntimeProfiler
+var _profiler_hud: ProfilerHud
 
 
 func _ready() -> void:
@@ -38,6 +40,7 @@ func _ready() -> void:
 		_problem = "Запуск остановлен:\n" + "\n".join(errors)
 		push_error("Runtime validation failed: " + "; ".join(errors))
 	_sync_session()
+	_configure_profiler()
 	print("%s Godot=%s renderer=%s physics=%s headless=%s" % [
 		"SESSION_READY" if errors.is_empty() else "SESSION_BLOCKED",
 		_runtime.engine_version, _runtime.rendering_driver, _runtime.physics_backend, _runtime.headless
@@ -46,6 +49,31 @@ func _ready() -> void:
 
 func get_session_status() -> SessionStatus:
 	return _session.get_status()
+
+
+func _configure_profiler() -> void:
+	var requested: bool = "--profile" in OS.get_cmdline_user_args()
+	if not OS.is_debug_build() and not requested:
+		return
+	_profiler = RuntimeProfiler.new()
+	_profiler.name = "RuntimeProfiler"
+	add_child(_profiler)
+	_profiler_hud = ProfilerHud.new()
+	_profiler_hud.name = "ProfilerHud"
+	add_child(_profiler_hud)
+	_profiler.sampled.connect(_profiler_hud.show_sample)
+	_profiler_hud.panel_toggled.connect(_profiler.set_panel_visible)
+	_profiler_hud.record_toggled.connect(_on_profile_record_toggled)
+	if requested:
+		_profiler_hud.set_panel_visible(true)
+		print("PROFILER_READY texture_profile=%s" % _profiler.SETTINGS.profile_label())
+
+
+func _on_profile_record_toggled() -> void:
+	if _profiler.recording:
+		_profiler.stop_recording()
+	else:
+		_profiler.start_recording()
 
 
 func _physics_process(delta: float) -> void:
@@ -124,6 +152,8 @@ func _drop_scope() -> void:
 
 func _sync_session() -> void:
 	var status: SessionStatus = _session.get_status()
+	if is_instance_valid(_profiler):
+		_profiler.level_label = chamber_scene.resource_path if _scope != null else "menu"
 	if not status.accepts_gameplay and _scope != null:
 		_scope.suspend_carry()
 	get_tree().paused = status.phase in [SessionLifecycle.Phase.READY, SessionLifecycle.Phase.PAUSED]
