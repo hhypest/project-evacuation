@@ -28,6 +28,23 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		"cube=%s hold=%s" % [_cube.position, _hold()]))
 	results.append(TestOutcome.new("the held cube and its carrier ignore each other's collisions",
 		_cube in _player.get_collision_exceptions() and _player in _cube.get_collision_exceptions()))
+	await _close()
+	# A cube that has rested a while sinks a little into the floor in Jolt; the first step toward a low hold
+	# point is almost horizontal and must still lift it out instead of leaving it stuck until the break delay.
+	await _open()
+	_cube.position = Vector3(0, 3, 0)
+	await _ticks(100)
+	var rest_height: float = _cube.position.y
+	_camera.look_at(_cube.global_position)
+	await _ticks(1, true)
+	await _ticks(12)
+	results.append(TestOutcome.new("a cube settled into the floor is lifted out and reaches a low hold point",
+		rest_height < 0.5 and _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.distance_to(_hold()) < 0.05,
+		"rest=%.4f cube=%s hold=%s" % [rest_height, _cube.position, _hold()]))
+	await _close()
+	await _open()
+	await _ticks(1, true)
+	await _ticks(12)
 	# An instant 40 degree turn jumps the hold point; the cube catches up within a few ticks.
 	_camera.rotation.y += deg_to_rad(40)
 	await _ticks(8)

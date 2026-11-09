@@ -109,17 +109,46 @@ func follow(id: StringName, desired: Transform3D, max_step: float, max_turn: flo
 		if space.intersect_shape(query, 1).is_empty():
 			origin = _slide(space, query, basis, origin, motion)
 		else:
-			# cast_motion ignores a start that already touches; accept only a step that ends free.
-			var step: Vector3 = motion
-			for _attempt: int in range(4):
-				query.transform = Transform3D(basis, origin + step)
-				if space.intersect_shape(query, 1).is_empty():
-					origin += step
-					break
-				step *= 0.5
+			# cast_motion ignores a start that already touches. A prop resting on a floor sinks into it a
+			# little in Jolt, so push it out along its contacts first and sweep on from free space.
+			var free: Vector3 = _recover(space, query, basis, origin)
+			var pushed: float = free.distance_to(origin)
+			query.transform = Transform3D(basis, free)
+			if pushed <= max_step and space.intersect_shape(query, 1).is_empty():
+				origin = _slide(space, query, basis, free, free.move_toward(desired.origin, max_step - pushed) - free)
+			else:
+				var step: Vector3 = motion
+				for _attempt: int in range(4):
+					query.transform = Transform3D(basis, origin + step)
+					if space.intersect_shape(query, 1).is_empty():
+						origin += step
+						break
+					step *= 0.5
 	result.available = true
 	result.transform = Transform3D(basis, origin)
 	return result
+
+
+## Moves a prop that overlaps the world out along its deepest contact, a few passes at most. The caller checks
+## that the result is free.
+func _recover(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D, basis: Basis,
+		origin: Vector3) -> Vector3:
+	var recovered: Vector3 = origin
+	query.margin = 0.0
+	query.motion = Vector3.ZERO
+	for _pass: int in range(4):
+		query.transform = Transform3D(basis, recovered)
+		var points: Array[Vector3] = space.collide_shape(query, 8)
+		var push: Vector3 = Vector3.ZERO
+		# Pairs: a point on the prop, then the matching point on the world body.
+		for index: int in range(0, points.size() - 1, 2):
+			var separation: Vector3 = points[index + 1] - points[index]
+			if separation.length() > push.length():
+				push = separation
+		if push.length() <= 0.000001:
+			break
+		recovered += push + push.normalized() * 0.002
+	return recovered
 
 
 ## Sweeps toward the hold point and, when a surface blocks the way, keeps the rest of the motion along it,

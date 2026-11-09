@@ -8,11 +8,11 @@ var max_mass: float = 40.0
 ## Grab ray length from the eyes.
 var reach: float = 3.0
 ## Height of the held prop's centre above the carrier's feet, along the carrier's up.
-var hold_height: float = 0.95
+var hold_height: float = 0.75
 ## Gap between the carrier's capsule and the held prop's near face.
 var hold_gap: float = 0.15
 ## How far looking straight up or down moves the hold point along the carrier's up.
-var pitch_lift: float = 0.7
+var pitch_lift: float = 0.9
 ## Speed limits of the snap toward the hold point; high enough to read as "sticking".
 var pull_speed: float = 14.0
 var turn_speed: float = 12.0
