@@ -2,7 +2,8 @@ class_name MovementSettings
 extends Resource
 ## Authoring boundary: Resource is converted once into a plain domain profile.
 
-@export var run_speed: float = 6.0
+@export var move_speed: float = 5.1
+@export var sprint_speed: float = 8.0
 @export var walk_speed: float = 2.5
 @export var crouch_speed: float = 1.8
 @export var ground_acceleration: float = 14.0
@@ -36,7 +37,8 @@ extends Resource
 
 func to_profile() -> MovementProfile:
 	var profile: MovementProfile = MovementProfile.new()
-	profile.run_speed = run_speed
+	profile.move_speed = move_speed
+	profile.sprint_speed = sprint_speed
 	profile.walk_speed = walk_speed
 	profile.crouch_speed = crouch_speed
 	profile.ground_acceleration = ground_acceleration

@@ -42,11 +42,13 @@ func execute(
 		return result
 	var vertical: float = observation.velocity.dot(up)
 	var planar: Vector3 = observation.velocity.slide(up)
-	var speed: float = profile.run_speed
+	var speed: float = profile.move_speed
 	if observation.crouched:
 		speed = profile.crouch_speed
 	elif command.walking:
 		speed = profile.walk_speed
+	elif command.sprinting:
+		speed = profile.sprint_speed
 	if observation.grounded:
 		result.mode = MovementStep.Mode.GROUND
 		planar = MovementRules.apply_friction(planar, profile.friction, profile.stop_speed, delta)
@@ -60,7 +62,8 @@ func execute(
 		result.mode = MovementStep.Mode.AIR
 		planar = MovementRules.accelerate(planar, wish.normalized(),
 			minf(speed, profile.air_control_speed) * axis.length(), profile.air_acceleration, delta)
-		planar = planar.limit_length(profile.run_speed)
+		# Air keeps sprint momentum; air control itself stays limited by air_control_speed.
+		planar = planar.limit_length(maxf(profile.move_speed, profile.sprint_speed))
 		vertical -= profile.gravity * observation.gravity_scale * delta
 	result.velocity = planar + up * vertical
 	return result

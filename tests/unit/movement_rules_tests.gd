@@ -17,10 +17,21 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	for _tick: int in range(60):
 		state.velocity = compute.execute(command, state, profile, 1.0 / 60.0).velocity
 	results.append(TestOutcome.new("ground acceleration reaches configured speed",
-		absf(state.velocity.slide(Vector3.UP).length() - profile.run_speed) < 0.01))
+		absf(state.velocity.slide(Vector3.UP).length() - profile.move_speed) < 0.01))
+	command.sprinting = true
+	for _tick: int in range(30):
+		state.velocity = compute.execute(command, state, profile, 1.0 / 60.0).velocity
+	results.append(TestOutcome.new("sprint raises the cap to sprint speed",
+		absf(state.velocity.slide(Vector3.UP).length() - profile.sprint_speed) < 0.01))
+	command.sprinting = false
+	for _tick: int in range(30):
+		state.velocity = compute.execute(command, state, profile, 1.0 / 60.0).velocity
+	results.append(TestOutcome.new("releasing sprint returns to ordinary speed on the ground",
+		absf(state.velocity.slide(Vector3.UP).length() - profile.move_speed) < 0.01))
+	command.sprinting = true
 	command.walking = true
 	state.velocity = compute.execute(command, state, profile, 1.0 / 60.0).velocity
-	results.append(TestOutcome.new("walk speed is capped independently of run speed",
+	results.append(TestOutcome.new("walk modifier wins over sprint and caps at walk speed",
 		absf(state.velocity.slide(Vector3.UP).length() - profile.walk_speed) < 0.01))
 	state.crouched = true
 	state.velocity = compute.execute(command, state, profile, 1.0 / 60.0).velocity
@@ -41,8 +52,15 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	state.crouched = false
 	command.move_axis = Vector2(1, 0)
 	var strafe: MovementStep = compute.execute(command, state, profile, 1.0 / 60.0)
-	results.append(TestOutcome.new("air control changes direction without exceeding run cap",
-		strafe.velocity.x > 0 and strafe.velocity.slide(Vector3.UP).length() <= profile.run_speed + 0.001))
+	results.append(TestOutcome.new("air control changes direction without exceeding the sprint cap",
+		strafe.velocity.x > 0 and strafe.velocity.slide(Vector3.UP).length() <= profile.sprint_speed + 0.001))
+	state.velocity = Vector3(0, 0, -profile.sprint_speed)
+	command.sprinting = false
+	command.walking = false
+	command.move_axis = Vector2(0, -1)
+	var sprint_jump: MovementStep = compute.execute(command, state, profile, 1.0 / 60.0)
+	results.append(TestOutcome.new("a sprint jump keeps its speed in the air without sprint held",
+		sprint_jump.velocity.slide(Vector3.UP).length() > profile.move_speed + 0.5))
 	state.on_ladder = true
 	command.move_axis = Vector2(0, -1)
 	var ladder_jump: MovementStep = compute.execute(command, state, profile, 1.0 / 60.0)

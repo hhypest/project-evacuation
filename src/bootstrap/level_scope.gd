@@ -108,6 +108,7 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	command.jump_held = frame.jump_held
 	command.crouching = frame.crouching
 	command.walking = frame.walking
+	command.sprinting = frame.sprinting
 	# Field power comes from the previous puzzle tick, like every other device output.
 	var field: GravityZone = _gravity.at(_player.center())
 	_player.set_gravity(field.up(), field.strength / _gravity.base().strength)
