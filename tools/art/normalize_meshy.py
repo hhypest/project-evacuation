@@ -16,6 +16,8 @@ wall_button_body / wall_switch_body — scaled per axis to the housing size of W
 wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the housing recess), its back at z = 0.
 wall_switch_lever — the lever turned so the arm points up (+Y) from its pivot hub; the hub centre is
          the origin and the axle runs along Z, so the device turns it about Z.
+emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
+         ReceiverDevice plate (dish towards +Z), centred on the node.
 
 The raw GLBs are not in the repository; their Meshy task IDs are listed in content/models/README.md.
 """
@@ -42,6 +44,10 @@ FITS: dict[str, dict] = {
     "wall_switch_body": {"node": "Body", "size": (0.32, 0.5, 0.12), "origin": "back", "back": -0.08},
     "wall_button_key": {"node": "Key", "rotate": (-90.0, 0.0, 0.0), "uniform": (0, 0.1), "origin": "back", "back": 0.0},
     "wall_switch_lever": {"node": "Lever", "uniform": (1, 0.22), "origin": "hub"},
+    # Optics: EmitterDevice housing 0.5 x 0.5 x 0.7 m firing along -Z; ReceiverDevice plate 0.6 x 0.6 x 0.25 m
+    # facing +Z. "shift" moves the model so its lens or dish sits on the device axis.
+    "emitter_body": {"node": "Body", "rotate": (0.0, -90.0, 0.0), "size": (0.5, 0.5, 0.7), "origin": "center", "shift": (0.037, -0.08, 0.0)},
+    "receiver_body": {"node": "Body", "size": (0.6, 0.6, 0.25), "origin": "center", "shift": (0.0, 0.02, 0.0)},
 }
 
 
@@ -255,6 +261,8 @@ def main() -> None:
         centre = (low + high) * 0.5
         if fit["origin"] == "back":
             offset = np.array([-centre[0], -centre[1] + fit.get("lift", 0.0), fit["back"] - low[2]])
+        elif fit["origin"] == "center":
+            offset = -centre + np.array(fit.get("shift", (0.0, 0.0, 0.0)))
         else:  # "hub": lever_frame already put the hub at the origin
             offset = np.zeros(3)
         vertices = np.hstack([position + offset, normal, uv])

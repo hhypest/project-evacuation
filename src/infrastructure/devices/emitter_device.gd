@@ -5,6 +5,11 @@ extends PuzzleDeviceNode
 
 const CYAN: Color = Color(0.22, 0.78, 0.86)
 const HOUSING: Vector3 = Vector3(0.5, 0.5, 0.7)
+## Art model (content/models/devices/emitter): its lens opening sits on the firing axis. The collision stays
+## the HOUSING box; the lens disc and the rear lamp are code, so only optics ever turn cyan (ADR-0006).
+const MODEL: PackedScene = preload("res://content/models/devices/emitter/emitter_body.gltf")
+const LENS_RADIUS: float = 0.075
+const LENS_Z: float = -0.295
 
 ## Maximum game-beam length, metres.
 @export var range_m: float = 20.0
@@ -30,16 +35,16 @@ func _ready() -> void:
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = shape
 	body.add_child(collision)
-	body.add_child(box_mesh(HOUSING, Color(0.88, 0.86, 0.82)))
 	add_child(body)
-	var stripe: MeshInstance3D = box_mesh(Vector3(0.52, 0.08, 0.5), Color(0.88, 0.42, 0.18))
-	stripe.position = Vector3(0, 0.2, 0.05)
-	add_child(stripe)
-	_lens = box_mesh(Vector3(0.24, 0.24, 0.04), DARK)
-	_lens.position = Vector3(0, 0, -HOUSING.z * 0.5 - 0.02)
+	var model: Node3D = MODEL.instantiate() as Node3D
+	model.name = "Model"
+	add_child(model)
+	_lens = disc_mesh(LENS_RADIUS, DARK)
+	_lens.rotation.x = PI * 0.5
+	_lens.position = Vector3(0, 0, LENS_Z)
 	add_child(_lens)
-	_lamp = box_mesh(Vector3(0.07, 0.07, 0.02), DARK)
-	_lamp.position = Vector3(0, 0.12, HOUSING.z * 0.5 + 0.01)
+	_lamp = box_mesh(Vector3(0.05, 0.05, 0.01), DARK)
+	_lamp.position = Vector3(0, 0.12, HOUSING.z * 0.5 + 0.006)
 	add_child(_lamp)
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -91,6 +96,9 @@ func show_beam(length: float) -> void:
 	if _beam == null:
 		return
 	_beam.visible = powered and beam_length > 0.01
-	var start: float = HOUSING.z * 0.5 + 0.05
-	_beam.scale = Vector3(1, 1, maxf(beam_length, 0.01))
-	_beam.position = Vector3(0, 0, -start - beam_length * 0.5)
+	# The traced beam starts at the muzzle, clear of the housing; the visible one starts at the lens inside
+	# the cowl, so it never looks detached from its source.
+	var start: float = -LENS_Z
+	var visible_length: float = beam_length + (HOUSING.z * 0.5 + 0.05 - start)
+	_beam.scale = Vector3(1, 1, maxf(visible_length, 0.01))
+	_beam.position = Vector3(0, 0, -start - visible_length * 0.5)
