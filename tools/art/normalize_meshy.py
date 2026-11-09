@@ -16,6 +16,7 @@ wall_button_body / wall_switch_body — scaled per axis to the housing size of W
 wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the housing recess), its back at z = 0.
 wall_switch_lever — the lever turned so the arm points up (+Y) from its pivot hub; the hub centre is
          the origin and the axle runs along Z, so the device turns it about Z.
+logic_box — the junction box housing of LogicDevice, centred, lid towards +Z.
 emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
          ReceiverDevice plate (dish towards +Z), centred on the node.
 
@@ -48,6 +49,8 @@ FITS: dict[str, dict] = {
     # facing +Z. "shift" moves the model so its lens or dish sits on the device axis.
     "emitter_body": {"node": "Body", "rotate": (0.0, -90.0, 0.0), "size": (0.5, 0.5, 0.7), "origin": "center", "shift": (0.037, -0.08, 0.0)},
     "receiver_body": {"node": "Body", "size": (0.6, 0.6, 0.25), "origin": "center", "shift": (0.0, 0.02, 0.0)},
+    # LogicDevice: one housing for every kind, 0.44 x 0.44 x 0.16 m centred on the node, lid towards +Z.
+    "logic_box": {"node": "Body", "size": (0.44, 0.44, 0.16), "origin": "center"},
 }
 
 

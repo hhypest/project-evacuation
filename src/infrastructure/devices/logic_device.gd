@@ -1,6 +1,13 @@
 class_name LogicDevice
 extends PuzzleDeviceNode
 ## Junction box for SOURCE, AND, OR, NOT, DELAY and LATCH. The symbol is a shape label, not a colour.
+## Art: one housing for every kind (content/models/devices/logic_box); the kind is the marking on a light
+## plate in the lid recess. Logic boxes have no collision.
+
+const MODEL: PackedScene = preload("res://content/models/devices/logic_box/logic_box.gltf")
+## Face of the lid recess and the frame around it, from the model.
+const PANEL_Z: float = 0.059
+const FRAME_Z: float = 0.066
 
 @export var kind: DeviceDefinition.Kind = DeviceDefinition.Kind.AND
 @export var delay_seconds: float = 1.0
@@ -9,18 +16,22 @@ extends PuzzleDeviceNode
 var _lamp: MeshInstance3D
 
 
-
 func _ready() -> void:
-	add_child(box_mesh(Vector3(0.44, 0.44, 0.16), Color(0.88, 0.86, 0.82)))
-	_lamp = box_mesh(Vector3(0.08, 0.08, 0.02), DARK)
-	_lamp.position = Vector3(0.14, 0.14, 0.085)
+	var model: Node3D = MODEL.instantiate() as Node3D
+	model.name = "Model"
+	add_child(model)
+	var plate: MeshInstance3D = box_mesh(Vector3(0.18, 0.13, 0.004), Color(0.91, 0.89, 0.86))
+	plate.position = Vector3(0, -0.005, PANEL_Z + 0.002)
+	add_child(plate)
+	_lamp = box_mesh(Vector3(0.04, 0.04, 0.006), DARK)
+	_lamp.position = Vector3(0.14, 0.14, FRAME_Z + 0.003)
 	add_child(_lamp)
 	var label: Label3D = Label3D.new()
 	label.text = symbol()
-	label.pixel_size = 0.004
+	label.pixel_size = 0.0018
 	label.font_size = 40
 	label.modulate = Color(0.1, 0.1, 0.1)
-	label.position = Vector3(0, -0.04, 0.085)
+	label.position = Vector3(0, -0.005, PANEL_Z + 0.005)
 	add_child(label)
 
 

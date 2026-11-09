@@ -1,0 +1,157 @@
+{
+ "asset": {
+  "version": "2.0",
+  "generator": "tools/art/normalize_meshy.py"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "name": "logic_box",
+   "nodes": [
+    0
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Body",
+   "mesh": 0
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Body",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "indices": 3,
+     "material": 0
+    }
+   ]
+  }
+ ],
+ "materials": [
+  {
+   "name": "logic_box",
+   "pbrMetallicRoughness": {
+    "baseColorTexture": {
+     "index": 0
+    },
+    "metallicRoughnessTexture": {
+     "index": 1
+    },
+    "metallicFactor": 1.0,
+    "roughnessFactor": 1.0
+   },
+   "normalTexture": {
+    "index": 2
+   },
+   "doubleSided": true
+  }
+ ],
+ "samplers": [
+  {
+   "magFilter": 9729,
+   "minFilter": 9987,
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "images": [
+  {
+   "uri": "logic_box_base_color.jpg"
+  },
+  {
+   "uri": "logic_box_metallic_roughness.jpg"
+  },
+  {
+   "uri": "logic_box_normal.jpg"
+  }
+ ],
+ "textures": [
+  {
+   "sampler": 0,
+   "source": 0
+  },
+  {
+   "sampler": 0,
+   "source": 1
+  },
+  {
+   "sampler": 0,
+   "source": 2
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "logic_box.bin",
+   "byteLength": 569748
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 141840,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 141840,
+   "byteLength": 141840,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 283680,
+   "byteLength": 94560,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 378240,
+   "byteLength": 191508,
+   "target": 34963
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 11820,
+   "type": "VEC3",
+   "min": [
+    -0.2199999988079071,
+    -0.2199999988079071,
+    -0.07999999821186066
+   ],
+   "max": [
+    0.2199999988079071,
+    0.2199999988079071,
+    0.07999999821186066
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 11820,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5126,
+   "count": 11820,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5125,
+   "count": 47877,
+   "type": "SCALAR"
+  }
+ ]
+}
