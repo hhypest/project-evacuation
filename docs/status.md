@@ -26,6 +26,7 @@
 | --- | --- | --- | --- |
 | SKL-01 Сессия, пауза, ввод | Принята владельцем, PR №1 | [ADR-0002](adr/0002-session-input-lifecycle.md) | CI, GPU владельца — [QA](qa/session-flow-2026-11-07.md) |
 | SKL-02 Мувсет и полигон движения | Слита, PR №2 | [ADR-0005](adr/0005-player-locomotion.md) | CI, GPU владельца — [QA](qa/player-movement-2026-11-07.md) |
+| SKL-02 доп.: бег по Shift, движение 5,1 м/с | На ревью | [ADR-0005](adr/0005-player-locomotion.md), дополнение 2026-11-09 | Unit и интеграция на Jolt; ручной проход не выполнен |
 | SKL-03 Перенос и бросок кубов | Слита, PR №5 | [ADR-0007](adr/0007-physics-carry.md) | CI, GPU владельца, экспорты — [QA](qa/physics-carry-2026-11-07.md) |
 | SKL-04 Устройства, кнопки, дверь | Слита, PR №14 | [ADR-0008](adr/0008-device-network.md) | CI, облако-Vulkan, GPU владельца, ручной проход — [QA](qa/devices-circuits-2026-11-08.md) |
 | SKL-05 Цепи, логика, задержка, защёлка | Слита, PR №14 | [ADR-0008](adr/0008-device-network.md) | CI, облако-Vulkan, GPU владельца, ручной проход — [QA](qa/devices-circuits-2026-11-08.md) |

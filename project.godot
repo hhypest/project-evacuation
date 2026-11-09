@@ -60,6 +60,10 @@ crouch={
 }
 walk={
 "deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":4194328)]
+}
+sprint={
+"deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":4194325)]
 }
 interact={

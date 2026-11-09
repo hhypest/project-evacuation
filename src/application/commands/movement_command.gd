@@ -7,3 +7,4 @@ var jump_requested: bool = false
 var jump_held: bool = false
 var crouching: bool = false
 var walking: bool = false
+var sprinting: bool = false

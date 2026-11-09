@@ -4,7 +4,7 @@ extends RefCounted
 
 const ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_back", &"move_left", &"move_right",
-	&"jump", &"crouch", &"walk", &"interact", &"throw_prop",
+	&"jump", &"crouch", &"walk", &"sprint", &"interact", &"throw_prop",
 ]
 
 var _enabled: bool = false
@@ -76,6 +76,7 @@ func take_frame() -> GameplayInputFrame:
 		frame.throw_requested = _throw_requested
 		frame.crouching = _held.has(&"crouch")
 		frame.walking = _held.has(&"walk")
+		frame.sprinting = _held.has(&"sprint")
 	_clear_edges()
 	return frame
 

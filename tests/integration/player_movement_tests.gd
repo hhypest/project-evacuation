@@ -17,10 +17,17 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(tree, command, 20)
 	command.move_axis = Vector2(0, -1)
 	await _ticks(tree, command, 60)
-	var run_speed: float = _player.velocity.slide(Vector3.UP).length()
-	results.append(TestOutcome.new("Jolt player moves on floor at run speed",
-		_player.global_position.z < 4.8 and absf(_player.global_position.y) < 0.05
-		and absf(run_speed - 6.0) < 0.1, "position=%s speed=%.3f" % [_player.position, run_speed]))
+	var move_speed: float = _player.velocity.slide(Vector3.UP).length()
+	results.append(TestOutcome.new("Jolt player moves on floor at ordinary speed",
+		_player.global_position.z < 5.6 and absf(_player.global_position.y) < 0.05
+		and absf(move_speed - 5.1) < 0.1, "position=%s speed=%.3f" % [_player.position, move_speed]))
+	command.sprinting = true
+	await _ticks(tree, command, 30)
+	var sprint_speed: float = _player.velocity.slide(Vector3.UP).length()
+	results.append(TestOutcome.new("holding sprint reaches 8 m/s on real contacts",
+		absf(sprint_speed - 8.0) < 0.1, "speed=%.3f" % sprint_speed))
+	command.sprinting = false
+	_player.global_position = Vector3(0, 0.05, 10)
 	command.walking = true
 	await _ticks(tree, command, 30)
 	results.append(TestOutcome.new("walk modifier selects slower speed on real contacts",
@@ -207,7 +214,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	command.move_axis = Vector2(1, -1)
 	await _ticks(tree, command, 60)
 	results.append(TestOutcome.new("physical diagonal speed does not exceed straight speed",
-		absf(_player.velocity.slide(Vector3.UP).length() - 6.0) < 0.1))
+		absf(_player.velocity.slide(Vector3.UP).length() - 5.1) < 0.1))
 	command.jump_requested = true
 	await _ticks(tree, command, 1)
 	command.jump_requested = false

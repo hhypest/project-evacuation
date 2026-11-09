@@ -11,3 +11,4 @@ var interact_requested: bool = false
 var throw_requested: bool = false
 var crouching: bool = false
 var walking: bool = false
+var sprinting: bool = false

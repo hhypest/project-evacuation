@@ -2,7 +2,10 @@ class_name MovementProfile
 extends RefCounted
 ## SI units. These are project tuning values, not claimed GoldSrc constants.
 
-var run_speed: float = 6.0
+## Ordinary movement, 15 % below the original 6 m/s at the owner's request (2026-11-09).
+var move_speed: float = 5.1
+## Shift sprint: HL1 default run 320 units/s scaled by its 72-unit hull to our 1.8 m player (0.025 m/unit).
+var sprint_speed: float = 8.0
 var walk_speed: float = 2.5
 var crouch_speed: float = 1.8
 var ground_acceleration: float = 14.0
