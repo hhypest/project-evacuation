@@ -103,7 +103,7 @@ func placement(id: StringName, view: Transform3D, reach: float, up: Vector3) -> 
 	var held_size: Vector3 = (held.carry_shape() as BoxShape3D).size
 	var pose: Transform3D = CarryRules.slot(top, reference, up, held.global_basis, held_size.y * 0.5,
 		_profile.place_lift)
-	if not fits(id, pose):
+	if not _fits(held, pose):
 		return CarryPlacement.new()
 	result.available = true
 	result.transform = pose
@@ -111,17 +111,32 @@ func placement(id: StringName, view: Transform3D, reach: float, up: Vector3) -> 
 	return result
 
 
-func fits(id: StringName, pose: Transform3D) -> bool:
+func settles(id: StringName, from: Transform3D, pose: Transform3D) -> bool:
 	var held: CarryRigidBody = _body(id)
-	if held == null:
+	if held == null or not _fits(held, pose):
 		return false
+	var space: PhysicsDirectSpaceState3D = _player.get_world_3d().direct_space_state
+	var query: PhysicsShapeQueryParameters3D = _held_query(held, Transform3D(pose.basis, from.origin))
+	if not space.intersect_shape(query, 1).is_empty():
+		return false
+	query.motion = pose.origin - from.origin
+	var fractions: PackedFloat32Array = space.cast_motion(query)
+	return fractions.size() == 2 and fractions[0] >= 1.0
+
+
+func _fits(held: CarryRigidBody, pose: Transform3D) -> bool:
+	return _player.get_world_3d().direct_space_state.intersect_shape(_held_query(held, pose), 1).is_empty()
+
+
+## The held prop's box at pose against the world, other props and the carrier: a slot the carrier stands in
+## is not free.
+func _held_query(held: CarryRigidBody, pose: Transform3D) -> PhysicsShapeQueryParameters3D:
 	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
 	query.shape = held.carry_shape()
 	query.transform = pose
-	# World, props and the carrier: a slot the carrier stands in is not free.
 	query.collision_mask = 3 | _player.collision_layer
 	query.exclude = [held.get_rid()]
-	return _player.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
+	return query
 
 
 func acquire(id: StringName) -> bool:

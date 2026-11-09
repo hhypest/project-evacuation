@@ -88,6 +88,31 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 			_ghost.visible]))
 	await _close()
 	await _open()
+	_cubes[0].global_position = Vector3(0, EDGE * 0.5 + 0.02, -2.0)
+	await _ticks(40)
+	await _grab(_cubes[1])
+	_player.global_position = Vector3(0, 0.05, 0.4)
+	await _ticks(10)
+	var support_top: Vector3 = _cubes[0].global_position + Vector3.UP * EDGE * 0.5
+	var eye: Vector3 = _player.eye_position()
+	var slit: float = lerpf(eye.y, support_top.y, (eye.z + 1.0) / (eye.z - support_top.z))
+	# A wall across the room with a 0.3 m slit on the line of sight: the view reaches the support, the cube does not.
+	_wall(Vector3(0, (slit - 0.15) * 0.5, -1.0), Vector3(4, slit - 0.15, 0.1))
+	_wall(Vector3(0, (slit + 0.15 + 3.0) * 0.5, -1.0), Vector3(4, 3.0 - slit - 0.15, 0.1))
+	_camera.look_at(support_top)
+	await _ticks(6)
+	_camera.look_at(support_top)
+	await _ticks(2)
+	var seen_through: bool = _ghost.visible
+	await _ticks(1, true)
+	await _ticks(60)
+	var blocked: CarryRigidBody = _cubes[1]
+	results.append(TestOutcome.new("a slot seen through a gap narrower than the cube never pulls the cube through it",
+		seen_through and _scope.held_prop_id().is_empty() and not blocked.is_carried()
+		and blocked.global_position.z > -1.0 and blocked.global_position.distance_to(support_top) > 0.5,
+		"seen=%s cube=%s" % [seen_through, blocked.global_position]))
+	await _close()
+	await _open()
 	var x: float = StackingLabBuilder.LEDGE_X
 	var front: float = StackingLabBuilder.LEDGE_FRONT
 	_cubes[0].global_position = Vector3(x, EDGE * 0.5 + 0.01, front + EDGE * 0.5 + 0.03)
@@ -154,6 +179,19 @@ func _ticks(count: int, interact: bool = false, move: Vector2 = Vector2.ZERO, ju
 		frame.jump_requested = jumping
 		frame.jump_held = jumping
 		_scope.apply_input(frame)
+
+
+func _wall(at: Vector3, size: Vector3) -> void:
+	var body: StaticBody3D = StaticBody3D.new()
+	body.position = at
+	body.collision_layer = 1
+	body.collision_mask = 6
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = size
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	_scope.get_node("StackingLab").add_child(body)
 
 
 func _close() -> void:

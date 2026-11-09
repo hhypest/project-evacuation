@@ -105,8 +105,10 @@ func close() -> void:
 	_forget()
 
 
-## The held prop moves straight to its slot; close enough, or out of time, it is set exactly there and let go
-## at rest. A slot that stopped being free (another prop fell in, the carrier stepped into it) drops it instead.
+## The held prop moves to its slot by the same sweeps as the hold. Once it has arrived within place_settle it is
+## set exactly in the slot and let go at rest, if the slot is still free and the last short stretch is clear.
+## Otherwise, or when it cannot arrive within place_timeout (a gap the view passes but the prop does not), it is
+## let go where the sweeps left it: placement never moves a prop through geometry.
 func _glide(request: CarryInput) -> void:
 	_placing_seconds += request.delta
 	var reached: CarryTarget = _world.follow(state.held_id, _slot,
@@ -114,9 +116,8 @@ func _glide(request: CarryInput) -> void:
 	if not reached.available:
 		_release(request)
 		return
-	var arrived: bool = reached.transform.origin.distance_to(_slot.origin) <= _profile.place_settle
-	if arrived or _placing_seconds >= _profile.place_timeout:
-		if _world.fits(state.held_id, _slot):
+	if reached.transform.origin.distance_to(_slot.origin) <= _profile.place_settle:
+		if _world.settles(state.held_id, reached.transform, _slot):
 			var command: CarryBodyCommand = _command(request)
 			command.releasing = true
 			command.placing = true
@@ -126,6 +127,9 @@ func _glide(request: CarryInput) -> void:
 			_forget()
 		else:
 			_release(request)
+		return
+	if _placing_seconds >= _profile.place_timeout:
+		_release(request)
 		return
 	var step: CarryBodyCommand = _command(request)
 	step.target = reached.transform

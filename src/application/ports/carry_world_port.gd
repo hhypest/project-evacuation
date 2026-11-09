@@ -31,8 +31,9 @@ func placement(_id: StringName, _view: Transform3D, _reach: float, _up: Vector3)
 	return CarryPlacement.new()
 
 
-## Whether the held prop still fits at pose without touching the world, other props or the carrier.
-func fits(_id: StringName, _pose: Transform3D) -> bool:
+## Whether the held prop can be set at pose: it fits there without touching the world, other props or the
+## carrier, and the straight move from where the sweeps left it (from) to pose is clear.
+func settles(_id: StringName, _from: Transform3D, _pose: Transform3D) -> bool:
 	return false
 
 

@@ -48,7 +48,7 @@ class FakeWorld extends CarryWorldPort:
 		placement_queries += 1
 		return slot
 
-	func fits(_id: StringName, _pose: Transform3D) -> bool:
+	func settles(_id: StringName, _from: Transform3D, _pose: Transform3D) -> bool:
 		return slot_fits
 
 	func cancel_pending() -> void:
@@ -277,9 +277,10 @@ func _placement_outcomes(profile: CarryProfile) -> Array[TestOutcome]:
 			held_until = tick
 	var timed_out: CarryBodyCommand = far.commands[far.commands.size() - 1]
 	var expected_ticks: int = ceili(profile.place_timeout / input.delta)
-	results.append(TestOutcome.new("a glide that cannot arrive sets the prop in its free slot after the timeout",
-		timed_out.placing and timed_out.target.is_equal_approx(world.slot.transform)
-		and absi(held_until - expected_ticks) <= 1, "held_until=%d expected=%d" % [held_until, expected_ticks]))
+	results.append(TestOutcome.new("a glide that cannot arrive lets the prop go where it stopped, never snapped to the slot",
+		timed_out.releasing and not timed_out.placing and absi(held_until - expected_ticks) <= 1
+		and not far.commands.any(func(command: CarryBodyCommand) -> bool: return command.placing),
+		"held_until=%d expected=%d" % [held_until, expected_ticks]))
 	var taken: FakeWorld = FakeWorld.new()
 	taken.slot = world.slot
 	taken.slot_fits = false
