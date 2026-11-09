@@ -7,6 +7,7 @@ var _level: Node3D
 var _camera: LookCamera
 var _player: PlayerMotor
 var _carry: CarryController
+var _ghost: CarryGhost
 var _puzzle: AdvancePuzzle
 var _gravity: SampleGravity
 var _gravity_world: GravityWorldAdapter
@@ -46,6 +47,8 @@ func open(scene: PackedScene, generation: int) -> bool:
 		_abort_open()
 		return false
 	_carry = CarryController.new(carry_world, profile, generation)
+	_ghost = CarryGhost.new()
+	level.add_child(_ghost)
 	var settings: PuzzleSettings = preload("res://content/definitions/default_puzzle.tres") as PuzzleSettings
 	var puzzle_world: PuzzleWorldAdapter = PuzzleWorldAdapter.new()
 	if settings == null or not puzzle_world.configure(level, player, settings.player_mass_kg):
@@ -82,6 +85,7 @@ func _abort_open() -> void:
 	if _carry != null:
 		_carry.close()
 	_carry = null
+	_ghost = null
 	_puzzle = null
 	_gravity = null
 	if _gravity_world != null:
@@ -132,6 +136,7 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.interact = interact
 	carry_input.throw_requested = frame.throw_requested
 	_carry.step(carry_input)
+	_ghost.present(_carry.preview)
 	_puzzle.step(_generation, _tick_id)
 	_portals.step(_generation, _tick_id)
 
@@ -171,6 +176,7 @@ func close() -> void:
 	if _carry != null:
 		_carry.close()
 	_carry = null
+	_ghost = null
 	if _puzzle != null:
 		_puzzle.close()
 	_puzzle = null

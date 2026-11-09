@@ -1,15 +1,21 @@
 class_name CarryController
 extends RefCounted
 ## Talos-style carry (ADR-0012): one press grabs, the prop sticks to a point in front of the carrier,
-## another press drops it, the throw button throws it.
+## another press drops it, the throw button throws it. Aimed at a floor button or a resting prop, the press
+## sets it down exactly in the slot its silhouette shows instead.
 
 var state: CarryState = CarryState.new()
+## Slot the silhouette shows this tick; null while nothing is held or no slot is in view.
+var preview: CarryPlacement = null
 var _world: CarryWorldPort
 var _profile: CarryProfile
 var _scope_id: int
 var _last_tick: int = -1
 var _facing: Vector3 = Vector3.FORWARD
 var _separated_seconds: float = 0.0
+var _placing: bool = false
+var _slot: Transform3D = Transform3D.IDENTITY
+var _placing_seconds: float = 0.0
 
 
 func _init(world: CarryWorldPort, profile: CarryProfile, scope_id: int) -> void:
@@ -36,8 +42,20 @@ func step(request: CarryInput) -> void:
 		state.take(candidate.id, candidate.mass, _profile)
 		_separated_seconds = 0.0
 	else:
+		if _placing:
+			_glide(request)
+			return
 		if request.interact:
-			_release(request)
+			var target: CarryPlacement = _world.placement(state.held_id, request.view, _profile.place_reach,
+				request.carrier_up)
+			if target.available:
+				preview = target
+				_placing = true
+				_slot = target.transform
+				_placing_seconds = 0.0
+				_glide(request)
+			else:
+				_release(request)
 			return
 		if request.throw_requested:
 			var thrown: CarryObservation = _world.observe(state.held_id)
@@ -70,7 +88,11 @@ func step(request: CarryInput) -> void:
 	command.target = reached.transform
 	command.carrier_velocity = request.carrier_velocity
 	if not _world.submit(state.held_id, command):
-		state.release()
+		_forget()
+		return
+	var shown: CarryPlacement = _world.placement(state.held_id, request.view, _profile.place_reach,
+		request.carrier_up)
+	preview = shown if shown.available else null
 
 
 func suspend() -> void:
@@ -80,7 +102,39 @@ func suspend() -> void:
 func close() -> void:
 	_scope_id = -1
 	_world.close()
-	state.release()
+	_forget()
+
+
+## The held prop moves to its slot by the same sweeps as the hold. Once it has arrived within place_settle it is
+## set exactly in the slot and let go at rest, if the slot is still free and the last short stretch is clear.
+## Otherwise, or when it cannot arrive within place_timeout (a gap the view passes but the prop does not), it is
+## let go where the sweeps left it: placement never moves a prop through geometry.
+func _glide(request: CarryInput) -> void:
+	_placing_seconds += request.delta
+	var reached: CarryTarget = _world.follow(state.held_id, _slot,
+		_profile.pull_speed * request.delta, _profile.turn_speed * request.delta)
+	if not reached.available:
+		_release(request)
+		return
+	if reached.transform.origin.distance_to(_slot.origin) <= _profile.place_settle:
+		if _world.settles(state.held_id, reached.transform, _slot):
+			var command: CarryBodyCommand = _command(request)
+			command.releasing = true
+			command.placing = true
+			command.target = _slot
+			command.carrier_velocity = Vector3.ZERO
+			_world.submit(state.held_id, command)
+			_forget()
+		else:
+			_release(request)
+		return
+	if _placing_seconds >= _profile.place_timeout:
+		_release(request)
+		return
+	var step: CarryBodyCommand = _command(request)
+	step.target = reached.transform
+	if not _world.submit(state.held_id, step):
+		_forget()
 
 
 func _command(request: CarryInput) -> CarryBodyCommand:
@@ -96,4 +150,11 @@ func _release(request: CarryInput, impulse: Vector3 = Vector3.ZERO) -> void:
 	command.releasing = true
 	command.impulse = impulse
 	_world.submit(state.held_id, command)
+	_forget()
+
+
+func _forget() -> void:
 	state.release()
+	preview = null
+	_placing = false
+	_placing_seconds = 0.0

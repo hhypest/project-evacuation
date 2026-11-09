@@ -17,6 +17,12 @@ extends Resource
 @export var max_throw_speed: float = 12.0
 @export var friction: float = 0.7
 @export var bounce: float = 0.0
+@export var place_reach: float = 3.5
+@export var place_lift: float = 0.01
+@export var level_tilt: float = 0.26
+@export var support_speed: float = 0.25
+@export var place_settle: float = 0.08
+@export var place_timeout: float = 0.35
 
 
 func to_profile() -> CarryProfile:
@@ -36,4 +42,10 @@ func to_profile() -> CarryProfile:
 	profile.max_throw_speed = max_throw_speed
 	profile.friction = friction
 	profile.bounce = bounce
+	profile.place_reach = place_reach
+	profile.place_lift = place_lift
+	profile.level_tilt = level_tilt
+	profile.support_speed = support_speed
+	profile.place_settle = place_settle
+	profile.place_timeout = place_timeout
 	return profile

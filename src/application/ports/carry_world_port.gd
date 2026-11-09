@@ -25,6 +25,18 @@ func follow(_id: StringName, _desired: Transform3D, _max_step: float, _max_turn:
 	return CarryTarget.new()
 
 
+## Where the held prop would rest if set down on the floor button or resting prop the view ray meets within
+## reach: a level support, with room for the prop clear of the world, other props and the carrier.
+func placement(_id: StringName, _view: Transform3D, _reach: float, _up: Vector3) -> CarryPlacement:
+	return CarryPlacement.new()
+
+
+## Whether the held prop can be set at pose: it fits there without touching the world, other props or the
+## carrier, and the straight move from where the sweeps left it (from) to pose is clear.
+func settles(_id: StringName, _from: Transform3D, _pose: Transform3D) -> bool:
+	return false
+
+
 func submit(_id: StringName, _command: CarryBodyCommand) -> bool:
 	return false
 

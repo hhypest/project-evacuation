@@ -19,7 +19,7 @@ const LAMP_WIDTH: float = 0.018
 const LAMP_DEPTH: float = 0.05
 const LAMP_CHANNEL_OFFSET: float = 0.08
 
-var plate: StaticBody3D
+var plate: CarrySocketBody
 var last_load: float = 0.0
 var _sensor: Area3D
 var _model: Node3D
@@ -38,8 +38,10 @@ func _ready() -> void:
 	for side: float in [-1.0, 1.0]:
 		_lamp_strip(Vector3(LAMP_WIDTH, LAMP_DEPTH, plate_size.z * 0.7), Vector3(side * half.x, lamp_y, 0))
 		_lamp_strip(Vector3(plate_size.x * 0.7, LAMP_DEPTH, LAMP_WIDTH), Vector3(0, lamp_y, side * half.y))
-	plate = StaticBody3D.new()
+	# A held cube aimed at the plate is set down on it by its silhouette (ADR-0012, placement).
+	plate = CarrySocketBody.new()
 	plate.name = "Plate"
+	plate.stable_id = stable_id
 	plate.collision_layer = 1
 	plate.collision_mask = 6
 	plate.position.y = plate_size.y * 0.5

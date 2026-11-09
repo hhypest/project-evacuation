@@ -10,3 +10,5 @@ var velocity: Vector3 = Vector3.ZERO
 var half_extent: float = 0.5
 ## Half of the prop's height in its upright hold, used to keep the hold point above the carrier's floor.
 var half_height: float = 0.5
+## Full size of the prop's box in its own axes.
+var size: Vector3 = Vector3.ONE

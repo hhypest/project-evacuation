@@ -57,7 +57,86 @@ func observe(id: StringName) -> CarryObservation:
 	var size: Vector3 = (body.carry_shape() as BoxShape3D).size
 	observation.half_extent = maxf(size.x, size.z) * 0.5
 	observation.half_height = size.y * 0.5
+	observation.size = size
 	return observation
+
+
+func placement(id: StringName, view: Transform3D, reach: float, up: Vector3) -> CarryPlacement:
+	var result: CarryPlacement = CarryPlacement.new()
+	var held: CarryRigidBody = _body(id)
+	if held == null or not held.is_carried():
+		return result
+	var space: PhysicsDirectSpaceState3D = _player.get_world_3d().direct_space_state
+	var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		view.origin, view.origin - view.basis.z * reach, 3, [_player.get_rid(), held.get_rid()])
+	var hit: Dictionary = space.intersect_ray(ray)
+	var collider: Variant = hit.get("collider")
+	var top: Vector3
+	var reference: Basis
+	if collider is CarrySocketBody:
+		# Raw engine query; the exact subtype was checked before crossing the typed boundary.
+		@warning_ignore("unsafe_cast")
+		var socket: CarrySocketBody = collider as CarrySocketBody
+		if socket.stable_id.is_empty() or not socket.is_level(up, _profile.level_tilt):
+			return result
+		top = socket.top_center(up)
+		reference = socket.global_basis.orthonormalized()
+		result.support_id = socket.stable_id
+	elif collider is CarryRigidBody:
+		@warning_ignore("unsafe_cast")
+		var support: CarryRigidBody = collider as CarryRigidBody
+		if _bodies.get(support.stable_id) != support or support.is_carried() or support.freeze \
+				or support.linear_velocity.length() > _profile.support_speed:
+			return result
+		var basis: Basis = support.global_basis.orthonormalized()
+		var axis: Vector3 = CarryRules.level_axis(basis, up, _profile.level_tilt)
+		if axis == Vector3.ZERO:
+			return result
+		var size: Vector3 = (support.carry_shape() as BoxShape3D).size
+		var half: float = 0.5 * (absf(axis.dot(basis.x)) * size.x + absf(axis.dot(basis.y)) * size.y
+			+ absf(axis.dot(basis.z)) * size.z)
+		top = support.global_position + axis * half
+		reference = basis
+		result.support_id = support.stable_id
+	else:
+		return result
+	var held_size: Vector3 = (held.carry_shape() as BoxShape3D).size
+	var pose: Transform3D = CarryRules.slot(top, reference, up, held.global_basis, held_size.y * 0.5,
+		_profile.place_lift)
+	if not _fits(held, pose):
+		return CarryPlacement.new()
+	result.available = true
+	result.transform = pose
+	result.size = held_size
+	return result
+
+
+func settles(id: StringName, from: Transform3D, pose: Transform3D) -> bool:
+	var held: CarryRigidBody = _body(id)
+	if held == null or not _fits(held, pose):
+		return false
+	var space: PhysicsDirectSpaceState3D = _player.get_world_3d().direct_space_state
+	var query: PhysicsShapeQueryParameters3D = _held_query(held, Transform3D(pose.basis, from.origin))
+	if not space.intersect_shape(query, 1).is_empty():
+		return false
+	query.motion = pose.origin - from.origin
+	var fractions: PackedFloat32Array = space.cast_motion(query)
+	return fractions.size() == 2 and fractions[0] >= 1.0
+
+
+func _fits(held: CarryRigidBody, pose: Transform3D) -> bool:
+	return _player.get_world_3d().direct_space_state.intersect_shape(_held_query(held, pose), 1).is_empty()
+
+
+## The held prop's box at pose against the world, other props and the carrier: a slot the carrier stands in
+## is not free.
+func _held_query(held: CarryRigidBody, pose: Transform3D) -> PhysicsShapeQueryParameters3D:
+	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+	query.shape = held.carry_shape()
+	query.transform = pose
+	query.collision_mask = 3 | _player.collision_layer
+	query.exclude = [held.get_rid()]
+	return query
 
 
 func acquire(id: StringName) -> bool:

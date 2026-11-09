@@ -40,6 +40,17 @@ class FakeWorld extends CarryWorldPort:
 		commands.append(command)
 		return true
 
+	var slot: CarryPlacement = CarryPlacement.new()
+	var slot_fits: bool = true
+	var placement_queries: int = 0
+
+	func placement(_id: StringName, _view: Transform3D, _reach: float, _up: Vector3) -> CarryPlacement:
+		placement_queries += 1
+		return slot
+
+	func settles(_id: StringName, _from: Transform3D, _pose: Transform3D) -> bool:
+		return slot_fits
+
 	func cancel_pending() -> void:
 		cancelled = true
 
@@ -187,6 +198,7 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("one press grabs and places the prop at its hold point in the same tick",
 		grab.state.held_id == &"cube" and first != null and not first.releasing
 		and first.target.origin.z < -0.5 and first.target.origin.y < profile.hold_height))
+	results.append_array(_placement_outcomes(profile))
 	var buffer: GameplayInputBuffer = GameplayInputBuffer.new()
 	buffer.configure(true, 1)
 	buffer.record_action(&"throw_prop", true)
@@ -200,4 +212,96 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	buffer.record_action(&"throw_prop", false)
 	buffer.record_action(&"throw_prop", true)
 	results.append(TestOutcome.new("pause quarantines a held throw until release and fresh press", blocked and buffer.take_frame().throw_requested))
+	return results
+
+
+func _placement_outcomes(profile: CarryProfile) -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	var tilt: float = profile.level_tilt
+	var on_side: Basis = Basis(Vector3.RIGHT, PI * 0.5)
+	results.append(TestOutcome.new("a support's level axis is its column closest to up, signed, or none when tilted",
+		CarryRules.level_axis(Basis.IDENTITY, Vector3.UP, tilt).is_equal_approx(Vector3.UP)
+		and CarryRules.level_axis(on_side, Vector3.UP, tilt).is_equal_approx(Vector3.UP)
+		and CarryRules.level_axis(Basis(Vector3.RIGHT, PI), Vector3.UP, tilt).is_equal_approx(Vector3.UP)
+		and CarryRules.level_axis(Basis(Vector3.RIGHT, deg_to_rad(30)), Vector3.UP, tilt) == Vector3.ZERO
+		and CarryRules.level_axis(Basis.IDENTITY, Vector3.RIGHT, tilt).is_equal_approx(Vector3.RIGHT)))
+	var reference: Basis = Basis(Vector3.UP, deg_to_rad(30))
+	var current: Basis = Basis(Vector3.UP, deg_to_rad(100))
+	var pose: Transform3D = CarryRules.slot(Vector3(1, 0.75, 0), reference, Vector3.UP, current, 0.375, 0.01)
+	var turn: float = rad_to_deg(reference.x.signed_angle_to(pose.basis.x, Vector3.UP))
+	var quarter_error: float = absf(turn - roundf(turn / 90.0) * 90.0)
+	var spin: float = rad_to_deg(current.get_rotation_quaternion().angle_to(pose.basis.get_rotation_quaternion()))
+	results.append(TestOutcome.new("a slot is centred over the top face, upright, square with the support, nearest quarter",
+		pose.origin.is_equal_approx(Vector3(1, 0.75 + 0.375 + 0.01, 0)) and pose.basis.y.is_equal_approx(Vector3.UP)
+		and quarter_error < 0.01 and spin <= 45.01 and is_equal_approx(pose.basis.determinant(), 1.0),
+		"turn=%.2f spin=%.2f" % [turn, spin]))
+	var wall: Transform3D = CarryRules.slot(Vector3(-5, 2, 0), Basis(Vector3.FORWARD, -PI * 0.5), Vector3.RIGHT,
+		Basis(Vector3.FORWARD, -PI * 0.5), 0.5, 0.0)
+	results.append(TestOutcome.new("a slot follows the carrier's own up on a wall",
+		wall.origin.is_equal_approx(Vector3(-4.5, 2, 0)) and wall.basis.y.is_equal_approx(Vector3.RIGHT)))
+	var world: FakeWorld = FakeWorld.new()
+	world.slot.available = true
+	world.slot.transform = Transform3D(Basis.IDENTITY, Vector3(0, 1.135, -2.2))
+	world.slot.size = Vector3.ONE * 0.75
+	var carry: CarryController = CarryController.new(world, profile, 4)
+	var input: CarryInput = CarryInput.new()
+	input.scope_id = 4
+	input.tick_id = 1
+	input.interact = true
+	carry.step(input)
+	input.interact = false
+	input.tick_id = 2
+	carry.step(input)
+	var shown: bool = carry.preview != null and carry.preview.available
+	input.interact = true
+	input.tick_id = 3
+	input.carrier_velocity = Vector3(3, 0, 0)
+	carry.step(input)
+	var placed: CarryBodyCommand = world.commands[world.commands.size() - 1]
+	results.append(TestOutcome.new("aimed at a slot, E sets the prop exactly in it at rest instead of dropping it",
+		shown and carry.state.held_id.is_empty() and carry.preview == null and placed.releasing and placed.placing
+		and placed.target.is_equal_approx(world.slot.transform) and placed.carrier_velocity == Vector3.ZERO))
+	var far: FakeWorld = FakeWorld.new()
+	far.slot = world.slot
+	far.jammed = true
+	var gliding: CarryController = CarryController.new(far, profile, 5)
+	input.scope_id = 5
+	input.carrier_velocity = Vector3.ZERO
+	var held_until: int = -1
+	for tick: int in range(40):
+		input.tick_id = 10 + tick
+		input.interact = tick == 0 or tick == 1
+		input.throw_requested = tick == 3
+		gliding.step(input)
+		if not gliding.state.held_id.is_empty():
+			held_until = tick
+	var timed_out: CarryBodyCommand = far.commands[far.commands.size() - 1]
+	var expected_ticks: int = ceili(profile.place_timeout / input.delta)
+	results.append(TestOutcome.new("a glide that cannot arrive lets the prop go where it stopped, never snapped to the slot",
+		timed_out.releasing and not timed_out.placing and absi(held_until - expected_ticks) <= 1
+		and not far.commands.any(func(command: CarryBodyCommand) -> bool: return command.placing),
+		"held_until=%d expected=%d" % [held_until, expected_ticks]))
+	var taken: FakeWorld = FakeWorld.new()
+	taken.slot = world.slot
+	taken.slot_fits = false
+	var blocked: CarryController = CarryController.new(taken, profile, 6)
+	input.scope_id = 6
+	input.throw_requested = false
+	for tick: int in range(3):
+		input.tick_id = 60 + tick
+		input.interact = tick != 1
+		blocked.step(input)
+	var dropped: CarryBodyCommand = taken.commands[taken.commands.size() - 1]
+	results.append(TestOutcome.new("a slot taken before the prop arrives turns the placement into a plain drop",
+		blocked.state.held_id.is_empty() and dropped.releasing and not dropped.placing))
+	var none: FakeWorld = FakeWorld.new()
+	var plain: CarryController = CarryController.new(none, profile, 7)
+	input.scope_id = 7
+	for tick: int in range(3):
+		input.tick_id = 80 + tick
+		input.interact = tick != 1
+		plain.step(input)
+	var plain_drop: CarryBodyCommand = none.commands[none.commands.size() - 1]
+	results.append(TestOutcome.new("without a slot in view E drops as before and no silhouette is shown",
+		plain.state.held_id.is_empty() and plain.preview == null and plain_drop.releasing and not plain_drop.placing))
 	return results

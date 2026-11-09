@@ -58,6 +58,9 @@ func submit(command: CarryBodyCommand) -> bool:
 		return false
 	_last_received_tick = command.tick_id
 	if command.releasing:
+		if command.placing:
+			# The adapter checked that the slot is free; the prop starts there at rest.
+			global_transform = command.target
 		_let_go(command.carrier_velocity)
 		_pending = command
 		return true

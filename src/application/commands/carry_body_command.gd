@@ -9,3 +9,5 @@ var target: Transform3D = Transform3D.IDENTITY
 var carrier_velocity: Vector3 = Vector3.ZERO
 var releasing: bool = false
 var impulse: Vector3 = Vector3.ZERO
+## A release that first sets the prop exactly at target (placement into a checked free slot).
+var placing: bool = false
