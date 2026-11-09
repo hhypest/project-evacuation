@@ -122,6 +122,9 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.delta = delta
 	carry_input.view = _camera.global_transform
 	carry_input.carrier_velocity = _player.velocity
+	carry_input.carrier_feet = _player.global_position
+	carry_input.carrier_up = _player.up_direction
+	carry_input.carrier_radius = _player.profile.radius
 	var interact: bool = frame.interact_requested
 	# A free hand uses a wall button under the view first; otherwise E keeps its carry meaning.
 	if interact and _carry.state.held_id.is_empty() and _puzzle.use(_generation, _camera.global_transform):

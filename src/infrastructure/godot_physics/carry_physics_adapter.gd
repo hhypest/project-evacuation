@@ -52,12 +52,19 @@ func observe(id: StringName) -> CarryObservation:
 	observation.position = body.global_position
 	observation.basis = body.global_basis
 	observation.velocity = body.linear_velocity
+	var size: Vector3 = (body.carry_shape() as BoxShape3D).size
+	observation.half_extent = maxf(size.x, size.z) * 0.5
 	return observation
 
 
 func acquire(id: StringName) -> bool:
 	var body: CarryRigidBody = _body(id)
-	return body != null and body.acquire()
+	if body == null or not body.acquire():
+		return false
+	# The held prop and its carrier never push each other; the prop is placed by sweeps instead.
+	body.add_collision_exception_with(_player)
+	_player.add_collision_exception_with(body)
+	return true
 
 
 func supporting_player(id: StringName) -> bool:
@@ -71,40 +78,59 @@ func supporting_player(id: StringName) -> bool:
 	return false
 
 
-func target(id: StringName, view: Transform3D, basis: Basis) -> CarryTarget:
+func follow(id: StringName, desired: Transform3D, max_step: float, max_turn: float) -> CarryTarget:
 	var result: CarryTarget = CarryTarget.new()
 	var body: CarryRigidBody = _body(id)
 	if body == null:
 		return result
+	var current: Transform3D = body.global_transform.orthonormalized()
 	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
 	query.shape = body.carry_shape()
-	query.transform = Transform3D(basis.orthonormalized(), view.origin)
 	query.collision_mask = 3
 	query.exclude = [_player.get_rid(), body.get_rid()]
 	query.margin = _profile.clearance
 	var space: PhysicsDirectSpaceState3D = _player.get_world_3d().direct_space_state
-	# cast_motion ignores initial overlaps. Reject those explicitly instead of guessing a clear path.
+	# Turn in place only where the turned box fits; otherwise keep the old orientation this tick.
+	var basis: Basis = CarryRules.turn_toward(current.basis, desired.basis, max_turn)
+	query.transform = Transform3D(basis, current.origin)
 	if not space.intersect_shape(query, 1).is_empty():
-		return result
-	query.motion = -view.basis.z * _profile.hold_distance
-	var fractions: PackedFloat32Array = space.cast_motion(query)
-	if fractions.size() != 2:
-		return result
-	var distance: float = maxf(0.0, _profile.hold_distance * fractions[0] - _profile.clearance)
-	if distance < _profile.minimum_distance:
-		return result
-	query.transform.origin += -view.basis.z * distance
-	query.motion = Vector3.ZERO
-	if not space.intersect_shape(query, 1).is_empty():
-		return result
+		basis = current.basis
+		query.transform = current
+	var origin: Vector3 = current.origin
+	var motion: Vector3 = current.origin.move_toward(desired.origin, max_step) - origin
+	if motion.length() > 0.000001:
+		# The sweep itself runs without margin; the clearance is kept by stopping short of the hit.
+		query.margin = 0.0
+		query.transform = Transform3D(basis, origin)
+		if space.intersect_shape(query, 1).is_empty():
+			query.motion = motion
+			var fractions: PackedFloat32Array = space.cast_motion(query)
+			if fractions.size() == 2:
+				var travel: float = motion.length()
+				if fractions[0] < 1.0:
+					travel = maxf(0.0, travel * fractions[0] - _profile.clearance)
+				origin += motion.normalized() * travel
+		else:
+			# cast_motion ignores a start that already touches; accept only a step that ends free.
+			var step: Vector3 = motion
+			for _attempt: int in range(4):
+				query.transform = Transform3D(basis, origin + step)
+				if space.intersect_shape(query, 1).is_empty():
+					origin += step
+					break
+				step *= 0.5
 	result.available = true
-	result.transform = query.transform
+	result.transform = Transform3D(basis, origin)
 	return result
 
 
 func submit(id: StringName, command: CarryBodyCommand) -> bool:
 	var body: CarryRigidBody = _body(id)
-	return body != null and body.submit(command)
+	if body == null or not body.submit(command):
+		return false
+	if command.releasing:
+		_unpair(body)
+	return true
 
 
 func cancel_pending() -> void:
@@ -117,8 +143,15 @@ func close() -> void:
 	_open = false
 	for body: CarryRigidBody in _bodies.values():
 		if is_instance_valid(body):
+			_unpair(body)
 			body.close()
 	_bodies.clear()
+
+
+func _unpair(body: CarryRigidBody) -> void:
+	if is_instance_valid(_player):
+		body.remove_collision_exception_with(_player)
+		_player.remove_collision_exception_with(body)
 
 
 func _body(id: StringName) -> CarryRigidBody:
@@ -127,6 +160,7 @@ func _body(id: StringName) -> CarryRigidBody:
 	var body: CarryRigidBody = _bodies.get(id)
 	if not is_instance_valid(body) or not body.is_inside_tree() or body.is_queued_for_deletion():
 		if is_instance_valid(body):
+			_unpair(body)
 			body.close()
 		_bodies.erase(id)
 		return null

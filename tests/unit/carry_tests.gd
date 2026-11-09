@@ -27,10 +27,13 @@ class FakeWorld extends CarryWorldPort:
 	func supporting_player(_id: StringName) -> bool:
 		return supporting
 
-	func target(_id: StringName, _view: Transform3D, basis: Basis) -> CarryTarget:
+	## Without obstacles the prop goes straight to its hold point; a jam keeps it where it is.
+	var jammed: bool = false
+
+	func follow(_id: StringName, desired: Transform3D, _max_step: float, _max_turn: float) -> CarryTarget:
 		var result: CarryTarget = CarryTarget.new()
 		result.available = true
-		result.transform = Transform3D(basis, Vector3(0, 0, -2))
+		result.transform = Transform3D(desired.basis, item.position if jammed else desired.origin)
 		return result
 
 	func submit(_id: StringName, command: CarryBodyCommand) -> bool:
@@ -61,10 +64,28 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	state.release()
 	results.append(TestOutcome.new("release clears ownership and permits another eligible body",
 		state.held_id.is_empty() and not state.take(&"", 5, profile) and state.take(&"other", 5, profile)))
-	var force: Vector3 = CarryRules.force(Vector3(100, 0, 0), Vector3.ZERO, Vector3.DOWN * 9.8, 20, profile)
-	results.append(TestOutcome.new("spring force remains bounded for extreme separation", force.length() <= profile.max_force + 0.001))
-	var support: Vector3 = CarryRules.force(Vector3.ZERO, Vector3.ZERO, Vector3.DOWN * 9.8, 20, profile)
-	results.append(TestOutcome.new("stationary hold compensates effective gravity exactly once", absf(support.y - 196) < 0.001))
+	var hold: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.FORWARD, 0.3, 0.5, profile)
+	results.append(TestOutcome.new("level gaze holds the prop at chest height just clear of the capsule",
+		hold.is_equal_approx(Vector3(0, profile.hold_height, -(0.3 + profile.hold_gap + 0.5)))))
+	var look_down: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.DOWN, 0.3, 0.5, profile)
+	var look_up: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.UP, 0.3, 0.5, profile)
+	results.append(TestOutcome.new("view pitch lowers and raises the hold point by at most pitch_lift",
+		is_equal_approx(look_down.y, profile.hold_height - profile.pitch_lift)
+		and is_equal_approx(look_up.y, profile.hold_height + profile.pitch_lift) and look_down.z == hold.z))
+	var wall_hold: Vector3 = CarryRules.hold_point(Vector3(-5, 2, 0), Vector3.RIGHT, Vector3.UP, Vector3.UP, 0.3, 0.5, profile)
+	results.append(TestOutcome.new("the hold point follows the carrier's own up on a wall",
+		is_equal_approx(wall_hold.x, -5 + profile.hold_height) and wall_hold.y > 2.5))
+	var straight_down: Vector3 = CarryRules.facing(Vector3.DOWN, Vector3.UP, Vector3.LEFT)
+	results.append(TestOutcome.new("looking straight down keeps the previous facing",
+		straight_down.is_equal_approx(Vector3.LEFT)))
+	var tilted: Basis = Basis(Vector3.UP, deg_to_rad(80)) * Basis(Vector3.RIGHT, deg_to_rad(25))
+	var upright: Basis = CarryRules.upright_basis(tilted, Vector3.UP, Vector3.FORWARD)
+	var yaw: float = rad_to_deg(Vector3.FORWARD.signed_angle_to(-upright.z, Vector3.UP))
+	results.append(TestOutcome.new("pick-up straightens the prop and turns it by the nearest quarter turn",
+		upright.y.is_equal_approx(Vector3.UP) and absf(absf(yaw) - 90.0) < 0.01))
+	var limited: Basis = CarryRules.turn_toward(Basis.IDENTITY, Basis(Vector3.UP, PI * 0.5), 0.2)
+	results.append(TestOutcome.new("turning toward the hold orientation is rate limited",
+		absf(limited.get_rotation_quaternion().get_angle() - 0.2) < 0.001))
 	var light: Vector3 = CarryRules.throw_impulse(Vector3.FORWARD, Vector3.ZERO, 5, profile)
 	var heavy: Vector3 = CarryRules.throw_impulse(Vector3.FORWARD, Vector3.ZERO, 40, profile)
 	results.append(TestOutcome.new("bounded throw impulse gives heavy bodies a smaller speed change",
@@ -134,17 +155,34 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("suspend cancels pending physics and closed scope rejects new input",
 		world.cancelled and world.closed and carry.state.held_id.is_empty()))
 	var stalled_world: FakeWorld = FakeWorld.new()
-	stalled_world.item.position = Vector3(-1.5, 0, -2)
+	stalled_world.item.position = Vector3(0, 0.5, 4)
+	stalled_world.jammed = true
 	var stalled: CarryController = CarryController.new(stalled_world, profile, 8)
 	var stalled_input: CarryInput = CarryInput.new()
 	stalled_input.scope_id = 8
 	stalled_input.interact = true
+	var held_after_grab: bool = false
 	for tick: int in range(40):
 		stalled_input.tick_id = tick
 		stalled.step(stalled_input)
+		if tick == 0:
+			held_after_grab = stalled.state.held_id == &"cube"
 		stalled_input.interact = false
-	results.append(TestOutcome.new("persistent target separation releases a jammed carry after the configured delay",
-		stalled.state.held_id.is_empty() and stalled_world.commands[stalled_world.commands.size() - 1].releasing))
+	results.append(TestOutcome.new("a prop jammed far from its hold point is dropped after the configured delay",
+		held_after_grab and stalled.state.held_id.is_empty()
+		and stalled_world.commands[stalled_world.commands.size() - 1].releasing))
+	var grab_world: FakeWorld = FakeWorld.new()
+	var grab: CarryController = CarryController.new(grab_world, profile, 9)
+	var grab_input: CarryInput = CarryInput.new()
+	grab_input.scope_id = 9
+	grab_input.tick_id = 1
+	grab_input.interact = true
+	grab_input.view = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-40)), Vector3(0, 1.65, 0))
+	grab.step(grab_input)
+	var first: CarryBodyCommand = grab_world.commands[0] if not grab_world.commands.is_empty() else null
+	results.append(TestOutcome.new("one press grabs and places the prop at its hold point in the same tick",
+		grab.state.held_id == &"cube" and first != null and not first.releasing
+		and first.target.origin.z < -0.5 and first.target.origin.y < profile.hold_height))
 	var buffer: GameplayInputBuffer = GameplayInputBuffer.new()
 	buffer.configure(true, 1)
 	buffer.record_action(&"throw_prop", true)
