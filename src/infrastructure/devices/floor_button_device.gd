@@ -10,21 +10,33 @@ extends PuzzleDeviceNode
 
 const TRAVEL: float = 0.03
 const STACK_HEIGHT: float = 3.0
+## Art model (content/models/devices/floor_button), authored for a 1.4 x 0.1 x 1.4 m plate: a "Frame" that
+## stays put and a "Plate" that sinks when pressed. Other plate sizes scale it; the collision stays the box.
+const MODEL: PackedScene = preload("res://content/models/devices/floor_button/floor_button.gltf")
+const MODEL_PLATE: Vector3 = Vector3(1.4, 0.1, 1.4)
+## Lamp strip along the plate edge; it also walls the recess that the pressed plate leaves.
+const LAMP_WIDTH: float = 0.025
+const LAMP_DEPTH: float = 0.05
 
 var plate: StaticBody3D
 var last_load: float = 0.0
 var _sensor: Area3D
-var _plate_visual: MeshInstance3D
-var _lamp: MeshInstance3D
+var _model: Node3D
+var _plate_visual: Node3D
+var _lamps: Array[MeshInstance3D] = []
 
 
 func _ready() -> void:
-	var skirt: MeshInstance3D = box_mesh(Vector3(plate_size.x + 0.4, 0.06, plate_size.z + 0.4), Color(0.23, 0.25, 0.28))
-	skirt.position.y = 0.03
-	add_child(skirt)
-	_lamp = box_mesh(Vector3(plate_size.x + 0.12, 0.065, plate_size.z + 0.12), DARK)
-	_lamp.position.y = 0.035
-	add_child(_lamp)
+	_model = MODEL.instantiate() as Node3D
+	_model.name = "Model"
+	_model.scale = plate_size / MODEL_PLATE
+	add_child(_model)
+	_plate_visual = _model.get_node("Plate") as Node3D
+	var half: Vector2 = Vector2(plate_size.x, plate_size.z) * 0.5 + Vector2.ONE * LAMP_WIDTH * 0.5
+	var lamp_y: float = plate_size.y - LAMP_DEPTH * 0.5 + 0.004
+	for side: float in [-1.0, 1.0]:
+		_lamp_strip(Vector3(LAMP_WIDTH, LAMP_DEPTH, half.y * 2.0 + LAMP_WIDTH), Vector3(side * half.x, lamp_y, 0))
+		_lamp_strip(Vector3(half.x * 2.0 - LAMP_WIDTH, LAMP_DEPTH, LAMP_WIDTH), Vector3(0, lamp_y, side * half.y))
 	plate = StaticBody3D.new()
 	plate.name = "Plate"
 	plate.collision_layer = 1
@@ -36,9 +48,6 @@ func _ready() -> void:
 	collision.shape = shape
 	plate.add_child(collision)
 	add_child(plate)
-	_plate_visual = box_mesh(plate_size, Color(0.6, 0.62, 0.64))
-	_plate_visual.position.y = plate_size.y * 0.5
-	add_child(_plate_visual)
 	_sensor = Area3D.new()
 	_sensor.name = "Sensor"
 	_sensor.collision_layer = 0
@@ -51,6 +60,13 @@ func _ready() -> void:
 	sensor_shape.position.y = plate_size.y + STACK_HEIGHT * 0.5
 	_sensor.add_child(sensor_shape)
 	add_child(_sensor)
+
+
+func _lamp_strip(size: Vector3, at: Vector3) -> void:
+	var strip: MeshInstance3D = box_mesh(size, DARK)
+	strip.position = at
+	add_child(strip)
+	_lamps.append(strip)
 
 
 func definition() -> DeviceDefinition:
@@ -104,5 +120,6 @@ func measure(player: CharacterBody3D, player_mass: float) -> float:
 
 
 func show_output(on: bool, _delta: float) -> void:
-	set_lamp(_lamp, on)
-	_plate_visual.position.y = plate_size.y * 0.5 - (TRAVEL if on else 0.0)
+	for lamp: MeshInstance3D in _lamps:
+		set_lamp(lamp, on)
+	_plate_visual.position.y = -TRAVEL / _model.scale.y if on else 0.0

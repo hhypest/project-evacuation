@@ -125,10 +125,10 @@ func _cube(label: String, id: StringName, at: Vector3, kilograms: float, edge: f
 	collision.name = "Collision"
 	collision.shape = shape
 	body.add_child(collision)
-	body.add_child(PuzzleDeviceNode.box_mesh(Vector3.ONE * edge, Color(0.86, 0.85, 0.82)))
+	body.add_child(PropVisuals.ballast_cube(edge))
 	var sign: Label3D = Label3D.new()
 	sign.text = "%.0f кг" % kilograms
-	sign.position = Vector3(0, 0, edge * 0.5 + 0.01)
+	sign.position = Vector3(0, 0, edge * 0.5 + 0.04)
 	sign.pixel_size = 0.005
 	sign.font_size = 48
 	sign.modulate = Color(0.1, 0.1, 0.1)
