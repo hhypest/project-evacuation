@@ -17,6 +17,7 @@ wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the hous
 wall_switch_lever — the lever turned so the arm points up (+Y) from its pivot hub; the hub centre is
          the origin and the axle runs along Z, so the device turns it about Z.
 logic_box — the junction box housing of LogicDevice, centred, lid towards +Z.
+door_leaf — one sliding leaf of DoorDevice, centred; the device mirrors it for the other side.
 emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
          ReceiverDevice plate (dish towards +Z), centred on the node.
 
@@ -51,6 +52,8 @@ FITS: dict[str, dict] = {
     "receiver_body": {"node": "Body", "size": (0.6, 0.6, 0.25), "origin": "center", "shift": (0.0, 0.02, 0.0)},
     # LogicDevice: one housing for every kind, 0.44 x 0.44 x 0.16 m centred on the node, lid towards +Z.
     "logic_box": {"node": "Body", "size": (0.44, 0.44, 0.16), "origin": "center"},
+    # DoorDevice leaf for the default 2.0 x 2.6 m opening: 1.0 x 2.6 x 0.15 m, centred, handle on the +X edge.
+    "door_leaf": {"node": "Leaf", "size": (1.0, 2.6, 0.15), "origin": "center"},
 }
 
 

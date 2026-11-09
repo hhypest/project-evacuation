@@ -50,7 +50,6 @@ static func static_box(size: Vector3, color: Color, at: Vector3) -> StaticBody3D
 	return body
 
 
-## Indicator lamp material: amber means "powered / signal present" (ADR-0006); dark means off.
 ## A flat disc (thin cylinder along local Y) with the same material rules as box_mesh.
 static func disc_mesh(radius: float, color: Color, emission: float = 0.0) -> MeshInstance3D:
 	var visual: MeshInstance3D = box_mesh(Vector3.ONE, color, emission)
@@ -63,6 +62,7 @@ static func disc_mesh(radius: float, color: Color, emission: float = 0.0) -> Mes
 	return visual
 
 
+## Indicator lamp material: amber means "powered / signal present" (ADR-0006); dark means off.
 static func set_lamp(lamp: MeshInstance3D, on: bool) -> void:
 	var material: StandardMaterial3D = lamp.material_override as StandardMaterial3D
 	if material == null:
