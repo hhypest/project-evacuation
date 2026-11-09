@@ -18,7 +18,7 @@
 | Поле | Значение |
 | --- | --- |
 | Генератор | Meshy API, `text-to-3d`: preview `ai_model=latest` (Meshy 7.1) для куба, `meshy-6` для кнопки; refine с PBR, текстуры 2K |
-| Задачи Meshy | Куб: preview `01a1bfe7-dd10-7029-aaaf-d9f2a1c2f25a`, refine `01a1bfe9-f03f-70c3-b010-c00adf9f7d32`. Кнопка: preview `01a1bfea-05ac-70f1-861a-37fb7d876b4c`, refine `01a1bfec-5bd0-74ba-b3f4-d2f0e84ad882` |
+| Задачи Meshy | Куб: preview `01a1bfe7-dd10-7029-aaaf-d9f2a1c2f25a`, refine `01a1bffe-15e5-70a5-a005-f283f8ff68bd`. Кнопка: preview `01a1bfea-05ac-70f1-861a-37fb7d876b4c`, refine `01a1bffb-cd84-7398-8690-d56726b67fa1`. Перекраска 2026-11-09 по решению владельца; отклонённые текстуры — refine `01a1bfe9-…`, `01a1bffb-c38d-…`, `01a1bffe-1f87-…` (куб) и `01a1bfec-…` (кнопка) |
 | Дата | 2026-11-09 |
 | Аккаунт и тариф | Аккаунт владельца проекта; доступ к API есть только с платного тарифа Pro, поэтому по условиям Meshy результат принадлежит пользователю и указывать Meshy не обязательно |
 | Обработка человеком/кодом | Масштаб и точка опоры, разрез кнопки на рамку и плиту по краю плиты, без изменения текстур |
@@ -34,22 +34,22 @@
 
 > Heavy industrial ballast cube for a sci-fi expedition, a perfect cube with chamfered protective steel edges and bolted corner guards, a recessed grab handle in the middle of every face, painted steel panels, a small recessed round indicator lamp in one face, a blank rectangular serial plate. Rugged, heavy but carriable by one person. Grounded hard sci-fi industrial realism. Single object, no text, no logos.
 
-Куб, refine (texture_prompt):
+Куб, refine (texture_prompt, принятый вариант):
 
-> Off-white painted steel panels (#E8E4DC) with safety-orange (#E06B2D) diagonal stripes on the corner guards, dark grey bare steel on edges, bolts and inside the handle wells, chipped and scuffed paint along edges and handles, dust in recesses, a small neutral white lamp lens, a blank light grey serial plate. Realistic industrial PBR. No text, no letters, no logos, no cyan, no green.
+> Industrial ballast cube. Face panels painted light grey (#C8C5BE), matte, with grime and scuffs. Wide bright safety-orange (#E06B2D) painted bands run along every edge of the cube, framing each face. Corner guards, bolts and handles are dark gunmetal grey steel (#3A4146), worn to bare metal at the tips. Chipped paint, dust in recesses. Realistic industrial PBR. No yellow, no blue, no brass, no gold, no text, no logos.
 
 Кнопка, preview (`meshy-6`, третья попытка; две предыдущие отклонены — лоток с дырами и круглый люк):
 
 > A very flat square industrial floor plate, like a large manhole cover lying on the floor: square, 1.8 m wide and only 10 cm tall, solid closed top, a square diamond-pattern steel pressure plate in the middle surrounded by a slightly lower beveled steel border frame, thin gap between plate and border, a short armored cable gland on one side. Solid watertight mesh, no openings, no box, no tray. Hard sci-fi industrial. No text, no logos.
 
-Кнопка, refine (texture_prompt):
+Кнопка, refine (texture_prompt, принятый вариант):
 
-> Central square pressure plate of worn galvanized diamond-pattern steel, scuffed shiny where it is stepped on. Surrounding border frame painted dark grey steel with black and safety-orange (#E06B2D) diagonal hazard stripes on its bevel. A thin dark recessed groove around the plate edge (unlit lamp channel). Dust and grime in gaps, chipped paint on corners, dark armored cable gland. Realistic industrial PBR. No text, no letters, no logos, no cyan, no green, no yellow.
+> Central square pressure plate of worn galvanized diamond-pattern steel, scuffed brighter where it is stepped on. The outer border frame is painted dark charcoal grey (#2A2E31) with bold diagonal black and safety-orange (#E06B2D) hazard stripes all around its top bevel. Dark steel bolts, a thin dark groove around the plate edge, dark armored cable gland. Dust and grime in gaps, chipped paint on corners. Realistic industrial PBR. No blue, no teal, no cyan, no green, no yellow, no text, no letters, no logos.
 
 ## Известные отступления
 
-- **Куб:** в оранжевых полосах есть жёлтые ромбы, болты бледно-голубоватые. Ни то, ни другое не игровой сигнал, но строго по палитре это не совпадает. Крышка сверху почти белая и при прямом свете выглядит плоской.
-- **Кнопка:** чёрно-оранжевых полос на рамке нет, рамка стальная с голубоватым оттенком. Шляпки рифления и болты плиты выступают над коллизией до 3 см.
+- **Куб:** после перекраски — светло-серые грани, оранжевые канты по всем рёбрам и уголки, тёмный крепёж. Серые грани чуть холоднее образца `#E8E4DC`.
+- **Кнопка:** после перекраски — чёрно-оранжевые полосы по рамке; оранжевый в полосах чуть теплее и желтее `#E06B2D`. Рифлёная плита под холодным светом отдаёт голубым — это отражение стали, а не краска. Шляпки рифления и болты плиты выступают над коллизией до 3 см.
 - Обе модели проверены на Vulkan через программный llvmpipe. Проверка на опорном GPU и у новых игроков впереди (SLICE-02/03).
 
 ## Пересборка
