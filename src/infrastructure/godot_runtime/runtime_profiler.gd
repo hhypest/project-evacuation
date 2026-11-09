@@ -162,7 +162,7 @@ func _publish_window() -> void:
 		latest.render_cpu_ms = _render_cpu_sum / float(_render_frames)
 	if recording and _file != null:
 		_write_sample()
-	_reset_window()
+	_reset_window(false)
 	_emit_status()
 
 
@@ -215,10 +215,13 @@ func _disable_viewports() -> void:
 	_viewports.clear()
 
 
-func _reset_window() -> void:
+func _reset_window(discard_timestamp: bool = true) -> void:
 	_times.clear()
-	_last_us = 0
-	_window_us = Time.get_ticks_usec()
+	# A normal rollover must include publication/CSV/HUD work in the next frame interval.
+	# Activation, recording start and scene/pause/focus boundaries deliberately discard the old timestamp.
+	if discard_timestamp:
+		_last_us = 0
+	_window_us = _last_us if _last_us > 0 else Time.get_ticks_usec()
 	_gpu_sum = 0.0
 	_render_cpu_sum = 0.0
 	_render_frames = 0

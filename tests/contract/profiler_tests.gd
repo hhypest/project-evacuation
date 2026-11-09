@@ -1,6 +1,10 @@
 class_name ProfilerTests
 extends TestSuite
 
+const PUBLICATION_STALL_MS: int = 80
+var _publication_stalled: bool = false
+var _following_window_max_ms: float = -1.0
+
 
 func suite_name() -> StringName:
 	return &"contract"
@@ -40,4 +44,34 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await tree.process_frame
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(directory))
+	results.append(await _publication_continuity(tree))
 	return results
+
+
+func _publication_continuity(tree: SceneTree) -> TestOutcome:
+	_publication_stalled = false
+	_following_window_max_ms = -1.0
+	var profiler: RuntimeProfiler = RuntimeProfiler.new()
+	tree.root.add_child(profiler)
+	profiler.sampled.connect(_stall_first_publication)
+	profiler.set_panel_visible(true)
+	var deadline: int = Time.get_ticks_msec() + 3000
+	while _following_window_max_ms < 0.0 and Time.get_ticks_msec() < deadline:
+		await tree.process_frame
+	profiler.set_panel_visible(false)
+	profiler.queue_free()
+	await tree.process_frame
+	return TestOutcome.new("publication stalls remain in the following frame window",
+		_publication_stalled and _following_window_max_ms >= float(PUBLICATION_STALL_MS),
+		"injected=%d ms measured_max=%.3f ms" % [PUBLICATION_STALL_MS, _following_window_max_ms])
+
+
+func _stall_first_publication(sample: ProfilerSample) -> void:
+	if sample.frame_count == 0:
+		return
+	if not _publication_stalled:
+		_publication_stalled = true
+		# Reproduce blocking CSV/HUD work in the actual publication callback, without a fake clock.
+		OS.delay_msec(PUBLICATION_STALL_MS)
+	elif _following_window_max_ms < 0.0:
+		_following_window_max_ms = sample.frame_max_ms
