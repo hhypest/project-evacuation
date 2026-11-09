@@ -80,16 +80,46 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("carrying into a wall stops the cube at the wall, never through it",
 		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.z > -0.7 + 0.45
 		and _cube.position.is_finite(), "cube=%s" % _cube.position))
+	# The carrier has walked into the blocked cube (collisions with it are off); dropping it there must not
+	# hand an interpenetrating pair to the solver.
+	var overlapped: bool = _player.position.z - _player.profile.radius < _cube.position.z + 0.5
+	await _ticks(1, true)
+	var kept_apart: bool = _cube in _player.get_collision_exceptions()
+	_maximum_speed = 0.0
+	var player_before: Vector3 = _player.position
+	await _ticks(60, false, false, Vector2(0, 1))
+	results.append(TestOutcome.new("dropping a cube the carrier overlaps keeps them apart until they separate",
+		overlapped and kept_apart and _cube not in _player.get_collision_exceptions()
+		and _player not in _cube.get_collision_exceptions()
+		and _player.position.z > player_before.z + 0.5 and _maximum_speed < 8 and _cube.position.is_finite(),
+		"player=%s cube=%s speed=%.2f" % [_player.position, _cube.position, _maximum_speed]))
 	await _close()
 	await _open()
 	await _ticks(30, true)
-	_wall(Vector3(0, 2.1, 0.5), Vector3(5, 0.2, 6))
+	_camera.rotation.x = deg_to_rad(-89)
+	await _ticks(20)
+	_maximum_lag = 0.0
+	await _ticks(40, false, false, Vector2(1, 0))
+	await _ticks(40, false, false, Vector2(0, -1))
+	results.append(TestOutcome.new("looking straight down, a 1 m cube rides above the floor and follows walking and strafing",
+		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.distance_to(_hold()) < 0.1
+		and _maximum_lag < 0.35 and _cube.position.y > 0.5,
+		"error=%.3f lag=%.3f cube=%s" % [_cube.position.distance_to(_hold()), _maximum_lag, _cube.position]))
+	await _close()
+	await _open()
+	await _ticks(30, true)
+	_wall(Vector3(0, 2.1, 0.5), Vector3(8, 0.2, 8))
 	_camera.rotation.x = deg_to_rad(80)
 	await _ticks(40)
 	results.append(TestOutcome.new("looking up under a 2 m ceiling keeps the cube held below the ceiling",
 		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.y + 0.5 <= 2.0 + 0.001
 		and _cube.position.y + 0.5 > 1.9,
 		"cube=%s" % _cube.position))
+	await _ticks(40, false, false, Vector2(1, 0))
+	var sideways: Vector3 = (_cube.position - _hold()).slide(Vector3.UP)
+	results.append(TestOutcome.new("a cube pressed to the ceiling still slides along it while strafing",
+		_scope.held_prop_id() == &"lab.cube.medium" and sideways.length() < 0.1 and _cube.position.y + 0.5 <= 2.001,
+		"cube=%s hold=%s" % [_cube.position, _hold()]))
 	await _close()
 	await _open(20.0, Vector3(0, 0.05, 2.6))
 	_wall(Vector3(-0.65, 1.5, 0), Vector3(0.2, 3, 4))
@@ -98,9 +128,12 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	var in_corridor: bool = _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.z > 1.5
 	_camera.rotation.y += deg_to_rad(55)
 	await _ticks(60)
-	results.append(TestOutcome.new("a cube held in a 1.1 m corridor neither turns into the walls nor escapes",
+	# Turning 55 degrees aims the hold point into a wall; the cube slides along the walls toward it but stays
+	# between them and in front of the carrier.
+	results.append(TestOutcome.new("a cube held in a 1.1 m corridor slides along the walls, never into or past them",
 		in_corridor and _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.is_finite()
-		and absf(_cube.position.x) < 0.06 and _cube.position.z < 2.0, "cube=%s" % _cube.position))
+		and absf(_cube.position.x) < 0.06 and _cube.position.z < _player.position.z - _player.profile.radius,
+		"cube=%s player=%s" % [_cube.position, _player.position]))
 	await _close()
 	await _open()
 	await _ticks(30, true)
@@ -162,7 +195,7 @@ func _hold() -> Vector3:
 	var forward: Vector3 = -_camera.global_basis.z
 	var facing: Vector3 = CarryRules.facing(forward, _player.up_direction, forward)
 	return CarryRules.hold_point(_player.global_position, _player.up_direction, facing, forward,
-		_player.profile.radius, 0.5, _profile)
+		_player.profile.radius, 0.5, 0.5, _profile)
 
 
 func _open(kilograms: float = 20.0, at: Vector3 = Vector3(0, 0.05, 3)) -> void:

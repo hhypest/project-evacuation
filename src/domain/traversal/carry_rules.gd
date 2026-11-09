@@ -16,10 +16,12 @@ static func facing(view_forward: Vector3, up: Vector3, previous: Vector3) -> Vec
 
 ## Centre of the held prop: in front of the carrier at chest height, raised or lowered by the view pitch.
 static func hold_point(feet: Vector3, up: Vector3, facing_direction: Vector3, view_forward: Vector3,
-	carrier_radius: float, half_extent: float, profile: CarryProfile) -> Vector3:
+	carrier_radius: float, half_extent: float, half_height: float, profile: CarryProfile) -> Vector3:
 	var lift: float = clampf(view_forward.normalized().dot(up), -1.0, 1.0) * profile.pitch_lift
+	# Never aim below the floor the carrier stands on: a tall prop stops at its own half height.
+	var height: float = maxf(profile.hold_height + lift, half_height + profile.clearance * 2.0)
 	var reach_out: float = carrier_radius + profile.hold_gap + half_extent
-	return feet + up * (profile.hold_height + lift) + facing_direction * reach_out
+	return feet + up * height + facing_direction * reach_out
 
 
 ## Upright orientation that faces the carrier, choosing the quarter turn about up closest to the current one,

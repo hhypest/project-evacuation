@@ -29,6 +29,11 @@ func submit(_id: StringName, _command: CarryBodyCommand) -> bool:
 	return false
 
 
+## Per-tick housekeeping for props that were released while still overlapping the carrier.
+func settle() -> void:
+	pass
+
+
 func cancel_pending() -> void:
 	pass
 

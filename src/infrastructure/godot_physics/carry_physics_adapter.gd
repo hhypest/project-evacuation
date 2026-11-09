@@ -5,6 +5,8 @@ var _bodies: Dictionary[StringName, CarryRigidBody] = {}
 var _player: PlayerMotor
 var _profile: CarryProfile
 var _open: bool = true
+## Released props that still overlap the carrier keep ignoring it until they separate (ADR-0012).
+var _separating: Array[CarryRigidBody] = []
 
 
 func configure(level: Node3D, player: PlayerMotor, profile: CarryProfile, scope_id: int) -> bool:
@@ -54,6 +56,7 @@ func observe(id: StringName) -> CarryObservation:
 	observation.velocity = body.linear_velocity
 	var size: Vector3 = (body.carry_shape() as BoxShape3D).size
 	observation.half_extent = maxf(size.x, size.z) * 0.5
+	observation.half_height = size.y * 0.5
 	return observation
 
 
@@ -61,6 +64,7 @@ func acquire(id: StringName) -> bool:
 	var body: CarryRigidBody = _body(id)
 	if body == null or not body.acquire():
 		return false
+	_separating.erase(body)
 	# The held prop and its carrier never push each other; the prop is placed by sweeps instead.
 	body.add_collision_exception_with(_player)
 	_player.add_collision_exception_with(body)
@@ -103,13 +107,7 @@ func follow(id: StringName, desired: Transform3D, max_step: float, max_turn: flo
 		query.margin = 0.0
 		query.transform = Transform3D(basis, origin)
 		if space.intersect_shape(query, 1).is_empty():
-			query.motion = motion
-			var fractions: PackedFloat32Array = space.cast_motion(query)
-			if fractions.size() == 2:
-				var travel: float = motion.length()
-				if fractions[0] < 1.0:
-					travel = maxf(0.0, travel * fractions[0] - _profile.clearance)
-				origin += motion.normalized() * travel
+			origin = _slide(space, query, basis, origin, motion)
 		else:
 			# cast_motion ignores a start that already touches; accept only a step that ends free.
 			var step: Vector3 = motion
@@ -124,13 +122,75 @@ func follow(id: StringName, desired: Transform3D, max_step: float, max_turn: flo
 	return result
 
 
+## Sweeps toward the hold point and, when a surface blocks the way, keeps the rest of the motion along it,
+## so a prop pressed to a floor, ceiling or wall still follows sideways movement.
+func _slide(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D, basis: Basis,
+		origin: Vector3, motion: Vector3) -> Vector3:
+	var remaining: Vector3 = motion
+	for _bounce: int in range(3):
+		if remaining.length() <= 0.000001:
+			break
+		query.margin = 0.0
+		query.transform = Transform3D(basis, origin)
+		query.motion = remaining
+		var fractions: PackedFloat32Array = space.cast_motion(query)
+		if fractions.size() != 2:
+			break
+		if fractions[0] >= 1.0:
+			origin += remaining
+			break
+		var touching: Vector3 = origin + remaining * fractions[1]
+		origin += remaining.normalized() * maxf(0.0, remaining.length() * fractions[0] - _profile.clearance)
+		query.motion = Vector3.ZERO
+		query.transform = Transform3D(basis, touching)
+		query.margin = _profile.clearance
+		var contact: Dictionary = space.get_rest_info(query)
+		if typeof(contact.get("normal")) != TYPE_VECTOR3:
+			break
+		var normal: Vector3 = contact["normal"]
+		remaining = (remaining * (1.0 - fractions[0])).slide(normal.normalized())
+	query.margin = 0.0
+	query.motion = Vector3.ZERO
+	return origin
+
+
 func submit(id: StringName, command: CarryBodyCommand) -> bool:
 	var body: CarryRigidBody = _body(id)
 	if body == null or not body.submit(command):
 		return false
 	if command.releasing:
-		_unpair(body)
+		if _overlaps_player(body):
+			# Restoring collisions now would hand an interpenetrating pair to the solver; wait for separation.
+			if body not in _separating:
+				_separating.append(body)
+		else:
+			_unpair(body)
 	return true
+
+
+func settle() -> void:
+	for body: CarryRigidBody in _separating.duplicate():
+		if not is_instance_valid(body) or not body.is_inside_tree():
+			_separating.erase(body)
+		elif body.is_carried():
+			_separating.erase(body)
+		elif not _overlaps_player(body):
+			_unpair(body)
+			_separating.erase(body)
+
+
+func _overlaps_player(body: CarryRigidBody) -> bool:
+	if not is_instance_valid(_player) or not _player.is_inside_tree():
+		return false
+	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+	query.shape = body.carry_shape()
+	query.transform = body.global_transform.orthonormalized()
+	query.collision_mask = _player.collision_layer
+	query.exclude = [body.get_rid()]
+	for hit: Dictionary in _player.get_world_3d().direct_space_state.intersect_shape(query, 8):
+		if hit.get("rid") == _player.get_rid():
+			return true
+	return false
 
 
 func cancel_pending() -> void:
@@ -146,6 +206,7 @@ func close() -> void:
 			_unpair(body)
 			body.close()
 	_bodies.clear()
+	_separating.clear()
 
 
 func _unpair(body: CarryRigidBody) -> void:

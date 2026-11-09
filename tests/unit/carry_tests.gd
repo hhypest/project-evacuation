@@ -64,15 +64,18 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	state.release()
 	results.append(TestOutcome.new("release clears ownership and permits another eligible body",
 		state.held_id.is_empty() and not state.take(&"", 5, profile) and state.take(&"other", 5, profile)))
-	var hold: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.FORWARD, 0.3, 0.5, profile)
+	var hold: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.FORWARD, 0.3, 0.5, 0.1, profile)
 	results.append(TestOutcome.new("level gaze holds the prop at chest height just clear of the capsule",
 		hold.is_equal_approx(Vector3(0, profile.hold_height, -(0.3 + profile.hold_gap + 0.5)))))
-	var look_down: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.DOWN, 0.3, 0.5, profile)
-	var look_up: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.UP, 0.3, 0.5, profile)
+	var look_down: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.DOWN, 0.3, 0.5, 0.1, profile)
+	var look_up: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.UP, 0.3, 0.5, 0.1, profile)
 	results.append(TestOutcome.new("view pitch lowers and raises the hold point by at most pitch_lift",
 		is_equal_approx(look_down.y, profile.hold_height - profile.pitch_lift)
 		and is_equal_approx(look_up.y, profile.hold_height + profile.pitch_lift) and look_down.z == hold.z))
-	var wall_hold: Vector3 = CarryRules.hold_point(Vector3(-5, 2, 0), Vector3.RIGHT, Vector3.UP, Vector3.UP, 0.3, 0.5, profile)
+	var tall_down: Vector3 = CarryRules.hold_point(Vector3.ZERO, Vector3.UP, Vector3.FORWARD, Vector3.DOWN, 0.3, 0.5, 0.5, profile)
+	results.append(TestOutcome.new("looking down never aims a tall prop below the carrier's floor",
+		is_equal_approx(tall_down.y, 0.5 + profile.clearance * 2.0) and tall_down.z == hold.z))
+	var wall_hold: Vector3 = CarryRules.hold_point(Vector3(-5, 2, 0), Vector3.RIGHT, Vector3.UP, Vector3.UP, 0.3, 0.5, 0.1, profile)
 	results.append(TestOutcome.new("the hold point follows the carrier's own up on a wall",
 		is_equal_approx(wall_hold.x, -5 + profile.hold_height) and wall_hold.y > 2.5))
 	var straight_down: Vector3 = CarryRules.facing(Vector3.DOWN, Vector3.UP, Vector3.LEFT)

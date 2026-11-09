@@ -22,6 +22,7 @@ func step(request: CarryInput) -> void:
 	if _scope_id < 0 or request.scope_id != _scope_id or request.tick_id <= _last_tick:
 		return
 	_last_tick = request.tick_id
+	_world.settle()
 	var view_forward: Vector3 = -request.view.basis.z
 	_facing = CarryRules.facing(view_forward, request.carrier_up, _facing)
 	if state.held_id.is_empty():
@@ -52,7 +53,7 @@ func step(request: CarryInput) -> void:
 	var desired: Transform3D = Transform3D(
 		CarryRules.upright_basis(observed.basis, request.carrier_up, _facing),
 		CarryRules.hold_point(request.carrier_feet, request.carrier_up, _facing, view_forward,
-			request.carrier_radius, observed.half_extent, _profile))
+			request.carrier_radius, observed.half_extent, observed.half_height, _profile))
 	var reached: CarryTarget = _world.follow(state.held_id, desired,
 		_profile.pull_speed * request.delta, _profile.turn_speed * request.delta)
 	if not reached.available:
