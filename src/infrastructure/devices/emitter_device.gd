@@ -96,6 +96,9 @@ func show_beam(length: float) -> void:
 	if _beam == null:
 		return
 	_beam.visible = powered and beam_length > 0.01
-	var start: float = HOUSING.z * 0.5 + 0.05
-	_beam.scale = Vector3(1, 1, maxf(beam_length, 0.01))
-	_beam.position = Vector3(0, 0, -start - beam_length * 0.5)
+	# The traced beam starts at the muzzle, clear of the housing; the visible one starts at the lens inside
+	# the cowl, so it never looks detached from its source.
+	var start: float = -LENS_Z
+	var visible_length: float = beam_length + (HOUSING.z * 0.5 + 0.05 - start)
+	_beam.scale = Vector3(1, 1, maxf(visible_length, 0.01))
+	_beam.position = Vector3(0, 0, -start - visible_length * 0.5)
