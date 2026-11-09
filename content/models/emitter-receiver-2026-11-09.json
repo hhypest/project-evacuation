@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-09",
+  "source_commit": "065534170c539161ec88ac5079def2d3fc8da26e",
+  "license": "MIT; existing owner decision for content/models/devices; 2D references not redistributed in repository",
+  "generated_ai_content": true,
+  "art_acceptance": "pending owner review",
+  "assets": [
+    {
+      "concept_id": "DEV-05",
+      "reference": "Abandoned_Meshy_Concepts/images/DEV-05.png",
+      "reference_sha256": "ef959ec100de871e1fc6855c5f14db6bc9deca36fd823900d122fb0a05425a2c",
+      "image_preparation": {
+        "task_id": "01a1c0da-c083-7703-96aa-d231b62f059c",
+        "ai_model": "nano-banana-2-1",
+        "prompt": "Preserve this exact industrial optical instrument, all geometry, ivory paint, orange markings, graphite fittings, brackets, lens rings, bolts, viewpoint and background. Change ONLY the optical glass: switch off ALL cyan light and replace the cyan glowing lens and cyan glass reflections with dark neutral graphite optical glass, with just subtle neutral white reflections. It must look fully powered off. Remove all letters, numbers, labels and tiny pseudo-writing. No glow, no turquoise, no blue, no laser beam. Do not add, remove, resize or reposition any mechanical part.",
+        "aspect_ratio": "1:1",
+        "consumed_credits": 4,
+        "result_sha256": "488773c7768eed99b021bd2055b4c6e4cc851de3b3e7e29cd439a0152ff65089"
+      },
+      "image_to_3d_task_id": "01a1c0db-7631-7564-86a2-72989f0c0c93",
+      "image_to_3d_settings": {
+        "ai_model": "meshy-7.1",
+        "geometry_resolution": "2k",
+        "image_enhancement": false,
+        "should_texture": true,
+        "texture_resolution": "4k",
+        "enable_pbr": true,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 25000,
+        "target_formats": [
+          "glb"
+        ],
+        "multi_view_thumbnails": true
+      },
+      "consumed_credits": 35,
+      "raw_model_sha256": "9cf832118ae4b9f92bdfcc8e6baae4408be5684316c909f951900923170476db",
+      "normalizer_mode": "emitter_concept",
+      "files": [
+        {
+          "path": "content/models/devices/emitter/emitter_body.bin",
+          "bytes": 1468116,
+          "sha256": "62619ea0fe42410e4f818cc91f8c68ed7dec92eb5aac43d6010b9adaddbea167"
+        },
+        {
+          "path": "content/models/devices/emitter/emitter_body.gltf",
+          "bytes": 2304,
+          "sha256": "83c90d2249ede9489adc5d02c6d8ecbb3164e00f2208e5eb1f2b487d76cf3318"
+        },
+        {
+          "path": "content/models/devices/emitter/emitter_body_base_color.jpg",
+          "bytes": 10953043,
+          "sha256": "69108cc56cc0ab7b432eca739d7d70231c21a9942db29aa428a1918348791946",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/emitter/emitter_body_metallic_roughness.jpg",
+          "bytes": 2302065,
+          "sha256": "9dccc53f01dc7b07705d90e0154c80663ca7bbd5c82dfaf86c59ae2667556081",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/emitter/emitter_body_normal.png",
+          "bytes": 16172799,
+          "sha256": "fbebd9a64a72bbaa8de9804a88d9880feeda7105155ea171b3f7a3b183a2537d",
+          "format": "PNG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "DEV-06",
+      "reference": "Abandoned_Meshy_Concepts/images/DEV-06.png",
+      "reference_sha256": "9cf4da7a292f53e4fa1deb12f70bebd54ca4de7d931b4b173e7374da13b0d9ec",
+      "image_preparation": {
+        "task_id": "01a1c0da-c916-7129-9074-a62ae9eb2e0b",
+        "ai_model": "nano-banana-2-1",
+        "prompt": "Preserve this exact industrial optical instrument, all geometry, ivory paint, orange markings, graphite fittings, brackets, lens rings, bolts, viewpoint and background. Change ONLY the optical glass: switch off ALL cyan light and replace the cyan glowing lens and cyan glass reflections with dark neutral graphite optical glass, with just subtle neutral white reflections. It must look fully powered off. Remove all letters, numbers, labels and tiny pseudo-writing. No glow, no turquoise, no blue, no laser beam. Do not add, remove, resize or reposition any mechanical part.",
+        "aspect_ratio": "1:1",
+        "consumed_credits": 4,
+        "result_sha256": "ad917c36ed4927cf9f1c9dbd5840b31884d9ab239b9a6a65144c59981ced3989"
+      },
+      "image_to_3d_task_id": "01a1c0db-8487-7793-b116-4f5fe72142db",
+      "image_to_3d_settings": {
+        "ai_model": "meshy-7.1",
+        "geometry_resolution": "2k",
+        "image_enhancement": false,
+        "should_texture": true,
+        "texture_resolution": "4k",
+        "enable_pbr": true,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 25000,
+        "target_formats": [
+          "glb"
+        ],
+        "multi_view_thumbnails": true
+      },
+      "consumed_credits": 35,
+      "raw_model_sha256": "573e829982eaeee1d6f0efe97f585ab67c22d2216c9be75b2c9d91b6c2239479",
+      "normalizer_mode": "receiver_concept",
+      "files": [
+        {
+          "path": "content/models/devices/receiver/receiver_body.bin",
+          "bytes": 1408352,
+          "sha256": "923e522c26618f76a8133e13c1f9e8690ac65765010132c093f3f380a7bec611"
+        },
+        {
+          "path": "content/models/devices/receiver/receiver_body.gltf",
+          "bytes": 2342,
+          "sha256": "9689ccbd2c5cecf9a5939aa6f557da1a521548b03451944b77a0ca75fef224b4"
+        },
+        {
+          "path": "content/models/devices/receiver/receiver_body_base_color.jpg",
+          "bytes": 11442462,
+          "sha256": "070cf0b56ff18202814c8a0f508380154387be3ba8232daca4ddf6a1deb9f59d",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/receiver/receiver_body_metallic_roughness.jpg",
+          "bytes": 2508904,
+          "sha256": "a5e7312a02e949c039c6b0dff405fcbb6baf2de458fbce77177d0644fea5dc73",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/receiver/receiver_body_normal.png",
+          "bytes": 17407841,
+          "sha256": "1c1db9f65879af9547ff7dae0b1a560ddd59c09338147065dff940bb287b8033",
+          "format": "PNG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "total_consumed_credits": 78
+}

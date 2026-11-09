@@ -5,11 +5,11 @@ extends PuzzleDeviceNode
 
 const CYAN: Color = Color(0.22, 0.78, 0.86)
 const HOUSING: Vector3 = Vector3(0.5, 0.5, 0.7)
-## Art model (content/models/devices/emitter): its lens opening sits on the firing axis. The collision stays
-## the HOUSING box; the lens disc and the rear lamp are code, so only optics ever turn cyan (ADR-0006).
+## DEV-05 art: its recessed lens opening sits on the firing axis. The collision stays the HOUSING box;
+## the lens disc and rear lamp are code, so only optics ever turn cyan (ADR-0006).
 const MODEL: PackedScene = preload("res://content/models/devices/emitter/emitter_body.gltf")
-const LENS_RADIUS: float = 0.075
-const LENS_Z: float = -0.295
+const LENS_RADIUS: float = 0.116
+const LENS_Z: float = -0.331
 
 ## Maximum game-beam length, metres.
 @export var range_m: float = 20.0
@@ -40,11 +40,13 @@ func _ready() -> void:
 	model.name = "Model"
 	add_child(model)
 	_lens = disc_mesh(LENS_RADIUS, DARK)
+	_lens.name = "Lens"
 	_lens.rotation.x = PI * 0.5
 	_lens.position = Vector3(0, 0, LENS_Z)
 	add_child(_lens)
 	_lamp = box_mesh(Vector3(0.05, 0.05, 0.01), DARK)
-	_lamp.position = Vector3(0, 0.12, HOUSING.z * 0.5 + 0.006)
+	_lamp.name = "PowerLamp"
+	_lamp.position = Vector3(0, 0.12, 0.332)
 	add_child(_lamp)
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

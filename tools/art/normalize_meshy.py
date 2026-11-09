@@ -11,6 +11,8 @@ cube   — centred on the origin and scaled per axis to exactly 1 x 1 x 1 m (the
 button — bottom at y = 0, plate top at y = 0.1 m, plate edge at ±0.7 m (the 1.4 x 0.1 x 1.4 m plate
          collision of FloorButtonDevice). The upper surfaces inside the plate edge are clipped out into
          a node "Plate", everything else stays in "Frame".
+button_concept — DEV-02 image-to-3D revision; cuts the plate sides as well as its top, so the whole
+         visible plate moves. Uses the measured 0.66 raw half-width and a cut 0.06 below its top.
 wall_button_body / wall_switch_body — scaled per axis to the housing size of WallButtonDevice, front
          towards +Z, back face at z = -0.08 m (the back of its 0.36 x 0.5 x 0.16 m collision box).
 wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the housing recess), its back at z = 0.
@@ -20,6 +22,8 @@ logic_box — the junction box housing of LogicDevice, centred, lid towards +Z.
 door_leaf — one sliding leaf of DoorDevice, centred; the device mirrors it for the other side.
 emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
          ReceiverDevice plate (dish towards +Z), centred on the node.
+emitter_concept / receiver_concept — DEV-05/DEV-06 revisions, with the optical centre aligned to the
+         existing beam axis. The receiver keeps a circular bezel instead of squashing its pedestal.
 
 The raw GLBs are not in the repository; their Meshy task IDs are listed in content/models/README.md.
 """
@@ -38,6 +42,7 @@ FLOAT, UINT32 = 5126, 5125
 PLATE_EDGE_RAW = 0.80  # rusty rim of the diamond plate in the texture
 PLATE_EDGE_GAME = 0.70
 PLATE_TOP_GAME = 0.10
+CONCEPT_PLATE_EDGE_RAW = 0.66  # DEV-02 white moving plate; the dark channel belongs to the frame
 
 
 # Wall devices (game metres; WallButtonDevice collision box is 0.36 x 0.5 x 0.16 m centred on the node).
@@ -50,6 +55,8 @@ FITS: dict[str, dict] = {
     # facing +Z. "shift" moves the model so its lens or dish sits on the device axis.
     "emitter_body": {"node": "Body", "rotate": (0.0, -90.0, 0.0), "size": (0.5, 0.5, 0.7), "origin": "center", "shift": (0.037, -0.08, 0.0)},
     "receiver_body": {"node": "Body", "size": (0.6, 0.6, 0.25), "origin": "center", "shift": (0.0, 0.02, 0.0)},
+    "emitter_concept": {"node": "Body", "rotate": (0.0, -90.0, 0.0), "size": (0.5, 0.433, 0.7), "origin": "center", "shift": (0.0, -0.025, 0.0)},
+    "receiver_concept": {"node": "Body", "size": (0.6, 0.808, 0.25), "origin": "center", "shift": (0.0, -0.105, 0.075)},
     # LogicDevice: one housing for every kind, 0.44 x 0.44 x 0.16 m centred on the node, lid towards +Z.
     "logic_box": {"node": "Body", "size": (0.44, 0.44, 0.16), "origin": "center"},
     # DoorDevice leaf for the default 2.0 x 2.6 m opening: 1.0 x 2.6 x 0.15 m, centred, handle on the +X edge.
@@ -167,6 +174,27 @@ def split_plate(vertices: np.ndarray, triangles: np.ndarray, top: float) -> tupl
     return np.array(frame), np.array(plate)
 
 
+def split_concept_plate(vertices: np.ndarray, triangles: np.ndarray, top: float) -> tuple[np.ndarray, np.ndarray]:
+    """Clip all triangles against the moving slab, including triangles crossing its side/bottom planes.
+    DEV-02 has a raised plate inside a dark channel. The old top-only selection leaves its side walls
+    attached to the frame; cutting 0.06 raw units below the tread includes those walls and fasteners.
+    """
+    frame, plate = [], []
+    for triangle in vertices[triangles]:
+        rest = list(triangle)
+        for axis, limit, below in ((1, top - 0.06, True),
+                                   (0, CONCEPT_PLATE_EDGE_RAW, False), (0, -CONCEPT_PLATE_EDGE_RAW, True),
+                                   (2, CONCEPT_PLATE_EDGE_RAW, False), (2, -CONCEPT_PLATE_EDGE_RAW, True)):
+            outside = clip(rest, axis, limit, below)
+            frame.extend(fan(outside) if len(outside) >= 3 else [])
+            rest = clip(rest, axis, limit, not below)
+            if len(rest) < 3:
+                break
+        if len(rest) >= 3:
+            plate.extend(fan(rest))
+    return np.array(frame), np.array(plate)
+
+
 def build_gltf(name: str, parts: dict[str, np.ndarray], gltf_in: dict, textures: dict[str, str]) -> tuple[dict, bytes]:
     blob = bytearray()
     views, accessors, meshes, nodes = [], [], [], []
@@ -228,7 +256,7 @@ def main() -> None:
         offset = -(low + high) * 0.5
         vertices = np.hstack([(position + offset) * scale, scale_normals(normal, scale), uv])
         parts = {"Cube": vertices[triangles]}
-    elif mode == "button":
+    elif mode in ("button", "button_concept"):
         name = "floor_button"
         centre = np.array([(low[0] + high[0]) * 0.5, 0.0, (low[2] + high[2]) * 0.5])
         position = position - centre
@@ -236,10 +264,20 @@ def main() -> None:
         faces = position[triangles]
         up = np.cross(faces[:, 1] - faces[:, 0], faces[:, 2] - faces[:, 0])
         up_facing = up[:, 1] / np.maximum(np.linalg.norm(up, axis=1), 1e-12) > 0.9
-        middle = np.abs(faces[:, :, [0, 2]]).max(axis=(1, 2)) < PLATE_EDGE_RAW * 0.7
-        top = float(np.median(faces[up_facing & middle][:, :, 1]))
-        frame, plate = split_plate(raw, triangles, top)
-        scale = np.array([PLATE_EDGE_GAME / PLATE_EDGE_RAW, PLATE_TOP_GAME / (top - low[1]), PLATE_EDGE_GAME / PLATE_EDGE_RAW])
+        edge_raw = CONCEPT_PLATE_EDGE_RAW if mode == "button_concept" else PLATE_EDGE_RAW
+        # Decimation can span the entire flat tread with a few large triangles. Select their centres,
+        # rather than requiring every vertex to lie in the small central sample square.
+        middle = (np.abs(faces.mean(axis=1)[:, [0, 2]]).max(axis=1) < edge_raw * 0.7
+                  if mode == "button_concept" else
+                  np.abs(faces[:, :, [0, 2]]).max(axis=(1, 2)) < edge_raw * 0.7)
+        sample = faces[up_facing & middle][:, :, 1]
+        if sample.size == 0:
+            raise ValueError("No upward plate surface in the central sample; measure the model before normalising")
+        top = float(np.median(sample))
+        if not np.isfinite(top) or top <= low[1]:
+            raise ValueError("Invalid plate height")
+        frame, plate = (split_concept_plate if mode == "button_concept" else split_plate)(raw, triangles, top)
+        scale = np.array([PLATE_EDGE_GAME / edge_raw, PLATE_TOP_GAME / (top - low[1]), PLATE_EDGE_GAME / edge_raw])
         parts = {}
         for part, soup in (("Frame", frame), ("Plate", plate)):
             flat = soup.reshape(-1, 8)
@@ -248,7 +286,7 @@ def main() -> None:
             parts[part] = flat.reshape(-1, 3, 8)
         print(f"plate top {top:.4f} raw, frame {len(frame)} tris, plate {len(plate)} tris, scale {scale.round(4).tolist()}")
     elif mode in FITS:
-        name = mode
+        name = {"emitter_concept": "emitter_body", "receiver_concept": "receiver_body"}.get(mode, mode)
         fit = FITS[mode]
         rotation = rotation_matrix(fit.get("rotate", (0.0, 0.0, 0.0)))
         position = position @ rotation.T
@@ -283,7 +321,9 @@ def main() -> None:
                "normal": material["normalTexture"]["index"]}
     textures = {}
     for key, texture in sources.items():
-        file_name = f"{name}_{key}.jpg"
+        source_image = gltf["images"][gltf["textures"][texture]["source"]]
+        extension = {"image/jpeg": "jpg", "image/png": "png"}[source_image["mimeType"]]
+        file_name = f"{name}_{key}.{extension}"
         (out_dir / file_name).write_bytes(image_bytes(gltf, blob, texture))
         textures[key] = file_name
     document, binary = build_gltf(name, parts, gltf, textures)

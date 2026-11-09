@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ldwiu0p1y3qx"
-path.s3tc="res://.godot/imported/floor_button_normal.jpg-d596edd65de36a76c8c38b953667e8e7.s3tc.ctex"
+uid="uid://sv0y6si13jb2"
+path.s3tc="res://.godot/imported/receiver_body_normal.png-657d74f87d8bf33454cc1ea4d0ed3e08.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://content/models/devices/floor_button/floor_button_normal.jpg"
-dest_files=["res://.godot/imported/floor_button_normal.jpg-d596edd65de36a76c8c38b953667e8e7.s3tc.ctex"]
+source_file="res://content/models/devices/receiver/receiver_body_normal.png"
+dest_files=["res://.godot/imported/receiver_body_normal.png-657d74f87d8bf33454cc1ea4d0ed3e08.s3tc.ctex"]
 
 [params]
 
