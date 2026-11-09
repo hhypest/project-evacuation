@@ -15,8 +15,7 @@ const BEAM_X: float = -3.5
 const BEAM_Z: float = -7.0
 const SHAFT: float = 0.6
 const OPENING: float = 0.3
-## Ballast cube edge. A 1 m cube does not fit beside a player who has just turned onto the wall (eye ~0.86 m
-## above the floor), and the carry rules release it; 0.75 m fits in any orientation.
+## Ballast cube edge; the plinth depth, plate size and beam distance are tuned for it.
 const CUBE_EDGE: float = 0.75
 ## Plinth on the wall carrying the plate; deep enough that a cube resting on it covers the beam.
 const PLINTH_DEPTH: float = 0.75

@@ -1,12 +1,14 @@
 class_name CarryController
 extends RefCounted
+## Talos-style carry (ADR-0012): one press grabs, the prop sticks to a point in front of the carrier,
+## another press drops it, the throw button throws it.
 
 var state: CarryState = CarryState.new()
 var _world: CarryWorldPort
 var _profile: CarryProfile
 var _scope_id: int
 var _last_tick: int = -1
-var _relative_basis: Basis = Basis.IDENTITY
+var _facing: Vector3 = Vector3.FORWARD
 var _separated_seconds: float = 0.0
 
 
@@ -20,6 +22,9 @@ func step(request: CarryInput) -> void:
 	if _scope_id < 0 or request.scope_id != _scope_id or request.tick_id <= _last_tick:
 		return
 	_last_tick = request.tick_id
+	_world.settle()
+	var view_forward: Vector3 = -request.view.basis.z
+	_facing = CarryRules.facing(view_forward, request.carrier_up, _facing)
 	if state.held_id.is_empty():
 		if not request.interact:
 			return
@@ -29,7 +34,6 @@ func step(request: CarryInput) -> void:
 		if not _world.acquire(candidate.id):
 			return
 		state.take(candidate.id, candidate.mass, _profile)
-		_relative_basis = request.view.basis.inverse() * candidate.basis
 		_separated_seconds = 0.0
 	else:
 		if request.interact:
@@ -37,23 +41,25 @@ func step(request: CarryInput) -> void:
 			return
 		if request.throw_requested:
 			var thrown: CarryObservation = _world.observe(state.held_id)
-			if thrown != null and _profile.accepts_mass(thrown.mass) and not _world.supporting_player(state.held_id):
-				_release(request, CarryRules.throw_impulse(-request.view.basis.z, thrown.velocity, thrown.mass, _profile))
+			if thrown != null and _profile.accepts_mass(thrown.mass):
+				_release(request, CarryRules.throw_impulse(view_forward, request.carrier_velocity, thrown.mass, _profile))
 			else:
 				_release(request)
 			return
 	var observed: CarryObservation = _world.observe(state.held_id)
-	if observed == null or not _profile.accepts_mass(observed.mass) or _world.supporting_player(state.held_id):
+	if observed == null or not _profile.accepts_mass(observed.mass):
 		_release(request)
 		return
-	if observed.position.distance_to(request.view.origin) > _profile.break_distance:
+	var desired: Transform3D = Transform3D(
+		CarryRules.upright_basis(observed.basis, request.carrier_up, _facing),
+		CarryRules.hold_point(request.carrier_feet, request.carrier_up, _facing, view_forward,
+			request.carrier_radius, observed.half_extent, observed.half_height, _profile))
+	var reached: CarryTarget = _world.follow(state.held_id, desired,
+		_profile.pull_speed * request.delta, _profile.turn_speed * request.delta)
+	if not reached.available:
 		_release(request)
 		return
-	var resolved: CarryTarget = _world.target(state.held_id, request.view, request.view.basis * _relative_basis)
-	if not resolved.available:
-		_release(request)
-		return
-	if observed.position.distance_to(resolved.transform.origin) > _profile.break_error:
+	if reached.transform.origin.distance_to(desired.origin) > _profile.break_distance:
 		_separated_seconds += request.delta
 	else:
 		_separated_seconds = 0.0
@@ -61,7 +67,7 @@ func step(request: CarryInput) -> void:
 		_release(request)
 		return
 	var command: CarryBodyCommand = _command(request)
-	command.target = resolved.transform
+	command.target = reached.transform
 	command.carrier_velocity = request.carrier_velocity
 	if not _world.submit(state.held_id, command):
 		state.release()
@@ -81,6 +87,7 @@ func _command(request: CarryInput) -> CarryBodyCommand:
 	var command: CarryBodyCommand = CarryBodyCommand.new()
 	command.scope_id = _scope_id
 	command.tick_id = request.tick_id
+	command.carrier_velocity = request.carrier_velocity
 	return command
 
 

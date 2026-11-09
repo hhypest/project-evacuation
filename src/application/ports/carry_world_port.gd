@@ -19,12 +19,19 @@ func supporting_player(_id: StringName) -> bool:
 	return false
 
 
-func target(_id: StringName, _view: Transform3D, _basis: Basis) -> CarryTarget:
+## Moves the held prop toward desired by at most max_step metres and max_turn radians without passing
+## through the world or other props; returns where it can stand this tick.
+func follow(_id: StringName, _desired: Transform3D, _max_step: float, _max_turn: float) -> CarryTarget:
 	return CarryTarget.new()
 
 
 func submit(_id: StringName, _command: CarryBodyCommand) -> bool:
 	return false
+
+
+## Per-tick housekeeping for props that were released while still overlapping the carrier.
+func settle() -> void:
+	pass
 
 
 func cancel_pending() -> void:

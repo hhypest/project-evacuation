@@ -1,11 +1,11 @@
 class_name CarryRigidBody
 extends RigidBody3D
-## Commands are consumed once in the direct-body callback; Jolt keeps all contacts.
+## Held: a kinematic body placed once per physics tick by the carry adapter (ADR-0012).
+## Released: an ordinary Jolt body again; a throw impulse is applied once in the direct-body callback.
 
 @export var stable_id: StringName = &""
 
 var last_applied_tick: int = -1
-var last_force: Vector3 = Vector3.ZERO
 var _profile: CarryProfile
 var _scope_id: int = -1
 var _held: bool = false
@@ -45,7 +45,11 @@ func acquire() -> bool:
 	if _scope_id < 0 or _held or _pending != null or freeze:
 		return false
 	_held = true
-	sleeping = false
+	# Talos-style hold (ADR-0012): while held the prop is a kinematic body placed by the carry adapter.
+	freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+	freeze = true
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
 	return true
 
 
@@ -53,48 +57,41 @@ func submit(command: CarryBodyCommand) -> bool:
 	if not _held or command.scope_id != _scope_id or command.tick_id <= _last_received_tick:
 		return false
 	_last_received_tick = command.tick_id
-	_pending = command
 	if command.releasing:
-		_held = false
-	sleeping = false
+		_let_go(command.carrier_velocity)
+		_pending = command
+		return true
+	# Called from the coordinator's physics tick, never per render frame; the body is kinematic here.
+	global_transform = command.target
+	last_applied_tick = command.tick_id
 	return true
 
 
 func cancel_pending() -> void:
 	_pending = null
-	last_force = Vector3.ZERO
 
 
 func close() -> void:
 	_scope_id = -1
-	_held = false
+	if _held:
+		_let_go(Vector3.ZERO)
 	cancel_pending()
 
 
+func _let_go(velocity: Vector3) -> void:
+	_held = false
+	freeze = false
+	linear_velocity = velocity.limit_length(_profile.max_throw_speed if _profile != null else velocity.length())
+	angular_velocity = Vector3.ZERO
+	sleeping = false
+
+
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
-	last_force = Vector3.ZERO
 	if _pending == null or _scope_id < 0:
 		return
 	var command: CarryBodyCommand = _pending
 	_pending = null
 	last_applied_tick = command.tick_id
-	if command.releasing:
+	if command.releasing and command.impulse != Vector3.ZERO:
 		state.apply_central_impulse(command.impulse)
 		state.linear_velocity = state.linear_velocity.limit_length(_profile.max_throw_speed)
-		return
-	if not _held:
-		return
-	last_force = CarryRules.force(command.target.origin - state.transform.origin,
-		state.linear_velocity - command.carrier_velocity, state.total_gravity, mass, _profile)
-	state.apply_central_force(last_force)
-	var difference: Quaternion = (command.target.basis * state.transform.basis.inverse()).get_rotation_quaternion().normalized()
-	if difference.w < 0.0:
-		difference = Quaternion(-difference.x, -difference.y, -difference.z, -difference.w)
-	var angular_error: Vector3 = Vector3.ZERO
-	if difference.get_angle() > 0.001:
-		angular_error = difference.get_axis() * difference.get_angle()
-	var angular_acceleration: Vector3 = angular_error * _profile.angular_spring - state.angular_velocity * _profile.angular_damping
-	if absf(state.inverse_inertia_tensor.determinant()) > 0.000001:
-		state.apply_torque((state.inverse_inertia_tensor.inverse() * angular_acceleration).limit_length(_profile.max_torque))
-	state.linear_velocity = state.linear_velocity.limit_length(_profile.max_hold_speed)
-	state.angular_velocity = state.angular_velocity.limit_length(_profile.max_angular_speed)

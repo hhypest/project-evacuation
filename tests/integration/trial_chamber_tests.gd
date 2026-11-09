@@ -154,10 +154,8 @@ func _trial_loop() -> Array[TestOutcome]:
 	await _ticks(1)
 	await _ticks(30, Vector2.ZERO, true)
 	var picked: bool = cube.is_carried()
-	# Raise the cube to a level gaze and step next to the beam so it catches up. Looking down at the floor
-	# while entering the field would leave no room for the cube once the eye drops to ~0.86 m above the
-	# floor, and the carry rules release it (docs/design/puzzles/loop.md).
-	_camera.look_at(_camera.global_position + Vector3.BACK, Vector3.UP)
+	# Still looking down at where the cube lay: the Talos-style hold keeps it through the turn onto the wall
+	# (ADR-0012). The test teleports, so it steps next to the beam first and lets the cube catch up.
 	_player.global_position = beam + Vector3(0, 0, 0.6)
 	await _ticks(40)
 	_player.global_position = beam

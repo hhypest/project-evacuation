@@ -13,10 +13,10 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	settings.max_mass = 80
 	results.append(TestOutcome.new("carry authoring resource is copied into an independent valid profile",
 		copied.max_mass == 40 and copied.is_valid()))
-	copied.reference_mass = 0
+	copied.pull_speed = 0
 	var zero_rejected: bool = not copied.is_valid()
 	copied = settings.to_profile()
-	copied.spring = NAN
+	copied.hold_height = NAN
 	results.append(TestOutcome.new("invalid carry tuning is rejected before physics", zero_rejected and not copied.is_valid()))
 	for duplicate: bool in [true, false]:
 		var level: Node3D = Node3D.new()
