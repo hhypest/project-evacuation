@@ -10,7 +10,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	create_timer(30.0, true, false, true).timeout.connect(_on_timeout)
+	create_timer(45.0, true, false, true).timeout.connect(_on_timeout)
 	var info: RuntimeInfo = RuntimeProbe.new().read()
 	if not _check(ValidateRuntime.new().execute(info).is_empty(), "real Vulkan runtime required"):
 		return
@@ -188,6 +188,51 @@ func _run() -> void:
 	await RenderingServer.frame_post_draw
 	if not _capture(capture.get_basename() + "-beam.png"):
 		return
+	# Placement (ADR-0012): a held cube aimed at the floor button shows its silhouette; E sets it there,
+	# and a second cube aimed at the first is set on top. Two 5 kg cubes press the 8 kg plate.
+	var plate: FloorButtonDevice = lab.get_node("lab_plate") as FloorButtonDevice
+	var cube_a: CarryRigidBody = lab.get_node("CubeA") as CarryRigidBody
+	var cube_b: CarryRigidBody = lab.get_node("CubeB") as CarryRigidBody
+	var ghost: CarryGhost = carry_scope.get_node("FoundationLab/CarryGhost") as CarryGhost
+	var plate_door: DoorDevice = lab.get_node("lab_door_plate") as DoorDevice
+	if not _check(plate != null and cube_a != null and cube_b != null and ghost != null and plate_door != null,
+			"placement bay"):
+		return
+	var plate_top: Vector3 = plate.plate.top_center(Vector3.UP)
+	for pair: Array[Node3D] in [[cube_a, plate] as Array[Node3D], [cube_b, cube_a] as Array[Node3D]]:
+		var prop: CarryRigidBody = pair[0] as CarryRigidBody
+		lab_player.global_position = Vector3(prop.global_position.x, 0.05, prop.global_position.z) + Vector3(0, 0, 1.6)
+		for _tick: int in range(20):
+			await physics_frame
+		carry_camera.look_at(prop.global_position)
+		TestInputEvents.key(KEY_E)
+		TestInputEvents.key(KEY_E, false)
+		for _tick: int in range(10):
+			await physics_frame
+		var target: Vector3 = plate_top if pair[1] == plate else cube_a.global_position + Vector3.UP * 0.5
+		lab_player.global_position = Vector3(plate_top.x, 0.05, plate_top.z) + Vector3(0.8, 0, 1.8)
+		for _tick: int in range(10):
+			await physics_frame
+		carry_camera.look_at(target)
+		for _tick: int in range(6):
+			await physics_frame
+		carry_camera.look_at(target)
+		for _tick: int in range(3):
+			await physics_frame
+		if not _check(carry_scope.held_prop_id() == prop.stable_id and ghost.visible, "held cube shows its placement silhouette"):
+			return
+		await RenderingServer.frame_post_draw
+		if not _capture(capture.get_basename() + ("-place-plate.png" if pair[1] == plate else "-place-stack.png")):
+			return
+		TestInputEvents.key(KEY_E)
+		TestInputEvents.key(KEY_E, false)
+		for _tick: int in range(60):
+			await physics_frame
+	var on_top: Vector3 = cube_b.global_position - cube_a.global_position
+	if not _check(on_top.slide(Vector3.UP).length() < 0.03 and absf(on_top.y - 1.0) < 0.03
+			and (cube_a.global_position - plate_top).slide(Vector3.UP).length() < 0.03 and plate_door.is_open()
+			and not ghost.visible, "E sets the cubes square on the plate and on each other; the plate opens its door"):
+		return
 	# Gravity (SKL-07): E powers the wall field; the player stepping in turns and stands on the wall.
 	var gravity_button: WallButtonDevice = lab.get_node("lab_button_gravity") as WallButtonDevice
 	var field: GravityFieldDevice = lab.get_node("lab_field") as GravityFieldDevice
@@ -218,7 +263,7 @@ func _run() -> void:
 	if not _capture(capture.get_basename() + "-gravity.png"):
 		return
 	_finished = true
-	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw devices=button/door/beam gravity=field/wall-walk movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
+	print("GPU_SMOKE_PASSED driver=%s gpu=%s carry=grab/hold/throw/place devices=button/door/beam gravity=field/wall-walk movement=strafe/run/jump/duck session=menu/pause/focus/restart/quit image=%s" % [
 		info.rendering_driver, RenderingServer.get_video_adapter_name(), capture
 	])
 	# Exercise the same close signal used by the window manager; Bootstrap owns cleanup.

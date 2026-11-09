@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="5_2bktj"]
 [ext_resource type="PackedScene" path="res://content/levels/portal_lab.tscn" id="6_portal"]
 [ext_resource type="PackedScene" path="res://content/levels/trial_loop.tscn" id="7_loop"]
+[ext_resource type="PackedScene" path="res://content/levels/stacking_lab.tscn" id="8_stack"]
 
 [sub_resource type="Resource" id="Resource_lh027"]
 script = ExtResource("1_cdh8c")
@@ -38,6 +39,12 @@ title = "Пример: камера «Петля»"
 summary = "Одна идея на готовых механиках: луч, НЕ, поле к стене, кнопка на стене. Подсказок нет."
 scene = ExtResource("7_loop")
 
+[sub_resource type="Resource" id="Resource_stack"]
+script = ExtResource("1_cdh8c")
+title = "Эксперимент: постановка кубов"
+summary = "Силуэт показывает, куда встанет куб: на кнопку или на другой куб. Лестница из трёх кубов на уступ 2,2 м."
+scene = ExtResource("8_stack")
+
 [resource]
 script = ExtResource("5_2bktj")
-entries = Array[ExtResource("1_cdh8c")]([SubResource("Resource_lh027"), SubResource("Resource_0tet8"), SubResource("Resource_2tiam"), SubResource("Resource_portal"), SubResource("Resource_loop")])
+entries = Array[ExtResource("1_cdh8c")]([SubResource("Resource_lh027"), SubResource("Resource_0tet8"), SubResource("Resource_2tiam"), SubResource("Resource_portal"), SubResource("Resource_loop"), SubResource("Resource_stack")])

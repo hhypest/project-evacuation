@@ -30,12 +30,46 @@ static func upright_basis(current: Basis, up: Vector3, facing_direction: Vector3
 	var y: Vector3 = up.normalized()
 	var z: Vector3 = -facing_direction.slide(y).normalized()
 	var x: Vector3 = y.cross(z).normalized()
-	var frame: Basis = Basis(x, y, z)
+	return _nearest_quarter(Basis(x, y, z), y, current)
+
+
+## Axis of a resting box (one of its basis columns, signed) that points closest to up, or zero when the box is
+## tilted further than max_tilt radians: a prop can only be set down on a level top face.
+static func level_axis(basis: Basis, up: Vector3, max_tilt: float) -> Vector3:
+	var y: Vector3 = up.normalized()
+	var best: Vector3 = Vector3.ZERO
+	var best_dot: float = cos(max_tilt)
+	for column: Vector3 in [basis.x, basis.y, basis.z]:
+		var axis: Vector3 = column.normalized()
+		var dot: float = axis.dot(y)
+		if absf(dot) >= best_dot:
+			best_dot = absf(dot)
+			best = axis * signf(dot)
+	return best
+
+
+## Pose of a prop set down on a level support (ADR-0012, placement): centred over the support's top face,
+## upright to up, square with the support's own axes and turned by the quarter closest to the prop's current
+## orientation, lift metres above the face.
+static func slot(top_center: Vector3, reference: Basis, up: Vector3, current: Basis, half_height: float,
+		lift: float) -> Transform3D:
+	var y: Vector3 = up.normalized()
+	var side: Vector3 = reference.x
+	for column: Vector3 in [reference.y, reference.z]:
+		if absf(column.normalized().dot(y)) < absf(side.normalized().dot(y)):
+			side = column
+	var x: Vector3 = side.slide(y).normalized()
+	var frame: Basis = Basis(x, y, x.cross(y).normalized())
+	return Transform3D(_nearest_quarter(frame, y, current), top_center + y * (half_height + lift))
+
+
+## Of the four quarter turns of frame about up, the one closest to current.
+static func _nearest_quarter(frame: Basis, up: Vector3, current: Basis) -> Basis:
 	var now: Quaternion = current.orthonormalized().get_rotation_quaternion()
 	var best: Basis = frame
 	var best_dot: float = -1.0
 	for quarter: int in range(4):
-		var candidate: Basis = Basis(y, quarter * PI * 0.5) * frame
+		var candidate: Basis = Basis(up, quarter * PI * 0.5) * frame
 		var dot: float = absf(now.dot(candidate.get_rotation_quaternion()))
 		if dot > best_dot:
 			best_dot = dot
