@@ -1,0 +1,2547 @@
+{
+  "baseline": "3c9f5d4460f0b713a03ccbd5c572da9af7d4a0b0",
+  "files": [
+    {
+      "source": "AGENTS.md",
+      "source_sha256": "1a200a07864b1bb167467a2984c22d41924a577f0256cd703a62993e7779bd35",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "правила-работы-агентов": {
+          "heading": "Правила работы агентов",
+          "destination": "AGENTS.md",
+          "anchor": "правила-работы-агентов"
+        },
+        "1-перед-работой": {
+          "heading": "1. Перед работой",
+          "destination": "AGENTS.md",
+          "anchor": "перед-работой"
+        },
+        "2-неизменяемые-рамки-без-отдельного-решения-владельца": {
+          "heading": "2. Неизменяемые рамки без отдельного решения владельца",
+          "destination": "AGENTS.md",
+          "anchor": "неизменяемые-рамки"
+        },
+        "3-архитектура": {
+          "heading": "3. Архитектура",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "инварианты-изменения"
+        },
+        "4-gdscript": {
+          "heading": "4. GDScript",
+          "destination": "docs/development/coding.md",
+          "anchor": "4-gdscript"
+        },
+        "5-физика-движение-порталы": {
+          "heading": "5. Физика, движение, порталы",
+          "destination": "docs/development/physics.md",
+          "anchor": "5-физика-движение-порталы"
+        },
+        "6-проверки": {
+          "heading": "6. Проверки",
+          "destination": "docs/development/checks.md",
+          "anchor": "6-проверки"
+        },
+        "7-контент-и-лицензии": {
+          "heading": "7. Контент и лицензии",
+          "destination": "docs/development/assets.md",
+          "anchor": "7-контент-и-лицензии"
+        },
+        "8-завершение-задачи": {
+          "heading": "8. Завершение задачи",
+          "destination": "AGENTS.md",
+          "anchor": "завершение"
+        }
+      }
+    },
+    {
+      "source": "Architecture.md",
+      "source_sha256": "1db9affd5ba8824ba757bbe417923e65a24cedab643a05559187ca327079b54b",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "архитектура-проекта-эвакуация": {
+          "heading": "Архитектура проекта «Эвакуация»",
+          "destination": "Architecture.md",
+          "anchor": "архитектура-abandoned"
+        },
+        "1-цели-и-ограничения": {
+          "heading": "1. Цели и ограничения",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "1-цели-и-ограничения"
+        },
+        "2-зависимости-и-слои": {
+          "heading": "2. Зависимости и слои",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "2-зависимости-и-слои"
+        },
+        "3-предметный-язык-и-контексты": {
+          "heading": "3. Предметный язык и контексты",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "3-предметный-язык-и-контексты"
+        },
+        "агрегаты-и-инварианты": {
+          "heading": "Агрегаты и инварианты",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "агрегаты-и-инварианты"
+        },
+        "4-структура-будущего-репозитория": {
+          "heading": "4. Структура будущего репозитория",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "4-структура-будущего-репозитория"
+        },
+        "5-типизированные-контракты": {
+          "heading": "5. Типизированные контракты",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "5-типизированные-контракты"
+        },
+        "6-выполнение-тики-и-владение-состоянием": {
+          "heading": "6. Выполнение, тики и владение состоянием",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "6-выполнение-тики-и-владение-состоянием"
+        },
+        "жизненный-цикл-уровня": {
+          "heading": "Жизненный цикл уровня",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "жизненный-цикл-уровня"
+        },
+        "цикл-симуляции": {
+          "heading": "Цикл симуляции",
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "цикл-симуляции"
+        },
+        "7-электрические-цепи-и-свет": {
+          "heading": "7. Электрические цепи и свет",
+          "destination": "docs/architecture/circuits.md",
+          "anchor": "7-электрические-цепи-и-свет"
+        },
+        "сеть-устройств": {
+          "heading": "Сеть устройств",
+          "destination": "docs/architecture/circuits.md",
+          "anchor": "сеть-устройств"
+        },
+        "световые-головоломки": {
+          "heading": "Световые головоломки",
+          "destination": "docs/architecture/circuits.md",
+          "anchor": "световые-головоломки"
+        },
+        "8-движение-и-физическое-взаимодействие": {
+          "heading": "8. Движение и физическое взаимодействие",
+          "destination": "docs/architecture/movement.md",
+          "anchor": "8-движение-и-физическое-взаимодействие"
+        },
+        "контроллер-игрока": {
+          "heading": "Контроллер игрока",
+          "destination": "docs/architecture/movement.md",
+          "anchor": "контроллер-игрока"
+        },
+        "предметы-в-духе-half-life-2": {
+          "heading": "Предметы в духе Half-Life 2",
+          "destination": "docs/architecture/movement.md",
+          "anchor": "предметы-в-духе-half-life-2"
+        },
+        "как-оценивать-сходство-с-half-life": {
+          "heading": "Как оценивать сходство с Half-Life",
+          "destination": "docs/architecture/movement.md",
+          "anchor": "как-оценивать-сходство-с-half-life"
+        },
+        "9-гравитационные-зоны": {
+          "heading": "9. Гравитационные зоны",
+          "destination": "docs/architecture/gravity.md",
+          "anchor": "9-гравитационные-зоны"
+        },
+        "10-порталы": {
+          "heading": "10. Порталы",
+          "destination": "docs/architecture/portals.md",
+          "anchor": "10-порталы"
+        },
+        "пространственное-преобразование": {
+          "heading": "Пространственное преобразование",
+          "destination": "docs/architecture/portals.md",
+          "anchor": "пространственное-преобразование"
+        },
+        "пересечение-и-коллизии": {
+          "heading": "Пересечение и коллизии",
+          "destination": "docs/architecture/portals.md",
+          "anchor": "пересечение-и-коллизии"
+        },
+        "изображение": {
+          "heading": "Изображение",
+          "destination": "docs/architecture/portals.md",
+          "anchor": "изображение"
+        },
+        "11-уровни-контент-и-валидация": {
+          "heading": "11. Уровни, контент и валидация",
+          "destination": "docs/architecture/content-and-saves.md",
+          "anchor": "11-уровни-контент-и-валидация"
+        },
+        "12-сохранения-и-восстановление": {
+          "heading": "12. Сохранения и восстановление",
+          "destination": "docs/architecture/content-and-saves.md",
+          "anchor": "12-сохранения-и-восстановление"
+        },
+        "13-рендеринг-звук-и-производительность": {
+          "heading": "13. Рендеринг, звук и производительность",
+          "destination": "docs/architecture/presentation.md",
+          "anchor": "13-рендеринг-звук-и-производительность"
+        },
+        "диегетическое-представление": {
+          "heading": "Диегетическое представление",
+          "destination": "docs/architecture/presentation.md",
+          "anchor": "диегетическое-представление"
+        },
+        "графический-backend-и-бюджеты": {
+          "heading": "Графический backend и бюджеты",
+          "destination": "docs/architecture/presentation.md",
+          "anchor": "графический-backend-и-бюджеты"
+        },
+        "14-проверки-и-наблюдаемость": {
+          "heading": "14. Проверки и наблюдаемость",
+          "destination": "docs/architecture/validation.md",
+          "anchor": "14-проверки-и-наблюдаемость"
+        },
+        "15-распространение-и-границы-steam": {
+          "heading": "15. Распространение и границы Steam",
+          "destination": "docs/architecture/distribution.md",
+          "anchor": "15-распространение-и-границы-steam"
+        },
+        "16-решения-и-порядок-изменения": {
+          "heading": "16. Решения и порядок изменения",
+          "destination": "docs/architecture/distribution.md",
+          "anchor": "16-решения-и-порядок-изменения"
+        }
+      }
+    },
+    {
+      "source": "CHANGELOG.md",
+      "source_sha256": "d63aeea6af798fd0d7810b55d869d9965e80a671716be84673b0b3d00d5ac8b3",
+      "role": "История",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "история-изменений": {
+          "heading": "История изменений",
+          "destination": "CHANGELOG.md",
+          "anchor": "история-изменений"
+        },
+        "009-dev--2026-11-08": {
+          "heading": "0.0.9-dev — 2026-11-08",
+          "destination": "CHANGELOG.md",
+          "anchor": "009-dev--2026-11-08"
+        },
+        "008-dev--2026-11-08": {
+          "heading": "0.0.8-dev — 2026-11-08",
+          "destination": "CHANGELOG.md",
+          "anchor": "008-dev--2026-11-08"
+        },
+        "007-dev--2026-11-08": {
+          "heading": "0.0.7-dev — 2026-11-08",
+          "destination": "CHANGELOG.md",
+          "anchor": "007-dev--2026-11-08"
+        },
+        "006-dev--2026-11-08": {
+          "heading": "0.0.6-dev — 2026-11-08",
+          "destination": "CHANGELOG.md",
+          "anchor": "006-dev--2026-11-08"
+        },
+        "005-dev--2026-11-08": {
+          "heading": "0.0.5-dev — 2026-11-08",
+          "destination": "CHANGELOG.md",
+          "anchor": "005-dev--2026-11-08"
+        },
+        "004-dev--2026-11-07": {
+          "heading": "0.0.4-dev — 2026-11-07",
+          "destination": "CHANGELOG.md",
+          "anchor": "004-dev--2026-11-07"
+        },
+        "003-dev--2026-11-07": {
+          "heading": "0.0.3-dev — 2026-11-07",
+          "destination": "CHANGELOG.md",
+          "anchor": "003-dev--2026-11-07"
+        },
+        "002-dev--2026-11-07": {
+          "heading": "0.0.2-dev — 2026-11-07",
+          "destination": "CHANGELOG.md",
+          "anchor": "002-dev--2026-11-07"
+        },
+        "001-dev--2026-11-07": {
+          "heading": "0.0.1-dev — 2026-11-07",
+          "destination": "CHANGELOG.md",
+          "anchor": "001-dev--2026-11-07"
+        }
+      }
+    },
+    {
+      "source": "CONTRIBUTING.md",
+      "source_sha256": "5cc18e6d0b8af3a688b18efcd4e4e037efd2e6e329c24ee7e9a54ae27dd8a230",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "участие-в-разработке": {
+          "heading": "Участие в разработке",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "участие-в-разработке"
+        },
+        "1-какие-изменения-полезны": {
+          "heading": "1. Какие изменения полезны",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "1-какие-изменения-полезны"
+        },
+        "2-среда-разработки": {
+          "heading": "2. Среда разработки",
+          "destination": "docs/getting-started.md",
+          "anchor": "что-понадобится"
+        },
+        "3-рабочий-цикл": {
+          "heading": "3. Рабочий цикл",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "3-рабочий-цикл"
+        },
+        "4-код-и-архитектурные-соглашения": {
+          "heading": "4. Код и архитектурные соглашения",
+          "destination": "docs/development/coding.md",
+          "anchor": "правила-кода"
+        },
+        "5-проверки-и-команды": {
+          "heading": "5. Проверки и команды",
+          "destination": "docs/development/checks.md",
+          "anchor": "5-проверки-и-команды"
+        },
+        "реализованный-тестовый-каркас": {
+          "heading": "Реализованный тестовый каркас",
+          "destination": "docs/development/checks.md",
+          "anchor": "реализованный-тестовый-каркас"
+        },
+        "матрица-проверок": {
+          "heading": "Матрица проверок",
+          "destination": "docs/development/checks.md",
+          "anchor": "матрица-проверок"
+        },
+        "gpu-и-экспорт": {
+          "heading": "GPU и экспорт",
+          "destination": "docs/development/checks.md",
+          "anchor": "gpu-и-экспорт"
+        },
+        "ci": {
+          "heading": "CI",
+          "destination": "docs/development/checks.md",
+          "anchor": "ci"
+        },
+        "6-уровни-и-головоломки": {
+          "heading": "6. Уровни и головоломки",
+          "destination": "docs/design/authoring.md",
+          "anchor": "6-уровни-и-головоломки"
+        },
+        "7-ассеты-и-лицензирование": {
+          "heading": "7. Ассеты и лицензирование",
+          "destination": "docs/development/assets.md",
+          "anchor": "7-ассеты-и-лицензирование"
+        },
+        "8-сообщение-об-ошибке": {
+          "heading": "8. Сообщение об ошибке",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "8-сообщение-об-ошибке"
+        },
+        "9-pull-request": {
+          "heading": "9. Pull request",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "9-pull-request"
+        },
+        "10-definition-of-done": {
+          "heading": "10. Definition of Done",
+          "destination": "CONTRIBUTING.md",
+          "anchor": "10-definition-of-done"
+        },
+        "11-выпуск": {
+          "heading": "11. Выпуск",
+          "destination": "docs/development/release.md",
+          "anchor": "11-выпуск"
+        }
+      }
+    },
+    {
+      "source": "Readme.md",
+      "source_sha256": "69cba5d4d956e4d76556c30e3bdc7f23f77d0cf502b3eb8a7c2f76e5c7ca5843",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "проект-эвакуация-игра-abandoned": {
+          "heading": "Проект «Эвакуация» (игра «Abandoned»)",
+          "destination": "Readme.md",
+          "anchor": "проект-эвакуация-игра-abandoned"
+        },
+        "документация": {
+          "heading": "Документация",
+          "destination": "docs/README.md",
+          "anchor": "документация-abandoned"
+        },
+        "зафиксированные-требования": {
+          "heading": "Зафиксированные требования",
+          "destination": "docs/requirements.md",
+          "anchor": "зафиксированные-требования"
+        },
+        "предлагаемые-границы-первой-игры": {
+          "heading": "Предлагаемые границы первой игры",
+          "destination": "docs/requirements.md",
+          "anchor": "предлагаемые-границы-первой-игры"
+        },
+        "игровые-принципы": {
+          "heading": "Игровые принципы",
+          "destination": "docs/requirements.md",
+          "anchor": "игровые-принципы"
+        },
+        "механики-и-минимальная-готовность-к-010": {
+          "heading": "Механики и минимальная готовность к 0.1.0",
+          "destination": "docs/requirements.md",
+          "anchor": "механики-и-минимальная-готовность-к-010"
+        },
+        "подготовка-и-запуск": {
+          "heading": "Подготовка и запуск",
+          "destination": "docs/getting-started.md",
+          "anchor": "первый-запуск"
+        },
+        "план-разработки": {
+          "heading": "План разработки",
+          "destination": "docs/roadmap.md",
+          "anchor": "план-разработки"
+        },
+        "правила-планирования": {
+          "heading": "Правила планирования",
+          "destination": "docs/roadmap.md",
+          "anchor": "правила-планирования"
+        },
+        "подготовка--рабочая-основа": {
+          "heading": "Подготовка — рабочая основа",
+          "destination": "docs/roadmap.md",
+          "anchor": "подготовка--рабочая-основа"
+        },
+        "010--скелет-игры-со-всеми-механиками": {
+          "heading": "0.1.0 — скелет игры со всеми механиками",
+          "destination": "docs/roadmap.md",
+          "anchor": "010--скелет-игры-со-всеми-механиками"
+        },
+        "020--надёжность-и-авторинг": {
+          "heading": "0.2.0 — надёжность и авторинг",
+          "destination": "docs/roadmap.md",
+          "anchor": "020--надёжность-и-авторинг"
+        },
+        "030--вертикальный-срез": {
+          "heading": "0.3.0 — вертикальный срез",
+          "destination": "docs/roadmap.md",
+          "anchor": "030--вертикальный-срез"
+        },
+        "040--создание-ассетов-и-проработка-сеттинга": {
+          "heading": "0.4.0 — создание ассетов и проработка сеттинга",
+          "destination": "docs/roadmap.md",
+          "anchor": "040--создание-ассетов-и-проработка-сеттинга"
+        },
+        "050--проектирование-и-создание-уровней": {
+          "heading": "0.5.0 — проектирование и создание уровней",
+          "destination": "docs/roadmap.md",
+          "anchor": "050--проектирование-и-создание-уровней"
+        },
+        "060--сборка-кампании": {
+          "heading": "0.6.0 — сборка кампании",
+          "destination": "docs/roadmap.md",
+          "anchor": "060--сборка-кампании"
+        },
+        "070--история-звук-интерфейс-и-доступность": {
+          "heading": "0.7.0 — история, звук, интерфейс и доступность",
+          "destination": "docs/roadmap.md",
+          "anchor": "070--история-звук-интерфейс-и-доступность"
+        },
+        "080--бета-и-подготовка-распространения": {
+          "heading": "0.8.0 — бета и подготовка распространения",
+          "destination": "docs/roadmap.md",
+          "anchor": "080--бета-и-подготовка-распространения"
+        },
+        "090--проходимый-билд": {
+          "heading": "0.9.0 — проходимый билд",
+          "destination": "docs/roadmap.md",
+          "anchor": "090--проходимый-билд"
+        },
+        "100--релиз-и-попытка-публикации-в-steam": {
+          "heading": "1.0.0 — релиз и попытка публикации в Steam",
+          "destination": "docs/roadmap.md",
+          "anchor": "100--релиз-и-попытка-публикации-в-steam"
+        },
+        "ключевые-риски-и-проверки": {
+          "heading": "Ключевые риски и проверки",
+          "destination": "docs/design/risks.md",
+          "anchor": "реестр-рисков"
+        },
+        "лицензирование-и-источники": {
+          "heading": "Лицензирование и источники",
+          "destination": "docs/requirements.md",
+          "anchor": "лицензирование-и-источники"
+        }
+      }
+    },
+    {
+      "source": "THIRD_PARTY_NOTICES.md",
+      "source_sha256": "ccd7b8a8873f152fff6b588318d13d5bfef57c61b066ee430a96edcd94d37e8b",
+      "role": "Производство; происхождение и права",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "third-party-components": {
+          "heading": "Third-party components",
+          "destination": "THIRD_PARTY_NOTICES.md",
+          "anchor": "third-party-components"
+        }
+      }
+    },
+    {
+      "source": "content/models/README.md",
+      "source_sha256": "0f89b02eca64afe76880b28297201615e9d837fef4ab2b39c98a9a40a9870ee3",
+      "role": "Производство; происхождение и права",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "модели-устройств": {
+          "heading": "Модели устройств",
+          "destination": "content/models/README.md",
+          "anchor": "модели-устройств"
+        },
+        "состав": {
+          "heading": "Состав",
+          "destination": "content/models/README.md",
+          "anchor": "состав"
+        },
+        "замена-куба-и-кнопки-по-концептам-dev-01dev-02": {
+          "heading": "Замена куба и кнопки по концептам DEV-01/DEV-02",
+          "destination": "content/models/README.md",
+          "anchor": "замена-куба-и-кнопки-по-концептам-dev-01dev-02"
+        },
+        "эмиттер-и-приёмник-по-концептам-dev-05dev-06": {
+          "heading": "Эмиттер и приёмник по концептам DEV-05/DEV-06",
+          "destination": "content/models/README.md",
+          "anchor": "эмиттер-и-приёмник-по-концептам-dev-05dev-06"
+        },
+        "происхождение-и-права-реестр-art-07": {
+          "heading": "Происхождение и права (реестр ART-07)",
+          "destination": "content/models/README.md",
+          "anchor": "происхождение-и-права-реестр-art-07"
+        },
+        "промты": {
+          "heading": "Промты",
+          "destination": "content/models/README.md",
+          "anchor": "промты"
+        },
+        "известные-отступления": {
+          "heading": "Известные отступления",
+          "destination": "content/models/README.md",
+          "anchor": "известные-отступления"
+        },
+        "пересборка": {
+          "heading": "Пересборка",
+          "destination": "content/models/README.md",
+          "anchor": "пересборка"
+        }
+      }
+    },
+    {
+      "source": "content/textures/README.md",
+      "source_sha256": "dfed53b6dc1d8e487ca6c0326faba3ff96d86abfc5f3c7fa5250f70ee43ff8e5",
+      "role": "Производство; происхождение и права",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "процедурные-текстуры-двух-слоёв-мира": {
+          "heading": "Процедурные текстуры «Двух слоёв мира»",
+          "destination": "content/textures/README.md",
+          "anchor": "процедурные-текстуры-двух-слоёв-мира"
+        },
+        "происхождение-и-лицензия-реестр-art-07": {
+          "heading": "Происхождение и лицензия (реестр ART-07)",
+          "destination": "content/textures/README.md",
+          "anchor": "происхождение-и-лицензия-реестр-art-07"
+        },
+        "карты": {
+          "heading": "Карты",
+          "destination": "content/textures/README.md",
+          "anchor": "карты"
+        },
+        "набор": {
+          "heading": "Набор",
+          "destination": "content/textures/README.md",
+          "anchor": "набор"
+        },
+        "человеческий-слой-поверхности": {
+          "heading": "Человеческий слой: поверхности",
+          "destination": "content/textures/README.md",
+          "anchor": "человеческий-слой-поверхности"
+        },
+        "человеческий-слой-устройства": {
+          "heading": "Человеческий слой: устройства",
+          "destination": "content/textures/README.md",
+          "anchor": "человеческий-слой-устройства"
+        },
+        "скафандр-клетуса": {
+          "heading": "Скафандр Клетуса",
+          "destination": "content/textures/README.md",
+          "anchor": "скафандр-клетуса"
+        },
+        "челнок-hevs-02": {
+          "heading": "Челнок HEVS-02",
+          "destination": "content/textures/README.md",
+          "anchor": "челнок-hevs-02"
+        },
+        "чужой-слой": {
+          "heading": "Чужой слой",
+          "destination": "content/textures/README.md",
+          "anchor": "чужой-слой"
+        },
+        "планета-грунт-и-небо": {
+          "heading": "Планета: грунт и небо",
+          "destination": "content/textures/README.md",
+          "anchor": "планета-грунт-и-небо"
+        },
+        "лагерь-экспедиции": {
+          "heading": "Лагерь экспедиции",
+          "destination": "content/textures/README.md",
+          "anchor": "лагерь-экспедиции"
+        },
+        "решения-по-семантике": {
+          "heading": "Решения по семантике",
+          "destination": "content/textures/README.md",
+          "anchor": "решения-по-семантике"
+        },
+        "демонстрационная-сцена": {
+          "heading": "Демонстрационная сцена",
+          "destination": "content/textures/README.md",
+          "anchor": "демонстрационная-сцена"
+        },
+        "пересборка": {
+          "heading": "Пересборка",
+          "destination": "content/textures/README.md",
+          "anchor": "пересборка"
+        },
+        "что-проверено-и-что-нет": {
+          "heading": "Что проверено и что нет",
+          "destination": "content/textures/README.md",
+          "anchor": "что-проверено-и-что-нет"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0001-foundation-toolchain.md",
+      "source_sha256": "2f4efdff9243585a788074ef92154d4f99f79e9d2c13c438809418615b66ad9e",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0001-начальная-среда-и-границы-проекта": {
+          "heading": "ADR-0001: Начальная среда и границы проекта",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "adr-0001-начальная-среда-и-границы-проекта"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "решение"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0001-foundation-toolchain.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0002-session-input-lifecycle.md",
+      "source_sha256": "e21f3a5cf3352bdc4c7f18ca6f49b4a54f46f4fed22208bcd01d188a2ab6be01",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0002-сессия-фокус-и-граница-игрового-ввода": {
+          "heading": "ADR-0002: Сессия, фокус и граница игрового ввода",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "adr-0002-сессия-фокус-и-граница-игрового-ввода"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "решение"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0002-session-input-lifecycle.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0003-json-save-format.md",
+      "source_sha256": "fb5d7e2a27bb838460be48ac2629af179b1eea9a6bf3270b30cc40c406f09974",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0003-json-как-формат-сохранения-прогресса": {
+          "heading": "ADR-0003: JSON как формат сохранения прогресса",
+          "destination": "docs/adr/0003-json-save-format.md",
+          "anchor": "adr-0003-json-как-формат-сохранения-прогресса"
+        },
+        "контекст-и-решение": {
+          "heading": "Контекст и решение",
+          "destination": "docs/adr/0003-json-save-format.md",
+          "anchor": "контекст-и-решение"
+        },
+        "граница-архитектуры": {
+          "heading": "Граница архитектуры",
+          "destination": "docs/adr/0003-json-save-format.md",
+          "anchor": "граница-архитектуры"
+        },
+        "проверка-и-последствия": {
+          "heading": "Проверка и последствия",
+          "destination": "docs/adr/0003-json-save-format.md",
+          "anchor": "проверка-и-последствия"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0004-diegetic-interface.md",
+      "source_sha256": "f5fa3677e178bb0d6ddc3b200fda4e9403841f57423edd43da44f2056f982352",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0004-диегетический-интерфейс": {
+          "heading": "ADR-0004: Диегетический интерфейс",
+          "destination": "docs/adr/0004-diegetic-interface.md",
+          "anchor": "adr-0004-диегетический-интерфейс"
+        },
+        "контекст-и-решение": {
+          "heading": "Контекст и решение",
+          "destination": "docs/adr/0004-diegetic-interface.md",
+          "anchor": "контекст-и-решение"
+        },
+        "архитектура-и-ограничения": {
+          "heading": "Архитектура и ограничения",
+          "destination": "docs/adr/0004-diegetic-interface.md",
+          "anchor": "архитектура-и-ограничения"
+        },
+        "план-и-приёмка": {
+          "heading": "План и приёмка",
+          "destination": "docs/adr/0004-diegetic-interface.md",
+          "anchor": "план-и-приёмка"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0005-player-locomotion.md",
+      "source_sha256": "d10937e9acf08585adda514d52c73781356111db59655e7a2127c5d14e213f29",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0005-мувсет-на-characterbody3d-и-jolt": {
+          "heading": "ADR-0005: Мувсет на CharacterBody3D и Jolt",
+          "destination": "docs/adr/0005-player-locomotion.md",
+          "anchor": "adr-0005-мувсет-на-characterbody3d-и-jolt"
+        },
+        "контекст-и-решение": {
+          "heading": "Контекст и решение",
+          "destination": "docs/adr/0005-player-locomotion.md",
+          "anchor": "контекст-и-решение"
+        },
+        "поведение-и-параметры": {
+          "heading": "Поведение и параметры",
+          "destination": "docs/adr/0005-player-locomotion.md",
+          "anchor": "поведение-и-параметры"
+        },
+        "проверки-и-последствия": {
+          "heading": "Проверки и последствия",
+          "destination": "docs/adr/0005-player-locomotion.md",
+          "anchor": "проверки-и-последствия"
+        },
+        "дополнение-2026-11-09-бег": {
+          "heading": "Дополнение 2026-11-09: бег",
+          "destination": "docs/adr/0005-player-locomotion.md",
+          "anchor": "дополнение-2026-11-09-бег"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0006-art-direction.md",
+      "source_sha256": "0df092da941e979f35f55535a6aad387507ebe1457b389c39558dd5b06f4c7ef",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0006-визуальное-направление-два-слоя-мира": {
+          "heading": "ADR-0006: Визуальное направление «Два слоя мира»",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "adr-0006-визуальное-направление-два-слоя-мира"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "решение"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0006-art-direction.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0007-physics-carry.md",
+      "source_sha256": "1aa79d085d70a10e3b31e6cbdfa4d2f41a40ad9bc1f09bb58e23aaaedeab62fa",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0007-перенос-кубов-ограниченными-силами-jolt": {
+          "heading": "ADR-0007: Перенос кубов ограниченными силами Jolt",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "adr-0007-перенос-кубов-ограниченными-силами-jolt"
+        },
+        "решение-и-границы": {
+          "heading": "Решение и границы",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "решение-и-границы"
+        },
+        "физический-шаг-и-жизненный-цикл": {
+          "heading": "Физический шаг и жизненный цикл",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "физический-шаг-и-жизненный-цикл"
+        },
+        "захват-препятствия-и-защита-от-обратной-связи": {
+          "heading": "Захват, препятствия и защита от обратной связи",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "захват-препятствия-и-защита-от-обратной-связи"
+        },
+        "исходный-профиль": {
+          "heading": "Исходный профиль",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "исходный-профиль"
+        },
+        "проверки-и-последующая-работа": {
+          "heading": "Проверки и последующая работа",
+          "destination": "docs/adr/0007-physics-carry.md",
+          "anchor": "проверки-и-последующая-работа"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0008-device-network.md",
+      "source_sha256": "af812ef9ece91f37a0c3b0379e9653bbd0a3bc73122efc118bea4e4c7ada9d08",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0008-сеть-устройств-и-порядок-логического-тика": {
+          "heading": "ADR-0008: Сеть устройств и порядок логического тика",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "adr-0008-сеть-устройств-и-порядок-логического-тика"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "решение"
+        },
+        "порядок-одного-логического-тика": {
+          "heading": "Порядок одного логического тика",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "порядок-одного-логического-тика"
+        },
+        "граница-с-движком": {
+          "heading": "Граница с движком",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "граница-с-движком"
+        },
+        "дополнение-skl-06-луч-эмиттер-приёмник": {
+          "heading": "Дополнение SKL-06: луч, эмиттер, приёмник",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "дополнение-skl-06-луч-эмиттер-приёмник"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0008-device-network.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0009-gravity-zones.md",
+      "source_sha256": "6bf8c48b7f137a1db33abd039ba0ddb27cf8247c0fa3ac573e0709fa8c7d18bb",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0009-гравитационные-зоны-единственный-источник-и-переориентация-игрока": {
+          "heading": "ADR-0009: Гравитационные зоны, единственный источник и переориентация игрока",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "adr-0009-гравитационные-зоны-единственный-источник-и-переориентация-игрока"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "решение"
+        },
+        "порядок-тика": {
+          "heading": "Порядок тика",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "порядок-тика"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0009-gravity-zones.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0010-portal-experiment.md",
+      "source_sha256": "4fb7d63c7d126c90a96cc4f7e43bbe3939f45f3e68a0c7a3e0bd243d19f872d6",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0010-порталы--вид-через-смещённую-пирамиду-и-перенос-по-пересечению-плоскости": {
+          "heading": "ADR-0010: Порталы — вид через смещённую пирамиду и перенос по пересечению плоскости",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "adr-0010-порталы--вид-через-смещённую-пирамиду-и-перенос-по-пересечению-плоскости"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "контекст"
+        },
+        "варианты-вида": {
+          "heading": "Варианты вида",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "варианты-вида"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "решение"
+        },
+        "порядок-тика": {
+          "heading": "Порядок тика",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "порядок-тика"
+        },
+        "последствия-и-выявленные-ограничения": {
+          "heading": "Последствия и выявленные ограничения",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "последствия-и-выявленные-ограничения"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0010-portal-experiment.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0011-level-rhythm.md",
+      "source_sha256": "b2295040d0d7534539372ab89741e300d507ca1990a0d45e13c7c0118f595216",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0011-ритм-сектора--переход-камера-станция-авангарда": {
+          "heading": "ADR-0011: Ритм сектора — переход, камера, станция авангарда",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "adr-0011-ритм-сектора--переход-камера-станция-авангарда"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "решение"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0011-level-rhythm.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/0012-talos-carry.md",
+      "source_sha256": "0a1755c9779ce8d136e460a55d24147b59f6c85b6b2cc8280fcf87097dbb9336",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-0012-захват-в-духе-the-talos-principle": {
+          "heading": "ADR-0012: Захват в духе The Talos Principle",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "adr-0012-захват-в-духе-the-talos-principle"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "решение"
+        },
+        "постановка-по-силуэту-дополнение-2026-11-09": {
+          "heading": "Постановка по силуэту (дополнение 2026-11-09)",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "постановка-по-силуэту-дополнение-2026-11-09"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/0012-talos-carry.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/adr/template.md",
+      "source_sha256": "b77f5cf8c9c654b28052d63086fcce07cec2a8237a4ca44983a686b618661861",
+      "role": "Решение / история решения",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "adr-nnnn-название-решения": {
+          "heading": "ADR-NNNN: Название решения",
+          "destination": "docs/adr/template.md",
+          "anchor": "adr-nnnn-название-решения"
+        },
+        "контекст": {
+          "heading": "Контекст",
+          "destination": "docs/adr/template.md",
+          "anchor": "контекст"
+        },
+        "варианты": {
+          "heading": "Варианты",
+          "destination": "docs/adr/template.md",
+          "anchor": "варианты"
+        },
+        "решение": {
+          "heading": "Решение",
+          "destination": "docs/adr/template.md",
+          "anchor": "решение"
+        },
+        "последствия": {
+          "heading": "Последствия",
+          "destination": "docs/adr/template.md",
+          "anchor": "последствия"
+        },
+        "проверка-и-пересмотр": {
+          "heading": "Проверка и пересмотр",
+          "destination": "docs/adr/template.md",
+          "anchor": "проверка-и-пересмотр"
+        }
+      }
+    },
+    {
+      "source": "docs/design/art-production-guide.md",
+      "source_sha256": "1ceff2b8f1b2694e451043cad941c30bee5641db89de4661c81b2fdfa6082e7b",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "abandoned-применение-визуального-концепта": {
+          "heading": "Abandoned: применение визуального концепта",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "abandoned-применение-визуального-концепта"
+        },
+        "основание-и-статус-источников": {
+          "heading": "Основание и статус источников",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "основание-и-статус-источников"
+        },
+        "художественная-опора": {
+          "heading": "Художественная опора",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "художественная-опора"
+        },
+        "палитра-и-читаемость": {
+          "heading": "Палитра и читаемость",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "палитра-и-читаемость"
+        },
+        "устройства-и-интерфейс": {
+          "heading": "Устройства и интерфейс",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "устройства-и-интерфейс"
+        },
+        "что-концепты-не-добавляют-к-объёму": {
+          "heading": "Что концепты не добавляют к объёму",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "что-концепты-не-добавляют-к-объёму"
+        },
+        "порядок-применения-и-приёмка": {
+          "heading": "Порядок применения и приёмка",
+          "destination": "docs/design/art-production-guide.md",
+          "anchor": "порядок-применения-и-приёмка"
+        },
+        "процедурный-базовый-набор-текстур": {
+          "heading": "Процедурный базовый набор текстур",
+          "destination": "docs/design/archive/asset-history.md",
+          "anchor": "процедурный-базовый-набор-текстур"
+        }
+      }
+    },
+    {
+      "source": "docs/design/cutscenes.md",
+      "source_sha256": "cdf65fe026521cb2110963e5820a1ffe7cc11fbaebf64a05e1e4f6f789d5afe3",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "катсцены-и-постановка": {
+          "heading": "Катсцены и постановка",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "катсцены-и-постановка"
+        },
+        "1-три-уровня-постановки": {
+          "heading": "1. Три уровня постановки",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "1-три-уровня-постановки"
+        },
+        "2-полные-катсцены-пролог-и-финал": {
+          "heading": "2. Полные катсцены: пролог и финал",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "2-полные-катсцены-пролог-и-финал"
+        },
+        "21-пролог": {
+          "heading": "2.1. Пролог",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "21-пролог"
+        },
+        "22-финал": {
+          "heading": "2.2. Финал",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "22-финал"
+        },
+        "3-ключевые-моменты-внутри-секторов": {
+          "heading": "3. Ключевые моменты внутри секторов",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "3-ключевые-моменты-внутри-секторов"
+        },
+        "4-принципы": {
+          "heading": "4. Принципы",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "4-принципы"
+        },
+        "5-как-делать-эталонно-пролог-и-финал": {
+          "heading": "5. Как делать эталонно (пролог и финал)",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "5-как-делать-эталонно-пролог-и-финал"
+        },
+        "процесс": {
+          "heading": "Процесс",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "процесс"
+        },
+        "художественные-приёмы": {
+          "heading": "Художественные приёмы",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "художественные-приёмы"
+        },
+        "что-понадобится-для-производства": {
+          "heading": "Что понадобится для производства",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "что-понадобится-для-производства"
+        },
+        "6-техника-в-godot": {
+          "heading": "6. Техника в Godot",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "6-техника-в-godot"
+        },
+        "7-когда-делать": {
+          "heading": "7. Когда делать",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "7-когда-делать"
+        },
+        "8-открытые-решения-владельца": {
+          "heading": "8. Открытые решения владельца",
+          "destination": "docs/design/cutscenes.md",
+          "anchor": "8-открытые-решения-владельца"
+        }
+      }
+    },
+    {
+      "source": "docs/design/level-construction.md",
+      "source_sha256": "e1b7e982a3d6620653c21be15d8f449b203ae1cee888dde9778807b0e77ec765",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "построение-уровней-сегменты-размеры-сборка": {
+          "heading": "Построение уровней: сегменты, размеры, сборка",
+          "destination": "docs/design/level-construction.md",
+          "anchor": "построение-уровней"
+        },
+        "0-коротко-принятый-подход": {
+          "heading": "0. Коротко: принятый подход",
+          "destination": "docs/design/level-construction.md",
+          "anchor": "0-коротко-принятый-подход"
+        },
+        "1-метрики--основа-всех-размеров": {
+          "heading": "1. Метрики — основа всех размеров",
+          "destination": "docs/design/level-metrics.md",
+          "anchor": "1-метрики--основа-всех-размеров"
+        },
+        "игрок-текущие-значения-в-коде": {
+          "heading": "Игрок (текущие значения в коде)",
+          "destination": "docs/design/level-metrics.md",
+          "anchor": "игрок-текущие-значения-в-коде"
+        },
+        "высоты-уступов-жёсткая-таблица": {
+          "heading": "Высоты уступов (жёсткая таблица)",
+          "destination": "docs/design/level-metrics.md",
+          "anchor": "высоты-уступов-жёсткая-таблица"
+        },
+        "пропасти-считать-от-прыжка-со-спринта": {
+          "heading": "Пропасти: считать от прыжка со спринта",
+          "destination": "docs/design/level-metrics.md",
+          "anchor": "пропасти-считать-от-прыжка-со-спринта"
+        },
+        "устройства-и-проёмы": {
+          "heading": "Устройства и проёмы",
+          "destination": "docs/design/level-metrics.md",
+          "anchor": "устройства-и-проёмы"
+        },
+        "2-сетка-и-кит": {
+          "heading": "2. Сетка и кит",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "2-сетка-и-кит"
+        },
+        "3-камеры": {
+          "heading": "3. Камеры",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "3-камеры"
+        },
+        "классы-размеров": {
+          "heading": "Классы размеров",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "классы-размеров"
+        },
+        "почему-не-больше-3236-м": {
+          "heading": "Почему не больше 32–36 м",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "почему-не-больше-3236-м"
+        },
+        "анатомия-камеры": {
+          "heading": "Анатомия камеры",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "анатомия-камеры"
+        },
+        "бюджет-элементов-на-камеру": {
+          "heading": "Бюджет элементов на камеру",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "бюджет-элементов-на-камеру"
+        },
+        "4-переходы": {
+          "heading": "4. Переходы",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "4-переходы"
+        },
+        "размер-и-время": {
+          "heading": "Размер и время",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "размер-и-время"
+        },
+        "типы-переходов": {
+          "heading": "Типы переходов",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "типы-переходов"
+        },
+        "навигация-без-подсказок": {
+          "heading": "Навигация без подсказок",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "навигация-без-подсказок"
+        },
+        "5-станции-авангарда": {
+          "heading": "5. Станции авангарда",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "5-станции-авангарда"
+        },
+        "6-как-собирать-один-сектор": {
+          "heading": "6. Как собирать один сектор",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "6-как-собирать-один-сектор"
+        },
+        "формула-сектора": {
+          "heading": "Формула сектора",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "формула-сектора"
+        },
+        "набросок-по-секторам": {
+          "heading": "Набросок по секторам",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "набросок-по-секторам"
+        },
+        "7-масштаб-как-показать-4-километра": {
+          "heading": "7. Масштаб: как показать 4 километра",
+          "destination": "docs/design/level-layout.md",
+          "anchor": "7-масштаб-как-показать-4-километра"
+        },
+        "8-техника-подгрузка-сегментов": {
+          "heading": "8. Техника: подгрузка сегментов",
+          "destination": "docs/architecture/segments.md",
+          "anchor": "8-техника-подгрузка-сегментов"
+        },
+        "бюджеты-производительности-стартовые-мерить-на-целевом-железе": {
+          "heading": "Бюджеты производительности (стартовые, мерить на целевом железе)",
+          "destination": "docs/architecture/segments.md",
+          "anchor": "бюджеты-производительности-стартовые-мерить-на-целевом-железе"
+        },
+        "9-инструменты-и-процесс": {
+          "heading": "9. Инструменты и процесс",
+          "destination": "docs/design/authoring.md",
+          "anchor": "9-инструменты-и-процесс"
+        },
+        "чем-строить": {
+          "heading": "Чем строить",
+          "destination": "docs/design/authoring.md",
+          "anchor": "чем-строить"
+        },
+        "процесс-одной-камеры": {
+          "heading": "Процесс одной камеры",
+          "destination": "docs/design/authoring.md",
+          "anchor": "процесс-одной-камеры"
+        },
+        "процесс-одного-перехода": {
+          "heading": "Процесс одного перехода",
+          "destination": "docs/design/authoring.md",
+          "anchor": "процесс-одного-перехода"
+        },
+        "10-оценка-объёма": {
+          "heading": "10. Оценка объёма",
+          "destination": "docs/design/campaign-budget.md",
+          "anchor": "10-оценка-объёма"
+        },
+        "11-порядок-работ-когда-начнётся-разработка-уровней": {
+          "heading": "11. Порядок работ (когда начнётся разработка уровней)",
+          "destination": "docs/design/authoring.md",
+          "anchor": "11-порядок-работ-когда-начнётся-разработка-уровней"
+        },
+        "12-принятые-решения-владелец-2026-11-09": {
+          "heading": "12. Принятые решения (владелец, 2026-11-09)",
+          "destination": "docs/design/level-construction.md",
+          "anchor": "12-принятые-решения-владелец-2026-11-09"
+        }
+      }
+    },
+    {
+      "source": "docs/design/level-structure.md",
+      "source_sha256": "237b98667d19f50f742fe13e00d5e2b53ff5af689be2568529e5aade9533d3c0",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "структура-уровней-переход-камера-станция-авангарда": {
+          "heading": "Структура уровней: переход, камера, станция авангарда",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "структура-уровней-переход-камера-станция-авангарда"
+        },
+        "три-режима": {
+          "heading": "Три режима",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "три-режима"
+        },
+        "переход": {
+          "heading": "Переход",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "переход"
+        },
+        "камера": {
+          "heading": "Камера",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "камера"
+        },
+        "станция-авангарда": {
+          "heading": "Станция авангарда",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "станция-авангарда"
+        },
+        "принципы-головоломок": {
+          "heading": "Принципы головоломок",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "принципы-головоломок"
+        },
+        "чек-лист-камеры-перед-сборкой": {
+          "heading": "Чек-лист камеры перед сборкой",
+          "destination": "docs/design/level-structure.md",
+          "anchor": "чек-лист-камеры-перед-сборкой"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/README.md",
+      "source_sha256": "1f50bd5ac63b391e0ba53fce6aaf7f1e4cc6451b187cba411907cebf851b943f",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "lore-01-первое-очертание-лора-abandoned": {
+          "heading": "LORE-01: первое очертание лора Abandoned",
+          "destination": "docs/design/lore/README.md",
+          "anchor": "lore-01-первое-очертание-лора-abandoned"
+        },
+        "источник-и-принятые-решения": {
+          "heading": "Источник и принятые решения",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "источник-и-принятые-решения"
+        },
+        "основа-истории-из-черновика": {
+          "heading": "Основа истории из черновика",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "основа-истории-из-черновика"
+        },
+        "связность-до-следующей-редакции": {
+          "heading": "Связность до следующей редакции",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "связность-до-следующей-редакции"
+        },
+        "научная-основа-и-фантастический-допуск": {
+          "heading": "Научная основа и фантастический допуск",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "научная-основа-и-фантастический-допуск"
+        },
+        "применение-к-сценарию-и-механикам": {
+          "heading": "Применение к сценарию и механикам",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "применение-к-сценарию-и-механикам"
+        },
+        "статус-в-roadmap": {
+          "heading": "Статус в roadmap",
+          "destination": "docs/design/lore/archive/initial-review.md",
+          "anchor": "статус-в-roadmap"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/outline-v2.md",
+      "source_sha256": "6a91a584b94fc574f47dafde76a6694b55d0ae386f2be9e5886a6a9b27693cc2",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "abandoned--лор-и-вступление": {
+          "heading": "«Abandoned» — лор и вступление",
+          "destination": "docs/design/lore/outline-v2.md",
+          "anchor": "abandoned--лор-и-вступление"
+        },
+        "1-земля-2389-год-мир-который-продали-по-частям": {
+          "heading": "1. Земля, 2389 год: мир, который продали по частям",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "1-земля-2389-год-мир-который-продали-по-частям"
+        },
+        "2-клетус-50-лет": {
+          "heading": "2. Клетус, 50 лет",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "2-клетус-50-лет"
+        },
+        "3-экспедиция-исход-8": {
+          "heading": "3. Экспедиция «Исход-8»",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "3-экспедиция-исход-8"
+        },
+        "4-toi-700-d-научный-профиль-мира": {
+          "heading": "4. TOI-700 d: научный профиль мира",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "4-toi-700-d-научный-профиль-мира"
+        },
+        "5-мегаструктура": {
+          "heading": "5. Мегаструктура",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "5-мегаструктура"
+        },
+        "6-провал": {
+          "heading": "6. Провал",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "6-провал"
+        },
+        "7-ситуация-на-момент-игры": {
+          "heading": "7. Ситуация на момент игры",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "7-ситуация-на-момент-игры"
+        },
+        "8-вступление-первая-сцена": {
+          "heading": "8. Вступление: первая сцена",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "8-вступление-первая-сцена"
+        },
+        "9-открытые-вопросы-к-владельцу": {
+          "heading": "9. Открытые вопросы к владельцу",
+          "destination": "docs/design/lore/archive/outline-v2.md",
+          "anchor": "9-открытые-вопросы-к-владельцу"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/outline-v3.md",
+      "source_sha256": "cd191f05309c5ea3890e194877c1cb12003b13100c0ca787cd6f04588508d91a",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "abandoned--лор-и-вступление": {
+          "heading": "«Abandoned» — лор и вступление",
+          "destination": "docs/design/lore/outline-v3.md",
+          "anchor": "abandoned--лор-и-вступление"
+        },
+        "1-земля-2389-мир-который-продали-по-частям": {
+          "heading": "1. Земля, 2389: мир, который продали по частям",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "1-земля-2389-мир-который-продали-по-частям"
+        },
+        "2-клетус": {
+          "heading": "2. Клетус",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "2-клетус"
+        },
+        "3-исход-8": {
+          "heading": "3. «Исход-8»",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "3-исход-8"
+        },
+        "4-toi-700-d": {
+          "heading": "4. TOI-700 d",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "4-toi-700-d"
+        },
+        "5-сооружение": {
+          "heading": "5. Сооружение",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "5-сооружение"
+        },
+        "6-сорок-один-день": {
+          "heading": "6. Сорок один день",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "6-сорок-один-день"
+        },
+        "7-сорок-второй-день": {
+          "heading": "7. Сорок второй день",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "7-сорок-второй-день"
+        },
+        "8-семнадцать-часов": {
+          "heading": "8. Семнадцать часов",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "8-семнадцать-часов"
+        },
+        "9-где-начинается-игра": {
+          "heading": "9. Где начинается игра",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "9-где-начинается-игра"
+        },
+        "10-путь-наверх": {
+          "heading": "10. Путь наверх",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "10-путь-наверх"
+        },
+        "11-вступление-первая-сцена": {
+          "heading": "11. Вступление: первая сцена",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "11-вступление-первая-сцена"
+        },
+        "12-финал-последнее-решение": {
+          "heading": "12. Финал: последнее решение",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "12-финал-последнее-решение"
+        },
+        "13-чего-не-знает-никто": {
+          "heading": "13. Чего не знает никто",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "13-чего-не-знает-никто"
+        },
+        "14-что-изменено-относительно-редакции-2": {
+          "heading": "14. Что изменено относительно редакции 2",
+          "destination": "docs/design/lore/archive/outline-v3.md",
+          "anchor": "14-что-изменено-относительно-редакции-2"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/outline-v4.md",
+      "source_sha256": "92c4c03a4287d33d7cb0b99bc0e387400ec73d27c52165f5edb2a42b7886ba56",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "abandoned--лор": {
+          "heading": "Abandoned — лор",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "abandoned--лор"
+        },
+        "1-земля-которую-продали": {
+          "heading": "1. Земля, которую продали",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "1-земля-которую-продали"
+        },
+        "2-человек-который-выполнил-приказ": {
+          "heading": "2. Человек, который выполнил приказ",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "2-человек-который-выполнил-приказ"
+        },
+        "3-восемь": {
+          "heading": "3. Восемь",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "3-восемь"
+        },
+        "4-солнце-которое-не-заходит": {
+          "heading": "4. Солнце, которое не заходит",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "4-солнце-которое-не-заходит"
+        },
+        "5-то-что-стоит-у-терминатора": {
+          "heading": "5. То, что стоит у терминатора",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "5-то-что-стоит-у-терминатора"
+        },
+        "6-сорок-один-день": {
+          "heading": "6. Сорок один день",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "6-сорок-один-день"
+        },
+        "7-сорок-второй-день": {
+          "heading": "7. Сорок второй день",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "7-сорок-второй-день"
+        },
+        "8-семнадцать-часов": {
+          "heading": "8. Семнадцать часов",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "8-семнадцать-часов"
+        },
+        "9-где-начинается-игра": {
+          "heading": "9. Где начинается игра",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "9-где-начинается-игра"
+        },
+        "10-путь-наверх": {
+          "heading": "10. Путь наверх",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "10-путь-наверх"
+        },
+        "11-вступление": {
+          "heading": "11. Вступление",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "11-вступление"
+        },
+        "12-финал": {
+          "heading": "12. Финал",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "12-финал"
+        },
+        "13-чего-не-знает-никто": {
+          "heading": "13. Чего не знает никто",
+          "destination": "docs/design/lore/outline-v4.md",
+          "anchor": "13-чего-не-знает-никто"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/pre-bible-checklist.md",
+      "source_sha256": "bfa08100fa513064528ff47659d749a378cd88e3a9c9de4e86d6576e6b91808d",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "abandoned--чек-лист-завершённости-лора-перед-написанием-библии": {
+          "heading": "Abandoned — чек-лист завершённости лора перед написанием библии",
+          "destination": "docs/design/lore/pre-bible-checklist.md",
+          "anchor": "abandoned--чек-лист-завершённости-лора-перед-написанием-библии"
+        },
+        "что-здесь-означает-конечность-лора": {
+          "heading": "Что здесь означает конечность лора",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "что-здесь-означает-конечность-лора"
+        },
+        "как-заполнять": {
+          "heading": "Как заполнять",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "как-заполнять"
+        },
+        "зафиксированная-основа-проекта": {
+          "heading": "Зафиксированная основа проекта",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "зафиксированная-основа-проекта"
+        },
+        "1-замысел-и-герой": {
+          "heading": "1. Замысел и герой",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "1-замысел-и-герой"
+        },
+        "2-календарь-корпорация-и-экспедиция": {
+          "heading": "2. Календарь, корпорация и экспедиция",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "2-календарь-корпорация-и-экспедиция"
+        },
+        "3-происшествие-и-память": {
+          "heading": "3. Происшествие и память",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "3-происшествие-и-память"
+        },
+        "4-транспорт-силовой-узел-и-мир": {
+          "heading": "4. Транспорт, силовой узел и мир",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "4-транспорт-силовой-узел-и-мир"
+        },
+        "5-кампания-и-раскрытие": {
+          "heading": "5. Кампания и раскрытие",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "5-кампания-и-раскрытие"
+        },
+        "6-финал-и-закрытие-истории": {
+          "heading": "6. Финал и закрытие истории",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "6-финал-и-закрытие-истории"
+        },
+        "необязательная-детализация": {
+          "heading": "Необязательная детализация",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "необязательная-детализация"
+        },
+        "итоговая-проверка-можно-ли-писать-библию": {
+          "heading": "Итоговая проверка: можно ли писать библию",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "итоговая-проверка-можно-ли-писать-библию"
+        },
+        "что-должно-получиться-из-заполненного-файла": {
+          "heading": "Что должно получиться из заполненного файла",
+          "destination": "docs/design/lore/archive/pre-bible-checklist.md",
+          "anchor": "что-должно-получиться-из-заполненного-файла"
+        }
+      }
+    },
+    {
+      "source": "docs/design/lore/world-bible.md",
+      "source_sha256": "56eb8c053c160e50888610627ee650b9e6de4d91c6a88062dc07e95edca2cd8f",
+      "role": "Автор/сценарист; канон или явно отмеченный архив",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "abandoned--библия-мира": {
+          "heading": "Abandoned — библия мира",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "abandoned--библия-мира"
+        },
+        "как-пользоваться-этой-библией": {
+          "heading": "Как пользоваться этой библией",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "как-пользоваться-этой-библией"
+        },
+        "1-история-в-одном-абзаце": {
+          "heading": "1. История в одном абзаце",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "1-история-в-одном-абзаце"
+        },
+        "2-тема-и-тон": {
+          "heading": "2. Тема и тон",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "2-тема-и-тон"
+        },
+        "3-хронология": {
+          "heading": "3. Хронология",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "3-хронология"
+        },
+        "4-земля-и-фостех": {
+          "heading": "4. Земля и ФосТех",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "4-земля-и-фостех"
+        },
+        "5-планета-toi-700-d": {
+          "heading": "5. Планета TOI-700 d",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "5-планета-toi-700-d"
+        },
+        "6-сооружение": {
+          "heading": "6. Сооружение",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "6-сооружение"
+        },
+        "7-техника-экспедиции": {
+          "heading": "7. Техника экспедиции",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "7-техника-экспедиции"
+        },
+        "8-персонажи": {
+          "heading": "8. Персонажи",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "8-персонажи"
+        },
+        "9-клетус": {
+          "heading": "9. Клетус",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "9-клетус"
+        },
+        "10-сорок-второй-день-по-часам": {
+          "heading": "10. Сорок второй день по часам",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "10-сорок-второй-день-по-часам"
+        },
+        "11-кампания-четыре-сектора": {
+          "heading": "11. Кампания: четыре сектора",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "11-кампания-четыре-сектора"
+        },
+        "сектор-1-входной-контур": {
+          "heading": "Сектор 1. Входной контур",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "сектор-1-входной-контур"
+        },
+        "сектор-2-энергетический-ярус": {
+          "heading": "Сектор 2. Энергетический ярус",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "сектор-2-энергетический-ярус"
+        },
+        "сектор-3-гравитационный-узел": {
+          "heading": "Сектор 3. Гравитационный узел",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "сектор-3-гравитационный-узел"
+        },
+        "сектор-4-транзит-к-эвакуации": {
+          "heading": "Сектор 4. Транзит к эвакуации",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "сектор-4-транзит-к-эвакуации"
+        },
+        "12-что-игрок-должен-найти": {
+          "heading": "12. Что игрок должен найти",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "12-что-игрок-должен-найти"
+        },
+        "13-кто-что-знает": {
+          "heading": "13. Кто что знает",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "13-кто-что-знает"
+        },
+        "14-терминал-правила-данных": {
+          "heading": "14. Терминал: правила данных",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "14-терминал-правила-данных"
+        },
+        "15-как-рассказывается-история": {
+          "heading": "15. Как рассказывается история",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "15-как-рассказывается-история"
+        },
+        "16-игровые-системы-которые-следуют-из-лора": {
+          "heading": "16. Игровые системы, которые следуют из лора",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "16-игровые-системы-которые-следуют-из-лора"
+        },
+        "17-финал": {
+          "heading": "17. Финал",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "17-финал"
+        },
+        "18-намеренные-тайны-и-их-границы": {
+          "heading": "18. Намеренные тайны и их границы",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "18-намеренные-тайны-и-их-границы"
+        },
+        "19-чего-нельзя-нигде": {
+          "heading": "19. Чего нельзя нигде",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "19-чего-нельзя-нигде"
+        },
+        "20-что-можно-уточнять-позже": {
+          "heading": "20. Что можно уточнять позже",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "20-что-можно-уточнять-позже"
+        },
+        "21-словарь": {
+          "heading": "21. Словарь",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "21-словарь"
+        },
+        "приложение-служебное": {
+          "heading": "Приложение. Служебное",
+          "destination": "docs/design/lore/world-bible.md",
+          "anchor": "приложение-служебное"
+        }
+      }
+    },
+    {
+      "source": "docs/design/puzzle-template.md",
+      "source_sha256": "85ee59ebee55673045d18d6a0c8b07fa924a482ac3b652694da4e4ae18bf7f08",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "карточка-головоломки": {
+          "heading": "Карточка головоломки",
+          "destination": "docs/design/puzzle-template.md",
+          "anchor": "карточка-головоломки"
+        }
+      }
+    },
+    {
+      "source": "docs/design/puzzles/loop.md",
+      "source_sha256": "da20f01407a05a1003e5b61ad987d82ae1a3779702affb762dfdd05549e43d67",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "камера-петля": {
+          "heading": "Камера «Петля»",
+          "destination": "docs/design/puzzles/loop.md",
+          "anchor": "камера-петля"
+        }
+      }
+    },
+    {
+      "source": "docs/design/risks.md",
+      "source_sha256": "f0f329e6e474bd20ae7d581edb8ae314419494376ec292a56e2c9046ebc7c3fd",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "реестр-рисков": {
+          "heading": "Реестр рисков",
+          "destination": "docs/design/risks.md",
+          "anchor": "реестр-рисков"
+        }
+      }
+    },
+    {
+      "source": "docs/documentation-rework.md",
+      "source_sha256": "984f573dee10486f18ec2078b603055f60c7485bb8da10c0d4bea2b2eb96c6a7",
+      "role": "Участник проекта; действующий документ",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
+      "headings": {
+        "план-переработки-документации": {
+          "heading": "План переработки документации",
+          "destination": "docs/documentation-rework.md",
+          "anchor": "переработка-документации-doc-01doc-05"
+        },
+        "что-мешает-сейчас": {
+          "heading": "Что мешает сейчас",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
+          "anchor": "что-мешает-сейчас"
+        },
+        "как-читатель-будет-входить": {
+          "heading": "Как читатель будет входить",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
+          "anchor": "как-читатель-будет-входить"
+        },
+        "карта-всех-материалов": {
+          "heading": "Карта всех материалов",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
+          "anchor": "карта-всех-материалов"
+        },
+        "порядок-работ-и-приёмка": {
+          "heading": "Порядок работ и приёмка",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
+          "anchor": "порядок-работ-и-приёмка"
+        },
+        "как-проверить-снижение-нагрузки": {
+          "heading": "Как проверить снижение нагрузки",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
+          "anchor": "как-проверить-снижение-нагрузки"
+        }
+      }
+    },
+    {
+      "source": "docs/performance.md",
+      "source_sha256": "d0c0419bb1de0a9d2a76dc17a67c3361eee121dcce7823d450dff3915b425325",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "профилирование-и-качество-текстур": {
+          "heading": "Профилирование и качество текстур",
+          "destination": "docs/performance.md",
+          "anchor": "профилирование-и-качество-текстур"
+        },
+        "быстрый-запуск": {
+          "heading": "Быстрый запуск",
+          "destination": "docs/performance.md",
+          "anchor": "быстрый-запуск"
+        },
+        "переход-на-2k-и-возврат-исходного-качества": {
+          "heading": "Переход на 2K и возврат исходного качества",
+          "destination": "docs/performance.md",
+          "anchor": "переход-на-2k-и-возврат-исходного-качества"
+        },
+        "что-показывает-панель": {
+          "heading": "Что показывает панель",
+          "destination": "docs/performance.md",
+          "anchor": "что-показывает-панель"
+        },
+        "csv-и-сравнение": {
+          "heading": "CSV и сравнение",
+          "destination": "docs/performance.md",
+          "anchor": "csv-и-сравнение"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/beam-2026-11-08.md",
+      "source_sha256": "d1f41649ac95eb694fe6fb322f5634f434f2fae034be269893326e1f7ca756ed",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-06-эмиттер-луч-перекрытие-и-приёмник-006-dev": {
+          "heading": "SKL-06: эмиттер, луч, перекрытие и приёмник, 0.0.6-dev",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "skl-06-эмиттер-луч-перекрытие-и-приёмник-006-dev"
+        },
+        "среда-и-область": {
+          "heading": "Среда и область",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "среда-и-область"
+        },
+        "полигон-отсек-5-луч": {
+          "heading": "Полигон: отсек 5 «Луч»",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "полигон-отсек-5-луч"
+        },
+        "результаты": {
+          "heading": "Результаты",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "результаты"
+        },
+        "независимость-от-частоты-кадров": {
+          "heading": "Независимость от частоты кадров",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "независимость-от-частоты-кадров"
+        },
+        "gpu-smoke": {
+          "heading": "GPU-smoke",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "gpu-smoke"
+        },
+        "ограничения": {
+          "heading": "Ограничения",
+          "destination": "docs/qa/beam-2026-11-08.md",
+          "anchor": "ограничения"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/concept-cube-button-2026-11-09.md",
+      "source_sha256": "483d4f70ee59bbcc8c1895f777fe761d661db51b864c4254527d14c6ec7ff478",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "куб-и-напольная-кнопка-по-концептам--2026-11-09": {
+          "heading": "Куб и напольная кнопка по концептам — 2026-11-09",
+          "destination": "docs/qa/concept-cube-button-2026-11-09.md",
+          "anchor": "куб-и-напольная-кнопка-по-концептам--2026-11-09"
+        },
+        "объём": {
+          "heading": "Объём",
+          "destination": "docs/qa/concept-cube-button-2026-11-09.md",
+          "anchor": "объём"
+        },
+        "подготовка-и-интеграция": {
+          "heading": "Подготовка и интеграция",
+          "destination": "docs/qa/concept-cube-button-2026-11-09.md",
+          "anchor": "подготовка-и-интеграция"
+        },
+        "свидетельства": {
+          "heading": "Свидетельства",
+          "destination": "docs/qa/concept-cube-button-2026-11-09.md",
+          "anchor": "свидетельства"
+        },
+        "границы-приёмки": {
+          "heading": "Границы приёмки",
+          "destination": "docs/qa/concept-cube-button-2026-11-09.md",
+          "anchor": "границы-приёмки"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/concept-optics-2026-11-09.md",
+      "source_sha256": "271c981100b20d148fef7487d7211aac328f22fb16a92a3b65f7fe5babae6d20",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "эмиттер-и-приёмник-по-dev-05dev-06--2026-11-09": {
+          "heading": "Эмиттер и приёмник по DEV-05/DEV-06 — 2026-11-09",
+          "destination": "docs/qa/concept-optics-2026-11-09.md",
+          "anchor": "эмиттер-и-приёмник-по-dev-05dev-06--2026-11-09"
+        },
+        "объём-и-происхождение": {
+          "heading": "Объём и происхождение",
+          "destination": "docs/qa/concept-optics-2026-11-09.md",
+          "anchor": "объём-и-происхождение"
+        },
+        "интеграция": {
+          "heading": "Интеграция",
+          "destination": "docs/qa/concept-optics-2026-11-09.md",
+          "anchor": "интеграция"
+        },
+        "проверки": {
+          "heading": "Проверки",
+          "destination": "docs/qa/concept-optics-2026-11-09.md",
+          "anchor": "проверки"
+        },
+        "ограничения": {
+          "heading": "Ограничения",
+          "destination": "docs/qa/concept-optics-2026-11-09.md",
+          "anchor": "ограничения"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/devices-circuits-2026-11-08.md",
+      "source_sha256": "4afa058e7eafbecf69ecd8cc5a8648722fa72f5eb8a0f6b07af8ce276d8d51af",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-0405-устройства-цепи-и-логика-005-dev": {
+          "heading": "SKL-04/05: устройства, цепи и логика, 0.0.5-dev",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "skl-0405-устройства-цепи-и-логика-005-dev"
+        },
+        "среда-и-область": {
+          "heading": "Среда и область",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "среда-и-область"
+        },
+        "полигон-устройств": {
+          "heading": "Полигон устройств",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "полигон-устройств"
+        },
+        "результаты": {
+          "heading": "Результаты",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "результаты"
+        },
+        "независимость-от-частоты-кадров": {
+          "heading": "Независимость от частоты кадров",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "независимость-от-частоты-кадров"
+        },
+        "gpu-smoke": {
+          "heading": "GPU-smoke",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "gpu-smoke"
+        },
+        "ограничения": {
+          "heading": "Ограничения",
+          "destination": "docs/qa/devices-circuits-2026-11-08.md",
+          "anchor": "ограничения"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/foundation-2026-11-07.md",
+      "source_sha256": "32cd510fd2e3b04ddccfbcae68a62c73f8c5c88c6b183e18d422d8d8ca0b0587",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "проверка-технической-основы-001-dev": {
+          "heading": "Проверка технической основы 0.0.1-dev",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "проверка-технической-основы-001-dev"
+        },
+        "среда-и-происхождение-инструментов": {
+          "heading": "Среда и происхождение инструментов",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "среда-и-происхождение-инструментов"
+        },
+        "выполненные-локальные-проверки": {
+          "heading": "Выполненные локальные проверки",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "выполненные-локальные-проверки"
+        },
+        "воспроизведение": {
+          "heading": "Воспроизведение",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "воспроизведение"
+        },
+        "ci-и-чистая-копия": {
+          "heading": "CI и чистая копия",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "ci-и-чистая-копия"
+        },
+        "ограничения-и-следующая-работа": {
+          "heading": "Ограничения и следующая работа",
+          "destination": "docs/qa/foundation-2026-11-07.md",
+          "anchor": "ограничения-и-следующая-работа"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/gravity-2026-11-08.md",
+      "source_sha256": "4a14a2470887bf2755c0c86d7dee94550f01be06c73003a1f4a668851d4cc174",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-07-гравитационные-зоны-для-тел-и-игрока-007-dev": {
+          "heading": "SKL-07: гравитационные зоны для тел и игрока, 0.0.7-dev",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "skl-07-гравитационные-зоны-для-тел-и-игрока-007-dev"
+        },
+        "среда-и-область": {
+          "heading": "Среда и область",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "среда-и-область"
+        },
+        "полигон-отсек-6-гравитация": {
+          "heading": "Полигон: отсек 6 «Гравитация»",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "полигон-отсек-6-гравитация"
+        },
+        "результаты": {
+          "heading": "Результаты",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "результаты"
+        },
+        "независимость-от-частоты-кадров": {
+          "heading": "Независимость от частоты кадров",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "независимость-от-частоты-кадров"
+        },
+        "gpu-smoke": {
+          "heading": "GPU-smoke",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "gpu-smoke"
+        },
+        "ограничения": {
+          "heading": "Ограничения",
+          "destination": "docs/qa/gravity-2026-11-08.md",
+          "anchor": "ограничения"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/physics-carry-2026-11-07.md",
+      "source_sha256": "9f8d27b028ddf963153449ba58a6f895c08964177987d941ff08ecc1d4c8b163",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-03-физический-перенос-предметов-004-dev": {
+          "heading": "SKL-03: физический перенос предметов, 0.0.4-dev",
+          "destination": "docs/qa/physics-carry-2026-11-07.md",
+          "anchor": "skl-03-физический-перенос-предметов-004-dev"
+        },
+        "среда-и-область": {
+          "heading": "Среда и область",
+          "destination": "docs/qa/physics-carry-2026-11-07.md",
+          "anchor": "среда-и-область"
+        },
+        "проверяемые-сценарии": {
+          "heading": "Проверяемые сценарии",
+          "destination": "docs/qa/physics-carry-2026-11-07.md",
+          "anchor": "проверяемые-сценарии"
+        },
+        "запуск-и-границы-свидетельств": {
+          "heading": "Запуск и границы свидетельств",
+          "destination": "docs/qa/physics-carry-2026-11-07.md",
+          "anchor": "запуск-и-границы-свидетельств"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/player-movement-2026-11-07.md",
+      "source_sha256": "9d07d0485b256926a963585feeaf5e3d9c6ef1ef3f3df0d943f67aa3dc4ed8bc",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-02-полигон-и-мувсет-003-dev": {
+          "heading": "SKL-02: полигон и мувсет 0.0.3-dev",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "skl-02-полигон-и-мувсет-003-dev"
+        },
+        "область-и-среда": {
+          "heading": "Область и среда",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "область-и-среда"
+        },
+        "автоматическая-приёмка": {
+          "heading": "Автоматическая приёмка",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "автоматическая-приёмка"
+        },
+        "исправления-по-ревью-codex": {
+          "heading": "Исправления по ревью Codex",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "исправления-по-ревью-codex"
+        },
+        "gpu-и-экспорт": {
+          "heading": "GPU и экспорт",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "gpu-и-экспорт"
+        },
+        "дальнейшая-работа": {
+          "heading": "Дальнейшая работа",
+          "destination": "docs/qa/player-movement-2026-11-07.md",
+          "anchor": "дальнейшая-работа"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/portal-experiment-2026-11-08.md",
+      "source_sha256": "e8d737b1cffb410b724b9e59fef9f88c61ce45f098eaab83b49954aa55945c4a",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-08-ранний-эксперимент-порталов-009-dev": {
+          "heading": "SKL-08: ранний эксперимент порталов, 0.0.9-dev",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "skl-08-ранний-эксперимент-порталов-009-dev"
+        },
+        "среда-и-область": {
+          "heading": "Среда и область",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "среда-и-область"
+        },
+        "уровень-эксперимент-порталы": {
+          "heading": "Уровень «Эксперимент: порталы»",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "уровень-эксперимент-порталы"
+        },
+        "результаты": {
+          "heading": "Результаты",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "результаты"
+        },
+        "независимость-от-частоты-кадров": {
+          "heading": "Независимость от частоты кадров",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "независимость-от-частоты-кадров"
+        },
+        "gpu": {
+          "heading": "GPU",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "gpu"
+        },
+        "выявленные-ограничения-цель-эксперимента": {
+          "heading": "Выявленные ограничения (цель эксперимента)",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "выявленные-ограничения-цель-эксперимента"
+        },
+        "что-проверить-владельцу": {
+          "heading": "Что проверить владельцу",
+          "destination": "docs/qa/portal-experiment-2026-11-08.md",
+          "anchor": "что-проверить-владельцу"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/profiler-texture-quality-2026-11-09.md",
+      "source_sha256": "000c49527523f0274b82f2dba13206cb098d350e41756f483e3bc258454f8ef7",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "профилировщик-и-импорт-2k--2026-11-09": {
+          "heading": "Профилировщик и импорт 2K — 2026-11-09",
+          "destination": "docs/qa/profiler-texture-quality-2026-11-09.md",
+          "anchor": "профилировщик-и-импорт-2k--2026-11-09"
+        },
+        "изменение": {
+          "heading": "Изменение",
+          "destination": "docs/qa/profiler-texture-quality-2026-11-09.md",
+          "anchor": "изменение"
+        },
+        "проверки": {
+          "heading": "Проверки",
+          "destination": "docs/qa/profiler-texture-quality-2026-11-09.md",
+          "anchor": "проверки"
+        },
+        "короткое-сравнение-памяти": {
+          "heading": "Короткое сравнение памяти",
+          "destination": "docs/qa/profiler-texture-quality-2026-11-09.md",
+          "anchor": "короткое-сравнение-памяти"
+        }
+      }
+    },
+    {
+      "source": "docs/qa/session-flow-2026-11-07.md",
+      "source_sha256": "cb67df7ab28f99d585a28c713c1ba4223e816017d147ee0c564bc6e67e3bf3be",
+      "role": "Свидетельство; читать по задаче",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "skl-01-проверка-сессии-и-ввода": {
+          "heading": "SKL-01: проверка сессии и ввода",
+          "destination": "docs/qa/session-flow-2026-11-07.md",
+          "anchor": "skl-01-проверка-сессии-и-ввода"
+        },
+        "выполнено": {
+          "heading": "Выполнено",
+          "destination": "docs/qa/session-flow-2026-11-07.md",
+          "anchor": "выполнено"
+        },
+        "прерванная-ручная-проверка": {
+          "heading": "Прерванная ручная проверка",
+          "destination": "docs/qa/session-flow-2026-11-07.md",
+          "anchor": "прерванная-ручная-проверка"
+        },
+        "воспроизведение-автоматических-проверок": {
+          "heading": "Воспроизведение автоматических проверок",
+          "destination": "docs/qa/session-flow-2026-11-07.md",
+          "anchor": "воспроизведение-автоматических-проверок"
+        }
+      }
+    },
+    {
+      "source": "docs/status.md",
+      "source_sha256": "0389b62742b60380a87be95e6df288e33b39fc79ade6298114eb423a6d48dcf3",
+      "role": "Текущее состояние",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "состояние-разработки": {
+          "heading": "Состояние разработки",
+          "destination": "docs/status.md",
+          "anchor": "состояние-разработки"
+        },
+        "переработка-документации": {
+          "heading": "Переработка документации",
+          "destination": "docs/status.md",
+          "anchor": "переработка-документации"
+        },
+        "подготовка": {
+          "heading": "Подготовка",
+          "destination": "docs/status.md",
+          "anchor": "подготовка"
+        },
+        "010--скелет-со-всеми-механиками": {
+          "heading": "0.1.0 — скелет со всеми механиками",
+          "destination": "docs/status.md",
+          "anchor": "010--скелет-со-всеми-механиками"
+        },
+        "известные-непроверенные-места": {
+          "heading": "Известные непроверенные места",
+          "destination": "docs/status.md",
+          "anchor": "известные-непроверенные-места"
+        },
+        "художественное-направление-и-мир": {
+          "heading": "Художественное направление и мир",
+          "destination": "docs/status.md",
+          "anchor": "художественное-направление-и-мир"
+        }
+      }
+    },
+    {
+      "source": "docs/testing.md",
+      "source_sha256": "b163d4a761cf83ad010540eb27cca79e106d91a32e87fb5527dd5c5a4e6a7574",
+      "role": "Участник проекта; действующий документ",
+      "action": "Сохранить; добавить маршрут/оглавление",
+      "headings": {
+        "проверка-механик": {
+          "heading": "Проверка механик",
+          "destination": "docs/testing.md",
+          "anchor": "проверка-механик"
+        },
+        "автоматические-проверки": {
+          "heading": "Автоматические проверки",
+          "destination": "docs/testing.md",
+          "anchor": "автоматические-проверки"
+        },
+        "уровни-для-ручной-проверки": {
+          "heading": "Уровни для ручной проверки",
+          "destination": "docs/testing.md",
+          "anchor": "уровни-для-ручной-проверки"
+        },
+        "полигон-все-механики": {
+          "heading": "Полигон: все механики",
+          "destination": "docs/testing.md",
+          "anchor": "полигон-все-механики"
+        },
+        "эксперимент-порталы": {
+          "heading": "Эксперимент: порталы",
+          "destination": "docs/testing.md",
+          "anchor": "эксперимент-порталы"
+        },
+        "испытание-1-кнопки-и-логика": {
+          "heading": "Испытание 1: кнопки и логика",
+          "destination": "docs/testing.md",
+          "anchor": "испытание-1-кнопки-и-логика"
+        },
+        "испытание-2-луч-и-гравитация": {
+          "heading": "Испытание 2: луч и гравитация",
+          "destination": "docs/testing.md",
+          "anchor": "испытание-2-луч-и-гравитация"
+        },
+        "пример-камера-петля": {
+          "heading": "Пример: камера «Петля»",
+          "destination": "docs/testing.md",
+          "anchor": "пример-камера-петля"
+        },
+        "эксперимент-постановка-кубов": {
+          "heading": "Эксперимент: постановка кубов",
+          "destination": "docs/testing.md",
+          "anchor": "эксперимент-постановка-кубов"
+        },
+        "реальный-gpu-и-экспорт": {
+          "heading": "Реальный GPU и экспорт",
+          "destination": "docs/testing.md",
+          "anchor": "реальный-gpu-и-экспорт"
+        }
+      }
+    }
+  ]
+}
