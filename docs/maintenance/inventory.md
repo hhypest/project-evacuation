@@ -1,14 +1,14 @@
 # Инвентаризация документации
 
-DOC-01. Основа: `3c9f5d4460f0b713a03ccbd5c572da9af7d4a0b0` (main после PR №39), 49 Markdown-файлов. Это карта переноса для сопровождения; повседневный вход — каталог документации. Машинная карта `migration-map.json` учитывает каждый исходный файл и каждый заголовок. Пути назначения ниже первоначально заданы до переноса.
+DOC-01. Основа: `3c9f5d4460f0b713a03ccbd5c572da9af7d4a0b0` (main после PR №39), 49 Markdown-файлов. Это карта переноса для сопровождения; повседневный вход — [каталог документации](../README.md). Машинная карта `migration-map.json` учитывает каждый исходный файл и каждый заголовок. Пути назначения отражают итог переноса; точные якоря — в машинной карте.
 
 | Исходный файл | Читатель и роль | Действие | Назначение |
 | --- | --- | --- | --- |
-| `AGENTS.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `AGENTS.md` |
+| `AGENTS.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `AGENTS.md`, `docs/architecture/foundation.md`, `docs/development/assets.md`, `docs/development/checks.md`, `docs/development/coding.md`, `docs/development/physics.md` |
 | `Architecture.md` | Участник проекта; действующий документ | Разделить по задачам | `Architecture.md`, `docs/architecture/circuits.md`, `docs/architecture/content-and-saves.md`, `docs/architecture/distribution.md`, `docs/architecture/foundation.md`, `docs/architecture/gravity.md`, `docs/architecture/movement.md`, `docs/architecture/portals.md`, `docs/architecture/presentation.md`, `docs/architecture/validation.md` |
 | `CHANGELOG.md` | История | Сохранить; добавить маршрут/оглавление | `CHANGELOG.md` |
 | `CONTRIBUTING.md` | Участник проекта; действующий документ | Разделить по задачам | `CONTRIBUTING.md`, `docs/design/authoring.md`, `docs/development/assets.md`, `docs/development/checks.md`, `docs/development/coding.md`, `docs/development/release.md`, `docs/getting-started.md` |
-| `Readme.md` | Участник проекта; действующий документ | Разделить по задачам | `Readme.md`, `docs/design/risks.md`, `docs/getting-started.md`, `docs/requirements.md`, `docs/roadmap.md` |
+| `Readme.md` | Участник проекта; действующий документ | Разделить по задачам | `Readme.md`, `docs/README.md`, `docs/design/risks.md`, `docs/getting-started.md`, `docs/requirements.md`, `docs/roadmap.md` |
 | `THIRD_PARTY_NOTICES.md` | Производство; происхождение и права | Сохранить; добавить маршрут/оглавление | `THIRD_PARTY_NOTICES.md` |
 | `content/models/README.md` | Производство; происхождение и права | Сохранить; добавить маршрут/оглавление | `content/models/README.md` |
 | `content/textures/README.md` | Производство; происхождение и права | Сохранить; добавить маршрут/оглавление | `content/textures/README.md` |
@@ -25,9 +25,9 @@ DOC-01. Основа: `3c9f5d4460f0b713a03ccbd5c572da9af7d4a0b0` (main посл�
 | `docs/adr/0011-level-rhythm.md` | Решение / история решения | Сохранить; добавить маршрут/оглавление | `docs/adr/0011-level-rhythm.md` |
 | `docs/adr/0012-talos-carry.md` | Решение / история решения | Сохранить; добавить маршрут/оглавление | `docs/adr/0012-talos-carry.md` |
 | `docs/adr/template.md` | Решение / история решения | Сохранить; добавить маршрут/оглавление | `docs/adr/template.md` |
-| `docs/design/art-production-guide.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/art-production-guide.md` |
+| `docs/design/art-production-guide.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/archive/asset-history.md`, `docs/design/art-production-guide.md` |
 | `docs/design/cutscenes.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/cutscenes.md` |
-| `docs/design/level-construction.md` | Участник проекта; действующий документ | Разделить по задачам | `docs/design/level-construction.md`, `docs/design/level-metrics.md` |
+| `docs/design/level-construction.md` | Участник проекта; действующий документ | Разделить по задачам | `docs/architecture/segments.md`, `docs/design/authoring.md`, `docs/design/campaign-budget.md`, `docs/design/level-construction.md`, `docs/design/level-layout.md`, `docs/design/level-metrics.md` |
 | `docs/design/level-structure.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/level-structure.md` |
 | `docs/design/lore/README.md` | Автор/сценарист; канон или явно отмеченный архив | Разделить по задачам | `docs/design/lore/README.md`, `docs/design/lore/archive/initial-review.md` |
 | `docs/design/lore/outline-v2.md` | Автор/сценарист; канон или явно отмеченный архив | Разделить по задачам | `docs/design/lore/archive/outline-v2.md`, `docs/design/lore/outline-v2.md` |
@@ -38,7 +38,7 @@ DOC-01. Основа: `3c9f5d4460f0b713a03ccbd5c572da9af7d4a0b0` (main посл�
 | `docs/design/puzzle-template.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/puzzle-template.md` |
 | `docs/design/puzzles/loop.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/puzzles/loop.md` |
 | `docs/design/risks.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/design/risks.md` |
-| `docs/documentation-rework.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/documentation-rework.md` |
+| `docs/documentation-rework.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/documentation-rework.md`, `docs/maintenance/archive/documentation-plan-2026-11-10.md` |
 | `docs/performance.md` | Участник проекта; действующий документ | Сохранить; добавить маршрут/оглавление | `docs/performance.md` |
 | `docs/qa/beam-2026-11-08.md` | Свидетельство; читать по задаче | Сохранить; добавить маршрут/оглавление | `docs/qa/beam-2026-11-08.md` |
 | `docs/qa/concept-cube-button-2026-11-09.md` | Свидетельство; читать по задаче | Сохранить; добавить маршрут/оглавление | `docs/qa/concept-cube-button-2026-11-09.md` |

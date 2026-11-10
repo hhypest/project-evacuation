@@ -1,0 +1,150 @@
+[
+  {
+    "url": "https://arxiv.org/abs/1105.4714",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_performance.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_physicsdirectbodystate3d.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_physicsdirectspacestate3d.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_projectsettings.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_renderingserver.html#class-renderingserver-method-viewport-get-measured-render-time-gpu",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/classes/class_resourceimportertexture.html#class-resourceimportertexture-property-process-size-limit",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/tutorials/editor/command_line_tutorial.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/tutorials/physics/using_jolt_physics.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/tutorials/rendering/renderers.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/tutorials/scripting/debug/the_profiler.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.godotengine.org/en/4.7/tutorials/scripting/gdscript/static_typing.html",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/actions/checkout/tree/3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/godotengine/godot/tree/4.7.2-stable/modules/jolt_physics",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/actions/runs/42378496110",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/blob/c3ccbc4/docs/adr/0006-art-direction.md",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/blob/main/tools/toolchain.json",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/1",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/11",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/13",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/14",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/15",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/16",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/2",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/4",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/5",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/6",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/hhypest/project-evacuation/pull/8",
+    "status": 200
+  },
+  {
+    "url": "https://github.com/jrouwe/JoltPhysics",
+    "status": 200
+  },
+  {
+    "url": "https://godotengine.org/license/",
+    "status": 200
+  },
+  {
+    "url": "https://ntrs.nasa.gov/citations/20210012798",
+    "status": 200
+  },
+  {
+    "url": "https://opensource.org/license/mit",
+    "status": 200
+  },
+  {
+    "url": "https://partner.steamgames.com/doc/gettingstarted/appfee",
+    "status": 200
+  },
+  {
+    "url": "https://partner.steamgames.com/doc/gettingstarted/onboarding",
+    "status": 200
+  },
+  {
+    "url": "https://www.jpl.nasa.gov/news/nasa-planet-hunter-finds-earth-size-habitable-zone-world/",
+    "status": 200
+  },
+  {
+    "url": "https://www.nasa.gov/universe/nasas-tess-discovers-planetary-systems-second-earth-size-world/",
+    "status": 200
+  }
+]

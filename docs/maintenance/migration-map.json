@@ -5,7 +5,7 @@
       "source": "AGENTS.md",
       "source_sha256": "1a200a07864b1bb167467a2984c22d41924a577f0256cd703a62993e7779bd35",
       "role": "Участник проекта; действующий документ",
-      "action": "Сохранить; добавить маршрут/оглавление",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "правила-работы-агентов": {
           "heading": "Правила работы агентов",
@@ -15,42 +15,42 @@
         "1-перед-работой": {
           "heading": "1. Перед работой",
           "destination": "AGENTS.md",
-          "anchor": "1-перед-работой"
+          "anchor": "перед-работой"
         },
         "2-неизменяемые-рамки-без-отдельного-решения-владельца": {
           "heading": "2. Неизменяемые рамки без отдельного решения владельца",
           "destination": "AGENTS.md",
-          "anchor": "2-неизменяемые-рамки-без-отдельного-решения-владельца"
+          "anchor": "неизменяемые-рамки"
         },
         "3-архитектура": {
           "heading": "3. Архитектура",
-          "destination": "AGENTS.md",
-          "anchor": "3-архитектура"
+          "destination": "docs/architecture/foundation.md",
+          "anchor": "инварианты-изменения"
         },
         "4-gdscript": {
           "heading": "4. GDScript",
-          "destination": "AGENTS.md",
+          "destination": "docs/development/coding.md",
           "anchor": "4-gdscript"
         },
         "5-физика-движение-порталы": {
           "heading": "5. Физика, движение, порталы",
-          "destination": "AGENTS.md",
+          "destination": "docs/development/physics.md",
           "anchor": "5-физика-движение-порталы"
         },
         "6-проверки": {
           "heading": "6. Проверки",
-          "destination": "AGENTS.md",
+          "destination": "docs/development/checks.md",
           "anchor": "6-проверки"
         },
         "7-контент-и-лицензии": {
           "heading": "7. Контент и лицензии",
-          "destination": "AGENTS.md",
+          "destination": "docs/development/assets.md",
           "anchor": "7-контент-и-лицензии"
         },
         "8-завершение-задачи": {
           "heading": "8. Завершение задачи",
           "destination": "AGENTS.md",
-          "anchor": "8-завершение-задачи"
+          "anchor": "завершение"
         }
       }
     },
@@ -58,12 +58,12 @@
       "source": "Architecture.md",
       "source_sha256": "1db9affd5ba8824ba757bbe417923e65a24cedab643a05559187ca327079b54b",
       "role": "Участник проекта; действующий документ",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "архитектура-проекта-эвакуация": {
           "heading": "Архитектура проекта «Эвакуация»",
           "destination": "Architecture.md",
-          "anchor": "архитектура-проекта-эвакуация"
+          "anchor": "архитектура-abandoned"
         },
         "1-цели-и-ограничения": {
           "heading": "1. Цели и ограничения",
@@ -274,7 +274,7 @@
       "source": "CONTRIBUTING.md",
       "source_sha256": "5cc18e6d0b8af3a688b18efcd4e4e037efd2e6e329c24ee7e9a54ae27dd8a230",
       "role": "Участник проекта; действующий документ",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "участие-в-разработке": {
           "heading": "Участие в разработке",
@@ -289,7 +289,7 @@
         "2-среда-разработки": {
           "heading": "2. Среда разработки",
           "destination": "docs/getting-started.md",
-          "anchor": "2-среда-разработки"
+          "anchor": "что-понадобится"
         },
         "3-рабочий-цикл": {
           "heading": "3. Рабочий цикл",
@@ -299,7 +299,7 @@
         "4-код-и-архитектурные-соглашения": {
           "heading": "4. Код и архитектурные соглашения",
           "destination": "docs/development/coding.md",
-          "anchor": "4-код-и-архитектурные-соглашения"
+          "anchor": "правила-кода"
         },
         "5-проверки-и-команды": {
           "heading": "5. Проверки и команды",
@@ -362,7 +362,7 @@
       "source": "Readme.md",
       "source_sha256": "69cba5d4d956e4d76556c30e3bdc7f23f77d0cf502b3eb8a7c2f76e5c7ca5843",
       "role": "Участник проекта; действующий документ",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "проект-эвакуация-игра-abandoned": {
           "heading": "Проект «Эвакуация» (игра «Abandoned»)",
@@ -371,8 +371,8 @@
         },
         "документация": {
           "heading": "Документация",
-          "destination": "Readme.md",
-          "anchor": "документация"
+          "destination": "docs/README.md",
+          "anchor": "документация-abandoned"
         },
         "зафиксированные-требования": {
           "heading": "Зафиксированные требования",
@@ -397,7 +397,7 @@
         "подготовка-и-запуск": {
           "heading": "Подготовка и запуск",
           "destination": "docs/getting-started.md",
-          "anchor": "подготовка-и-запуск"
+          "anchor": "первый-запуск"
         },
         "план-разработки": {
           "heading": "План разработки",
@@ -467,7 +467,7 @@
         "ключевые-риски-и-проверки": {
           "heading": "Ключевые риски и проверки",
           "destination": "docs/design/risks.md",
-          "anchor": "ключевые-риски-и-проверки"
+          "anchor": "реестр-рисков"
         },
         "лицензирование-и-источники": {
           "heading": "Лицензирование и источники",
@@ -1123,7 +1123,7 @@
       "source": "docs/design/art-production-guide.md",
       "source_sha256": "1ceff2b8f1b2694e451043cad941c30bee5641db89de4661c81b2fdfa6082e7b",
       "role": "Участник проекта; действующий документ",
-      "action": "Сохранить; добавить маршрут/оглавление",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "abandoned-применение-визуального-концепта": {
           "heading": "Abandoned: применение визуального концепта",
@@ -1162,7 +1162,7 @@
         },
         "процедурный-базовый-набор-текстур": {
           "heading": "Процедурный базовый набор текстур",
-          "destination": "docs/design/art-production-guide.md",
+          "destination": "docs/design/archive/asset-history.md",
           "anchor": "процедурный-базовый-набор-текстур"
         }
       }
@@ -1249,12 +1249,12 @@
       "source": "docs/design/level-construction.md",
       "source_sha256": "e1b7e982a3d6620653c21be15d8f449b203ae1cee888dde9778807b0e77ec765",
       "role": "Участник проекта; действующий документ",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "построение-уровней-сегменты-размеры-сборка": {
           "heading": "Построение уровней: сегменты, размеры, сборка",
           "destination": "docs/design/level-construction.md",
-          "anchor": "построение-уровней-сегменты-размеры-сборка"
+          "anchor": "построение-уровней"
         },
         "0-коротко-принятый-подход": {
           "heading": "0. Коротко: принятый подход",
@@ -1288,117 +1288,117 @@
         },
         "2-сетка-и-кит": {
           "heading": "2. Сетка и кит",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "2-сетка-и-кит"
         },
         "3-камеры": {
           "heading": "3. Камеры",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "3-камеры"
         },
         "классы-размеров": {
           "heading": "Классы размеров",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "классы-размеров"
         },
         "почему-не-больше-3236-м": {
           "heading": "Почему не больше 32–36 м",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "почему-не-больше-3236-м"
         },
         "анатомия-камеры": {
           "heading": "Анатомия камеры",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "анатомия-камеры"
         },
         "бюджет-элементов-на-камеру": {
           "heading": "Бюджет элементов на камеру",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "бюджет-элементов-на-камеру"
         },
         "4-переходы": {
           "heading": "4. Переходы",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "4-переходы"
         },
         "размер-и-время": {
           "heading": "Размер и время",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "размер-и-время"
         },
         "типы-переходов": {
           "heading": "Типы переходов",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "типы-переходов"
         },
         "навигация-без-подсказок": {
           "heading": "Навигация без подсказок",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "навигация-без-подсказок"
         },
         "5-станции-авангарда": {
           "heading": "5. Станции авангарда",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "5-станции-авангарда"
         },
         "6-как-собирать-один-сектор": {
           "heading": "6. Как собирать один сектор",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "6-как-собирать-один-сектор"
         },
         "формула-сектора": {
           "heading": "Формула сектора",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "формула-сектора"
         },
         "набросок-по-секторам": {
           "heading": "Набросок по секторам",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "набросок-по-секторам"
         },
         "7-масштаб-как-показать-4-километра": {
           "heading": "7. Масштаб: как показать 4 километра",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/level-layout.md",
           "anchor": "7-масштаб-как-показать-4-километра"
         },
         "8-техника-подгрузка-сегментов": {
           "heading": "8. Техника: подгрузка сегментов",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/architecture/segments.md",
           "anchor": "8-техника-подгрузка-сегментов"
         },
         "бюджеты-производительности-стартовые-мерить-на-целевом-железе": {
           "heading": "Бюджеты производительности (стартовые, мерить на целевом железе)",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/architecture/segments.md",
           "anchor": "бюджеты-производительности-стартовые-мерить-на-целевом-железе"
         },
         "9-инструменты-и-процесс": {
           "heading": "9. Инструменты и процесс",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/authoring.md",
           "anchor": "9-инструменты-и-процесс"
         },
         "чем-строить": {
           "heading": "Чем строить",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/authoring.md",
           "anchor": "чем-строить"
         },
         "процесс-одной-камеры": {
           "heading": "Процесс одной камеры",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/authoring.md",
           "anchor": "процесс-одной-камеры"
         },
         "процесс-одного-перехода": {
           "heading": "Процесс одного перехода",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/authoring.md",
           "anchor": "процесс-одного-перехода"
         },
         "10-оценка-объёма": {
           "heading": "10. Оценка объёма",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/campaign-budget.md",
           "anchor": "10-оценка-объёма"
         },
         "11-порядок-работ-когда-начнётся-разработка-уровней": {
           "heading": "11. Порядок работ (когда начнётся разработка уровней)",
-          "destination": "docs/design/level-construction.md",
+          "destination": "docs/design/authoring.md",
           "anchor": "11-порядок-работ-когда-начнётся-разработка-уровней"
         },
         "12-принятые-решения-владелец-2026-11-09": {
@@ -1455,7 +1455,7 @@
       "source": "docs/design/lore/README.md",
       "source_sha256": "1f50bd5ac63b391e0ba53fce6aaf7f1e4cc6451b187cba411907cebf851b943f",
       "role": "Автор/сценарист; канон или явно отмеченный архив",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "lore-01-первое-очертание-лора-abandoned": {
           "heading": "LORE-01: первое очертание лора Abandoned",
@@ -1498,7 +1498,7 @@
       "source": "docs/design/lore/outline-v2.md",
       "source_sha256": "6a91a584b94fc574f47dafde76a6694b55d0ae386f2be9e5886a6a9b27693cc2",
       "role": "Автор/сценарист; канон или явно отмеченный архив",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "abandoned--лор-и-вступление": {
           "heading": "«Abandoned» — лор и вступление",
@@ -1556,7 +1556,7 @@
       "source": "docs/design/lore/outline-v3.md",
       "source_sha256": "cd191f05309c5ea3890e194877c1cb12003b13100c0ca787cd6f04588508d91a",
       "role": "Автор/сценарист; канон или явно отмеченный архив",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "abandoned--лор-и-вступление": {
           "heading": "«Abandoned» — лор и вступление",
@@ -1717,7 +1717,7 @@
       "source": "docs/design/lore/pre-bible-checklist.md",
       "source_sha256": "bfa08100fa513064528ff47659d749a378cd88e3a9c9de4e86d6576e6b91808d",
       "role": "Автор/сценарист; канон или явно отмеченный архив",
-      "action": "Разделить по задачам",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "abandoned--чек-лист-завершённости-лора-перед-написанием-библии": {
           "heading": "Abandoned — чек-лист завершённости лора перед написанием библии",
@@ -1977,36 +1977,36 @@
       "source": "docs/documentation-rework.md",
       "source_sha256": "984f573dee10486f18ec2078b603055f60c7485bb8da10c0d4bea2b2eb96c6a7",
       "role": "Участник проекта; действующий документ",
-      "action": "Сохранить; добавить маршрут/оглавление",
+      "action": "Разделено по задачам; старые пути и якоря сохранены",
       "headings": {
         "план-переработки-документации": {
           "heading": "План переработки документации",
           "destination": "docs/documentation-rework.md",
-          "anchor": "план-переработки-документации"
+          "anchor": "переработка-документации-doc-01doc-05"
         },
         "что-мешает-сейчас": {
           "heading": "Что мешает сейчас",
-          "destination": "docs/documentation-rework.md",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
           "anchor": "что-мешает-сейчас"
         },
         "как-читатель-будет-входить": {
           "heading": "Как читатель будет входить",
-          "destination": "docs/documentation-rework.md",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
           "anchor": "как-читатель-будет-входить"
         },
         "карта-всех-материалов": {
           "heading": "Карта всех материалов",
-          "destination": "docs/documentation-rework.md",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
           "anchor": "карта-всех-материалов"
         },
         "порядок-работ-и-приёмка": {
           "heading": "Порядок работ и приёмка",
-          "destination": "docs/documentation-rework.md",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
           "anchor": "порядок-работ-и-приёмка"
         },
         "как-проверить-снижение-нагрузки": {
           "heading": "Как проверить снижение нагрузки",
-          "destination": "docs/documentation-rework.md",
+          "destination": "docs/maintenance/archive/documentation-plan-2026-11-10.md",
           "anchor": "как-проверить-снижение-нагрузки"
         }
       }

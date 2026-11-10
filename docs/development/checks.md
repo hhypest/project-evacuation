@@ -94,7 +94,7 @@ godot --headless --path . --export-release "Linux Vulkan" builds/evacuation.x86_
 
 ## Документация
 
-Для проверки ссылок нужен Python 3 без внешних пакетов:
+Для проверки ссылок нужен Python 3.10+ без внешних пакетов:
 
 ```bash
 python tools/check_docs.py

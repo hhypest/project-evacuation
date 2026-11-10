@@ -99,3 +99,11 @@ Main создаёт сервисы, LevelScope — зависимости кон
 - [16. Решения и порядок изменения](docs/architecture/distribution.md#16-решения-и-порядок-изменения)
 
 </details>
+
+<details>
+<summary>Ссылки из прежней структуры</summary>
+
+<a id="архитектура-проекта-эвакуация"></a>
+- [Архитектура проекта «Эвакуация»](Architecture.md#архитектура-abandoned)
+
+</details>
