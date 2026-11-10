@@ -37,6 +37,7 @@ func teleport(_body_id: StringName, _destination: Transform3D, _linear: Vector3,
 	pass
 
 
-## Keeps a refused body on the allowed side of the entry: front of the plane, no velocity into it.
-func hold(_body_id: StringName, _destination: Transform3D, _linear: Vector3) -> void:
-	pass
+## Applies recovery only if the complete pose and path from the current body are free. A failed
+## placement must leave the physical body unchanged, so the coordinator can reset the chamber.
+func hold(_body_id: StringName, _destination: Transform3D, _linear: Vector3) -> bool:
+	return false

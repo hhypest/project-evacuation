@@ -152,7 +152,7 @@ func acquire(id: StringName) -> bool:
 
 func supporting_player(id: StringName) -> bool:
 	var body: CarryRigidBody = _body(id)
-	if body == null:
+	if body == null or not _player.has_floor_support():
 		return false
 	for index: int in range(_player.get_slide_collision_count()):
 		var contact: KinematicCollision3D = _player.get_slide_collision(index)

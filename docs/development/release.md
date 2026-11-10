@@ -11,7 +11,19 @@ $env:GODOT_BIN = ./tools/setup.ps1
 ./tools/export.ps1
 ```
 
-Результаты: `builds/evacuation.exe` и `builds/evacuation.x86_64`, лицензии рядом. Сначала выполните [проверки изменения](checks.md); упаковка не подтверждает запуск на каждой ОС. Для графического запуска требуется Vulkan.
+Результаты: `builds/evacuation.exe` и `builds/evacuation.x86_64`, Windows console wrapper `builds/evacuation.console.exe`, лицензии и `builds/build-manifest.json` рядом. Экспорт требует чистого tracked checkout и отсутствия незакоммиченных игровых ресурсов. Manifest фиксирует фактический commit/tree и SHA256. Сначала выполните [проверки изменения](checks.md); упаковка не подтверждает запуск на каждой ОС. Для графического запуска требуется Vulkan.
+
+## Проверка готового бинарника
+
+На соответствующей ОС:
+
+```powershell
+./builds/evacuation.console.exe --headless --fixed-fps 144 -- --runtime-smoke
+# Linux:
+./builds/evacuation.x86_64 --headless --fixed-fps 144 -- --runtime-smoke
+```
+
+Ожидаются `EXPORTED_GAMEPLAY_SMOKE_PASSED` и exit 0. Проверяются реальные игровые сцены и ввод внутри pack, включая аварийное восстановление портала; графика этим не подтверждается. CI выполняет Linux-вариант и сохраняет оба дистрибутива на 14 дней; Windows runtime и Vulkan/RTX требуют отдельной приёмки. [Сценарии TD-08](../qa/technical-debt-stabilization-2026-11-10.md#приёмка-на-целевом-пк--td-08-открыта).
 
 ## 11. Выпуск
 

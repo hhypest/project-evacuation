@@ -36,7 +36,7 @@ func use(scope_id: int, view: Transform3D) -> bool:
 
 
 func step(scope_id: int, tick_id: int) -> PuzzleStepResult:
-	if not ready() or scope_id != _scope_id:
+	if not ready() or scope_id != _scope_id or tick_id <= network.last_tick:
 		return null
 	var observation: PuzzleObservation = _world.observe(tick_id)
 	if observation == null:

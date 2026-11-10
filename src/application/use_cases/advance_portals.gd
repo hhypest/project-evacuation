@@ -5,6 +5,13 @@ extends RefCounted
 
 var errors: PackedStringArray = PackedStringArray()
 var transfers: Array[PortalTransfer] = []
+const HISTORY_LIMIT: int = 128
+var crossing_count: int = 0
+var blocked_count: int = 0
+## Unrecoverable geometry stops the scope until Bootstrap replaces the entire chamber generation.
+var recovery_required: bool = false
+var recovery_body_id: StringName = &""
+var _safe_poses: Dictionary[StringName, PortalRecoveryPose] = {}
 var _world: PortalWorldPort
 var _scope_id: int = -1
 var _last_tick: int = -1
@@ -37,6 +44,12 @@ func ready() -> bool:
 
 
 func reset() -> void:
+	recovery_required = false
+	recovery_body_id = &""
+	_safe_poses.clear()
+	transfers.clear()
+	crossing_count = 0
+	blocked_count = 0
 	_previous.clear()
 	_guard.clear()
 	_powered.clear()
@@ -50,15 +63,20 @@ func reset() -> void:
 
 
 func prepare(scope_id: int, delta: float) -> void:
-	if scope_id != _scope_id or not ready():
+	if scope_id != _scope_id or not ready() or recovery_required:
 		return
 	var pairs: Array[PortalPairState] = _world.pairs()
 	if pairs.is_empty():
 		return
 	var bodies: Array[PortalBodyState] = _world.bodies()
+	_remember_safe(pairs, bodies)
 	for pair: PortalPairState in pairs:
 		_prepare_entry(pair.a, pair.b, pair.powered, bodies, delta)
+		if recovery_required:
+			return
 		_prepare_entry(pair.b, pair.a, pair.powered, bodies, delta)
+		if recovery_required:
+			return
 
 
 func _prepare_entry(entry: PortalPlane, exit: PortalPlane, powered: bool,
@@ -88,13 +106,14 @@ func _prepare_entry(entry: PortalPlane, exit: PortalPlane, powered: bool,
 				# Never enable a slab inside an existing shape. First put a newly obstructed traveller
 				# safely in front of it, then let Jolt enforce the closed passage.
 				if local.origin.z < extent.z + PortalRules.BARRIER_HALF_DEPTH - PortalRules.CONTACT_TOLERANCE:
-					_hold(entry, body)
+					if not _hold(entry, body):
+						return
 	_world.set_barrier(entry.id, blocked)
 
 
 func step(scope_id: int, tick_id: int) -> Array[PortalTransfer]:
 	var done: Array[PortalTransfer] = []
-	if scope_id != _scope_id or tick_id <= _last_tick or not ready():
+	if scope_id != _scope_id or tick_id <= _last_tick or not ready() or recovery_required:
 		return done
 	_last_tick = tick_id
 	var pairs: Array[PortalPairState] = _world.pairs()
@@ -102,7 +121,11 @@ func step(scope_id: int, tick_id: int) -> Array[PortalTransfer]:
 		return done
 	var bodies: Array[PortalBodyState] = _world.bodies()
 	_restore_unfinished(pairs, bodies)
+	if recovery_required:
+		return done
 	_resolve_held_obstructions(pairs, bodies)
+	if recovery_required:
+		return done
 	# Carriers are processed first, regardless of the adapter's collection order.
 	var ordered: Array[PortalBodyState] = []
 	for body: PortalBodyState in bodies:
@@ -112,6 +135,8 @@ func step(scope_id: int, tick_id: int) -> Array[PortalTransfer]:
 		if not body.is_player:
 			ordered.append(body)
 	for body: PortalBodyState in ordered:
+		if recovery_required:
+			break
 		var current: Vector3 = body.transform.origin
 		var previous: Vector3 = _previous.get(body.id, current)
 		_previous[body.id] = current
@@ -134,7 +159,13 @@ func step(scope_id: int, tick_id: int) -> Array[PortalTransfer]:
 				done.append(outcome)
 				break
 		_clear_held(body.id)
-	transfers.append_array(done)
+	for outcome: PortalTransfer in done:
+		crossing_count += 1
+		if outcome.blocked:
+			blocked_count += 1
+		transfers.append(outcome)
+		if transfers.size() > HISTORY_LIMIT:
+			transfers.pop_front()
 	return done
 
 
@@ -169,8 +200,8 @@ func _try(pair: PortalPairState, entry: PortalPlane, exit: PortalPlane, body: Po
 	if not PortalRules.fits(entry, crossing_pose, body.half_extents) \
 			or not _world.exit_free(body.id, destination, group, start):
 		outcome.blocked = true
-		_hold(entry, body)
-		_world.set_barrier(entry.id, true)
+		if _hold(entry, body):
+			_world.set_barrier(entry.id, true)
 		return outcome
 	var companions: Array[PortalBodyState] = []
 	for mate: PortalBodyState in bodies:
@@ -187,7 +218,9 @@ func _try(pair: PortalPairState, entry: PortalPlane, exit: PortalPlane, body: Po
 			_world.release(mate.id)
 			mate.held = false
 			outcome.detached_id = mate.id
-			_hold(entry, mate)
+			if not _hold(entry, mate):
+				outcome.blocked = true
+				return outcome
 			# The pre-transfer snapshot is no longer held, but must not be independently transferred
 			# later in this same tick after being deliberately left at the entry.
 			_previous[mate.id] = mate.transform.origin
@@ -216,7 +249,7 @@ func _move(entry: PortalPlane, exit: PortalPlane, body: PortalBodyState, destina
 	body.transform = destination
 
 
-func _hold(entry: PortalPlane, body: PortalBodyState) -> void:
+func _hold(entry: PortalPlane, body: PortalBodyState) -> bool:
 	var local: Transform3D = entry.transform.affine_inverse() * body.transform
 	# The authored frame is 0.4 m deep. Keep even a prop beside the aperture clear of its front,
 	# rather than dropping a too-wide companion halfway into the frame or behind the entry wall.
@@ -225,10 +258,48 @@ func _hold(entry: PortalPlane, body: PortalBodyState) -> void:
 	var velocity: Vector3 = entry.transform.basis.inverse() * body.linear_velocity
 	velocity.z = maxf(0.0, velocity.z)
 	var held_at: Transform3D = entry.transform * local
-	_world.hold(body.id, held_at, entry.transform.basis * velocity)
+	if not _world.hold(body.id, held_at, entry.transform.basis * velocity):
+		var saved: PortalRecoveryPose = _safe_poses.get(body.id)
+		var restored: Transform3D = body.transform
+		if saved != null:
+			restored.origin = saved.transform.origin
+		if saved == null or saved.entry_id != entry.id \
+				or not _world.hold(body.id, restored, entry.transform.basis * velocity):
+			recovery_required = true
+			recovery_body_id = body.id
+			return false
+		held_at = restored
 	_previous[body.id] = held_at.origin
 	_clear_held(body.id)
 	body.transform = held_at
+	body.linear_velocity = entry.transform.basis * velocity
+	return true
+
+
+func _remember_safe(pairs: Array[PortalPairState], bodies: Array[PortalBodyState]) -> void:
+	# Keep one current approach per body. No scene/physics handles enter this application snapshot.
+	var live: Dictionary[StringName, bool] = {}
+	for body: PortalBodyState in bodies:
+		live[body.id] = true
+		var nearest: float = INF
+		for pair: PortalPairState in pairs:
+			for plane: PortalPlane in [pair.a, pair.b]:
+				var local: Transform3D = plane.transform.affine_inverse() * body.transform
+				var extent: Vector3 = PortalRules.projected_extent(local.basis, body.half_extents)
+				if not plane.inside_opening(local.origin) or local.origin.z < extent.z \
+						+ PortalRules.FRAME_HALF_DEPTH + PortalRules.ENTRY_CLEARANCE:
+					continue
+				if local.origin.z >= nearest:
+					continue
+				if _world.exit_free(body.id, body.transform):
+					var saved: PortalRecoveryPose = PortalRecoveryPose.new()
+					saved.entry_id = plane.id
+					saved.transform = body.transform
+					_safe_poses[body.id] = saved
+					nearest = local.origin.z
+	for id: StringName in _safe_poses.keys():
+		if not live.has(id):
+			_safe_poses.erase(id)
 
 
 func _group_ids(body: PortalBodyState, bodies: Array[PortalBodyState]) -> Array[StringName]:
@@ -253,7 +324,8 @@ func _restore_unfinished(pairs: Array[PortalPairState], bodies: Array[PortalBody
 						if body.held:
 							_world.release(body.id)
 							body.held = false
-						_hold(plane, body)
+						if not _hold(plane, body):
+							return
 						break
 		_powered[pair.id] = pair.powered
 
@@ -277,7 +349,8 @@ func _resolve_held_obstructions(pairs: Array[PortalPairState], bodies: Array[Por
 			if not _world.exit_free(body.id, destination, _group_ids(body, bodies), start):
 				_world.release(body.id)
 				body.held = false
-				_hold(entry, body)
+				if not _hold(entry, body):
+					return
 				_world.set_barrier(entry.id, true)
 			break
 

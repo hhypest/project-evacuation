@@ -45,6 +45,10 @@ func _ready() -> void:
 		"SESSION_READY" if errors.is_empty() else "SESSION_BLOCKED",
 		_runtime.engine_version, _runtime.rendering_driver, _runtime.physics_backend, _runtime.headless
 	])
+	if "--runtime-smoke" in OS.get_cmdline_user_args():
+		var smoke: RuntimeGameplaySmoke = RuntimeGameplaySmoke.new()
+		add_child(smoke)
+		smoke.start(self)
 
 
 func get_session_status() -> SessionStatus:
@@ -79,6 +83,9 @@ func _on_profile_record_toggled() -> void:
 func _physics_process(delta: float) -> void:
 	if _scope != null and _session.get_status().accepts_gameplay:
 		_scope.apply_input(_input.take_frame(), delta)
+		if _scope.needs_recovery():
+			print("CHAMBER_RECOVERY body=%s" % _scope.portals().recovery_body_id)
+			_on_restart_requested()
 
 
 func _on_start_requested() -> void:

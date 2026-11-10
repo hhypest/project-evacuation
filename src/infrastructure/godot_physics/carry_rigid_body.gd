@@ -5,6 +5,11 @@ extends RigidBody3D
 
 @export var stable_id: StringName = &""
 
+class SupportContact:
+	extends RefCounted
+	var collider: RID
+	var normal: Vector3
+
 var last_applied_tick: int = -1
 var _profile: CarryProfile
 var _scope_id: int = -1
@@ -12,6 +17,8 @@ var _held: bool = false
 var _last_received_tick: int = -1
 var _pending: CarryBodyCommand
 var _collision: CollisionShape3D
+## Snapshot of the last completed Jolt contacts. Sleeping bodies retain their resting contacts.
+var _contacts: Array[SupportContact] = []
 
 
 func configure(profile: CarryProfile, scope_id: int) -> bool:
@@ -41,10 +48,22 @@ func is_carried() -> bool:
 	return _held
 
 
+## Jolt reports these normals in world coordinates. A contact must oppose the plate's gravity;
+## touching a side, or touching a taller neighbour, is not a supported stack.
+func supported_by(other: CollisionObject3D, up: Vector3) -> bool:
+	if _held or freeze or not get_colliding_bodies().has(other):
+		return false
+	for contact: SupportContact in _contacts:
+		if contact.collider == other.get_rid() and contact.normal.dot(up) >= 0.7:
+			return true
+	return false
+
+
 func acquire() -> bool:
 	if _scope_id < 0 or _held or _pending != null or freeze:
 		return false
 	_held = true
+	_contacts.clear()
 	# Talos-style hold (ADR-0012): while held the prop is a kinematic body placed by the carry adapter.
 	freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
 	freeze = true
@@ -81,6 +100,7 @@ func release_for_portal() -> void:
 
 
 func portal_place(pose: Transform3D, linear: Vector3, angular: Vector3) -> void:
+	_contacts.clear()
 	var rotation: Basis = pose.basis * global_basis.inverse()
 	if _pending != null:
 		_pending.impulse = rotation * _pending.impulse
@@ -93,6 +113,7 @@ func portal_place(pose: Transform3D, linear: Vector3, angular: Vector3) -> void:
 
 
 func close() -> void:
+	_contacts.clear()
 	_scope_id = -1
 	if _held:
 		_let_go(Vector3.ZERO)
@@ -108,6 +129,12 @@ func _let_go(velocity: Vector3) -> void:
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	_contacts.clear()
+	for index: int in range(state.get_contact_count()):
+		var contact: SupportContact = SupportContact.new()
+		contact.collider = state.get_contact_collider(index)
+		contact.normal = state.get_contact_local_normal(index)
+		_contacts.append(contact)
 	if _pending == null or _scope_id < 0:
 		return
 	var command: CarryBodyCommand = _pending
