@@ -113,7 +113,9 @@ func measure(player: PlayerMotor, player_mass: float) -> float:
 	if player != null and player.has_floor_support():
 		for index: int in range(player.get_slide_collision_count()):
 			var contact: KinematicCollision3D = player.get_slide_collision(index)
-			if contact.get_normal().dot(player.up_direction) < 0.7:
+			# A floor for the player may be the plate's side/underside in another gravity field.
+			# Player and rigid-body loads must follow the same directed support chain.
+			if contact.get_normal().dot(player.up_direction) < 0.7 or contact.get_normal().dot(up) < 0.7:
 				continue
 			var collider: Object = contact.get_collider()
 			if collider == plate or (collider is RigidBody3D and supported.has(collider.get_instance_id())):

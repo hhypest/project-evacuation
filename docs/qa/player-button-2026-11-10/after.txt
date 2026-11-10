@@ -1,0 +1,27 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS player load requires the plate top normal, including rotated gravity (normal=(0.0, 1.0, 0.0) turned=false) load=80.00 grounded=true touches=true
+PASS player load requires the plate top normal, including rotated gravity (normal=(1.0, 0.0, 0.0) turned=false) load=0.00 grounded=true touches=true
+PASS player load requires the plate top normal, including rotated gravity (normal=(0.0, -1.0, 0.0) turned=false) load=0.00 grounded=true touches=true
+PASS player load follows the supported stack top, not its side (normal=(0.0, 1.0, 0.0) turned=false) load=100.00 grounded=true touches=true
+PASS player load follows the supported stack top, not its side (normal=(1.0, 0.0, 0.0) turned=false) load=20.00 grounded=true touches=true
+PASS player load requires the plate top normal, including rotated gravity (normal=(0.0, 1.0, 0.0) turned=true) load=80.00 grounded=true touches=true
+PASS player load requires the plate top normal, including rotated gravity (normal=(1.0, 0.0, 0.0) turned=true) load=0.00 grounded=true touches=true
+PASS player load requires the plate top normal, including rotated gravity (normal=(0.0, -1.0, 0.0) turned=true) load=0.00 grounded=true touches=true
+PASS player load follows the supported stack top, not its side (normal=(0.0, 1.0, 0.0) turned=true) load=100.00 grounded=true touches=true
+PASS player load follows the supported stack top, not its side (normal=(1.0, 0.0, 0.0) turned=true) load=20.00 grounded=true touches=true
+PASS a cube touching only the plate side contributes no supported load (turned=false) 
+PASS a cube really resting on the plate contributes its mass (turned=false) 20.0
+PASS real stacked contacts count every mass once (turned=false) 25.0
+PASS a side contact higher than a supported cube is not a stack (turned=false) 25.0
+PASS removing supported bodies leaves no stale load (turned=false) 
+PASS portal recovery invalidates old rigid-body support before the next observation (turned=false) 
+PASS a cube touching only the plate side contributes no supported load (turned=true) 
+PASS a cube really resting on the plate contributes its mass (turned=true) 20.0
+PASS real stacked contacts count every mass once (turned=true) 25.0
+PASS a side contact higher than a supported cube is not a stack (turned=true) 25.0
+PASS removing supported bodies leaves no stale load (turned=true) 
+PASS portal recovery invalidates old rigid-body support before the next observation (turned=true) 
+PASS field rotation cannot jump from old support or lose its air branch (jump=false) (-0.333333, 0.0, 0.0)
+PASS field rotation cannot jump from old support or lose its air branch (jump=true) (-0.333333, 0.0, 0.0)
+PASS blocked exit and recovery corridor never place the capsule into a new obstacle (-5.0, 0.9, -2.95)

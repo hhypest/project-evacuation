@@ -12,6 +12,7 @@ func suite_name() -> StringName:
 func run(tree: SceneTree) -> Array[TestOutcome]:
 	_tree = tree
 	var results: Array[TestOutcome] = []
+	results.append_array(await _player_plate_contacts())
 	for turned: bool in [false, true]:
 		_room = Node3D.new()
 		_room.basis = Basis(Vector3.FORWARD, PI * 0.5) if turned else Basis.IDENTITY
@@ -115,6 +116,65 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		not overlaps and traveller.center().is_equal_approx(before) and scope.needs_recovery(), str(traveller.center())))
 	scope.close()
 	await tree.process_frame
+	return results
+
+
+func _player_plate_contacts() -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	for turned: bool in [false, true]:
+		for normal: Vector3 in [Vector3.UP, Vector3.RIGHT, Vector3.DOWN]:
+			_room = Node3D.new()
+			_room.basis = Basis(Vector3.FORWARD, PI * 0.5) if turned else Basis.IDENTITY
+			_tree.root.add_child(_room)
+			var plate: FloorButtonDevice = FloorButtonDevice.new()
+			plate.stable_id = &"audit.player_plate"
+			_room.add_child(plate)
+			var player: PlayerMotor = PlayerMotor.new()
+			_room.add_child(player)
+			var feet: Vector3 = Vector3(0, 0.11, 0) if normal == Vector3.UP \
+				else Vector3(0.71, 0.05, 0) if normal == Vector3.RIGHT else Vector3(0, -0.01, 0)
+			var frame: Basis = _room.global_basis * PlayerMotor._shortest_turn(Vector3.UP, normal, Vector3.RIGHT)
+			var up: Vector3 = _room.global_basis * normal
+			player.portal_place(Transform3D(frame, _room.to_global(feet) + up * player.portal_shape().height * 0.5), Vector3.ZERO)
+			for tick: int in range(40):
+				await _tree.physics_frame
+				player.step(MovementCommand.new(), 1.0 / 60.0)
+			var touches: bool = false
+			for index: int in range(player.get_slide_collision_count()):
+				touches = touches or player.get_slide_collision(index).get_collider() == plate.plate
+			var load: float = plate.measure(player, 80.0)
+			var expected: float = 80.0 if normal == Vector3.UP else 0.0
+			results.append(TestOutcome.new("player load requires the plate top normal, including rotated gravity (normal=%s turned=%s)" % [normal, turned],
+				player.has_floor_support() and touches and is_equal_approx(load, expected), "load=%.2f grounded=%s touches=%s" % [load, player.has_floor_support(), touches]))
+			_room.queue_free()
+			await _tree.process_frame
+		for normal: Vector3 in [Vector3.UP, Vector3.RIGHT]:
+			_room = Node3D.new()
+			_room.basis = Basis(Vector3.FORWARD, PI * 0.5) if turned else Basis.IDENTITY
+			_tree.root.add_child(_room)
+			var plate: FloorButtonDevice = FloorButtonDevice.new()
+			plate.stable_id = &"audit.player_stack"
+			_room.add_child(plate)
+			var cube: CarryRigidBody = _cube(&"audit.support", Vector3(0, 0.48, 0), 20.0)
+			await _ticks(60)
+			var player: PlayerMotor = PlayerMotor.new()
+			_room.add_child(player)
+			var feet: Vector3 = Vector3(0, 0.86, 0) if normal == Vector3.UP else Vector3(0.385, 0.475, 0)
+			var frame: Basis = _room.global_basis * PlayerMotor._shortest_turn(Vector3.UP, normal, Vector3.RIGHT)
+			var up: Vector3 = _room.global_basis * normal
+			player.portal_place(Transform3D(frame, _room.to_global(feet) + up * player.portal_shape().height * 0.5), Vector3.ZERO)
+			for tick: int in range(20):
+				await _tree.physics_frame
+				player.step(MovementCommand.new(), 1.0 / 60.0)
+			var touches: bool = false
+			for index: int in range(player.get_slide_collision_count()):
+				touches = touches or player.get_slide_collision(index).get_collider() == cube
+			var load: float = plate.measure(player, 80.0)
+			var expected: float = 100.0 if normal == Vector3.UP else 20.0
+			results.append(TestOutcome.new("player load follows the supported stack top, not its side (normal=%s turned=%s)" % [normal, turned],
+				player.has_floor_support() and touches and is_equal_approx(load, expected), "load=%.2f grounded=%s touches=%s" % [load, player.has_floor_support(), touches]))
+			_room.queue_free()
+			await _tree.process_frame
 	return results
 
 
