@@ -16,6 +16,8 @@ var _step_ray: RayCast3D
 var _wanted_up: Vector3 = Vector3.UP
 var _wanted_scale: float = 1.0
 var _gravity_scale: float = 1.0
+## CharacterBody support belongs to its last move_and_slide, not a newly placed pose.
+var _support_valid: bool = true
 ## True while a new field direction waits for free space to turn the capsule.
 var reorientation_blocked: bool = false
 
@@ -69,6 +71,7 @@ func portal_place(pose: Transform3D, motion: Vector3) -> void:
 	velocity = motion
 	_wanted_up = up_direction
 	mode = MovementStep.Mode.AIR
+	_support_valid = false
 	_ladder_lock = profile.ladder_detach_seconds
 	reset_physics_interpolation()
 
@@ -90,6 +93,7 @@ func step(command: MovementCommand, delta: float) -> void:
 		_try_step(velocity.slide(up_direction) * delta)
 	var desired_velocity: Vector3 = velocity
 	move_and_slide()
+	_support_valid = true
 	_push_props(desired_velocity, delta)
 
 
@@ -140,7 +144,7 @@ func _update_stance(wants_crouch: bool) -> void:
 		return
 	var height: float = profile.crouched_height if wants_crouch else profile.standing_height
 	var offset: float = 0.0
-	if not is_on_floor():
+	if not _support_valid or not is_on_floor():
 		offset = _shape.height - height
 	var destination: Vector3 = global_position + up_direction * offset
 	if not wants_crouch:
@@ -163,7 +167,7 @@ func _update_stance(wants_crouch: bool) -> void:
 func _observe() -> MovementObservation:
 	var observation: MovementObservation = MovementObservation.new()
 	observation.velocity = velocity
-	observation.grounded = is_on_floor()
+	observation.grounded = _support_valid and is_on_floor()
 	observation.crouched = crouched
 	observation.up = up_direction
 	observation.gravity_scale = _gravity_scale

@@ -67,6 +67,36 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		and cube.global_position.distance_to(a.transform.origin) > 5.0, str(cube.linear_velocity)))
 	await _close()
 	if not await _open(LAB):
+		return results + [TestOutcome.new("backwards carry portal scope opens", false)]
+	cube = _lab.get_node("CubeA") as CarryRigidBody
+	a = _pair.state().a
+	cube.global_transform = Transform3D(Basis.IDENTITY, a.transform * Vector3(0, -0.65, 2.5))
+	cube.linear_velocity = Vector3.ZERO
+	await _ticks(10)
+	_camera.look_at(cube.global_position, _player.up_direction)
+	await _ticks(1, Vector2.ZERO, true)
+	_camera.global_basis = Basis(Vector3.UP, PI)
+	grabbed = _scope.held_prop_id() == cube.stable_id
+	for tick: int in range(60):
+		await _ticks(1, Vector2(0, 1))
+		if _player_transfers() > 0:
+			break
+	var trailing_visual: bool = false
+	for child: Node in _lab.get_children():
+		if child is PortalPropVisual and (child as PortalPropVisual).body == cube:
+			var trailing: PortalPropVisual = child as PortalPropVisual
+			trailing.refresh()
+			trailing_visual = trailing.twin_visible and trailing.entry == _pair.surface_b
+	results.append(TestOutcome.new("walking backwards through a portal preserves a held trailing cube's remote visual",
+		grabbed and _player_transfers() == 1 and _scope.held_prop_id() == cube.stable_id and trailing_visual
+		and _pair.state().b.local(cube.global_position).z < -0.5))
+	await _ticks(1, Vector2.ZERO, false, true)
+	await _ticks(6)
+	results.append(TestOutcome.new("throwing a trailing cube materialises it back at the original visible entry",
+		_scope.held_prop_id().is_empty() and a.local(cube.global_position).z > 0.5
+		and cube.linear_velocity.dot(a.transform.basis.z) > 1.0, str(cube.global_position)))
+	await _close()
+	if not await _open(LAB):
 		return results + [TestOutcome.new("inserted held cube scope opens", false)]
 	cube = _lab.get_node("CubeA") as CarryRigidBody
 	a = _pair.state().a

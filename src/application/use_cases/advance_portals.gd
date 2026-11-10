@@ -66,6 +66,10 @@ func _prepare_entry(entry: PortalPlane, exit: PortalPlane, powered: bool,
 	var blocked: bool = false
 	if powered:
 		for body: PortalBodyState in bodies:
+			# Companions are admitted or safely detached by the carrier's transaction in _try().
+			# Closing the shared slab for them here would prevent that transaction ever being reached.
+			if body.held:
+				continue
 			if _guard.get(body.id, &"") == entry.id:
 				continue
 			var local: Transform3D = entry.transform.affine_inverse() * body.transform
@@ -200,6 +204,13 @@ func _move(entry: PortalPlane, exit: PortalPlane, body: PortalBodyState, destina
 	_guard[body.id] = exit.id
 	_previous[body.id] = destination.origin
 	_clear_held(body.id)
+	if body.held and exit.local(destination.origin).z < 0.0:
+		# Walking backwards sends the carrier first. The companion still spans the exit and its
+		# visible part remains at the old entry until it follows or is released back onto that side.
+		_guard.erase(body.id)
+		_held_entries[body.id] = exit.id
+		_held_carriers[body.id] = body.carrier_id
+		_world.straddle(body.id, exit.id)
 	# Other members of this tick's snapshot must see the new pose, especially the attached prop
 	# which is visited after its carrier. Do not overwrite its mapped history with its old entry pose.
 	body.transform = destination

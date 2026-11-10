@@ -10,6 +10,7 @@ class World:
 	var dropped: Array[StringName] = []
 	var barriers: Dictionary[StringName, bool] = {}
 	var excluded: Array[StringName] = []
+	var straddles: Dictionary[StringName, StringName] = {}
 
 	func _init() -> void:
 		pair.id = &"pair"
@@ -30,6 +31,9 @@ class World:
 
 	func set_barrier(id: StringName, blocked: bool) -> void:
 		barriers[id] = blocked
+
+	func straddle(id: StringName, plane_id: StringName) -> void:
+		straddles[id] = plane_id
 
 	func release(id: StringName) -> void:
 		dropped.append(id)
@@ -145,6 +149,42 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	use_case.step(7, 3)
 	results.append(TestOutcome.new("an obstruction appearing inside the remote held pose safely drops it at the entry",
 		world.dropped == [&"cube"] and world.states[0].transform.origin.z > 0.5 and not world.states[0].held))
+	for oversized: bool in [false, true]:
+		world = _world()
+		cube = world.states[0]
+		cube.transform.origin.z = 0.1
+		if oversized:
+			cube.half_extents.x = 1.0
+		else:
+			world.refused = cube.id
+		use_case = AdvancePortals.new(world, 7)
+		use_case.step(7, 1)
+		use_case.prepare(7, 1.0 / 60.0)
+		var passage_open: bool = not world.barriers[&"a"]
+		# A real motor cannot reach the crossing if prepare closed the slab first.
+		if passage_open:
+			world.states[1].transform.origin.z = -0.1
+		var alone: Array[PortalTransfer] = use_case.step(7, 2)
+		results.append(TestOutcome.new("prepare allows a clear carrier past a refused companion (oversized=%s)" % oversized,
+			passage_open and alone.size() == 1 and alone[0].detached_id == cube.id
+			and world.moved == [&"player"] and not cube.held and cube.transform.origin.z > 0.5))
+	world = _world()
+	cube = world.states[0]
+	cube.transform.origin.z = 1.0
+	use_case = AdvancePortals.new(world, 7)
+	use_case.step(7, 1)
+	world.states[1].transform.origin.z = -0.1
+	use_case.step(7, 2)
+	var straddled: StringName = world.straddles.get(cube.id, &"")
+	results.append(TestOutcome.new("a companion behind its carrier keeps the exit straddle for its remote visual",
+		straddled == &"b" and world.pair.b.local(cube.transform.origin).z < -0.5))
+	cube.held = false
+	cube.carrier_id = &""
+	use_case.step(7, 3)
+	straddled = world.straddles.get(cube.id, &"")
+	results.append(TestOutcome.new("releasing a companion still behind the exit materialises it on the original side",
+		world.moved == [&"player", &"cube", &"cube"] and world.pair.a.local(cube.transform.origin).z > 0.5
+		and straddled == &""))
 	return results
 
 
