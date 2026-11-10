@@ -44,6 +44,14 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		await _ticks(5)
 		results.append(TestOutcome.new("removing supported bodies leaves no stale load (turned=%s)" % turned,
 			absf(plate.measure(null, 0.0) - 20.0) < 0.01))
+		var portal_world: PortalWorldAdapter = PortalWorldAdapter.new()
+		portal_world.configure(_room)
+		var raised: Transform3D = cube.global_transform
+		raised.origin += plate.global_basis.y * 1.5
+		var recovered: bool = portal_world.hold(cube.stable_id, raised, Vector3.ZERO)
+		results.append(TestOutcome.new("portal recovery invalidates old rigid-body support before the next observation (turned=%s)" % turned,
+			recovered and plate.measure(null, 0.0) == 0.0))
+		portal_world.close()
 		_room.queue_free()
 		await tree.process_frame
 	for jumping: bool in [false, true]:

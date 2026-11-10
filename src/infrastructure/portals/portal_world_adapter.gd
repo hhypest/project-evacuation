@@ -161,25 +161,26 @@ func teleport(body_id: StringName, destination: Transform3D, linear: Vector3, an
 
 
 func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> bool:
-	var current: Vector3
+	var current: Transform3D
 	if body_id == PLAYER_ID and is_instance_valid(_player):
-		current = _player.center()
+		current = Transform3D(_player.global_basis, _player.center())
 	else:
 		var found: CarryRigidBody = _bodies.get(body_id)
 		if not is_instance_valid(found):
 			return false
-		current = found.global_position
-	if not exit_free(body_id, destination, [], current):
+		current = found.global_transform
+	# cast_motion sweeps translation, not rotation. Recovery keeps the body's current frame so
+	# neither a stored approach nor a caller can hide a rotation through intervening geometry.
+	if not destination.basis.is_equal_approx(current.basis) \
+			or not exit_free(body_id, destination, [], current.origin):
 		return false
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		_player.portal_place(destination, linear)
 		return true
 	var body: CarryRigidBody = _bodies.get(body_id)
 	if is_instance_valid(body):
-		body.global_transform = destination
-		body.linear_velocity = linear
-		body.sleeping = false
-		body.reset_physics_interpolation()
+		body.cancel_pending()
+		body.portal_place(destination, linear, body.angular_velocity)
 		return true
 	return false
 
