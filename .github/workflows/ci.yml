@@ -43,6 +43,33 @@ jobs:
         run: |
           chmod +x builds/evacuation.x86_64
           if ($LASTEXITCODE -ne 0) { throw 'chmod failed' }
-          $output = (& ./builds/evacuation.x86_64 --headless --fixed-fps 60 --quit-after 120 2>&1 | Out-String)
-          if ($LASTEXITCODE -ne 0 -or $output -match '(SCRIPT ERROR:|ERROR:)' -or $output -notmatch 'SESSION_READY') { throw $output }
+          $output = (& timeout 120 ./builds/evacuation.x86_64 --headless --fixed-fps 144 -- --runtime-smoke 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 0 -or $output -match '(SCRIPT ERROR:|ERROR:|WARNING:)' -or $output -notmatch 'EXPORTED_GAMEPLAY_SMOKE_PASSED') { throw $output }
           Write-Output $output
+          $negative = (& timeout 30 ./builds/evacuation.x86_64 --headless -- --runtime-smoke --self-test-failure 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 1 -or $negative -notmatch 'intentional smoke failure') { throw $negative }
+      - name: Windows distribution with provenance and notices
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: evacuation-windows-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            builds/evacuation.exe
+            builds/evacuation.console.exe
+            builds/build-manifest.json
+            builds/LICENSE
+            builds/THIRD_PARTY_NOTICES.md
+            builds/content/licenses/
+      - name: Linux distribution with provenance and notices
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: evacuation-linux-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            builds/evacuation.x86_64
+            builds/build-manifest.json
+            builds/LICENSE
+            builds/THIRD_PARTY_NOTICES.md
+            builds/content/licenses/

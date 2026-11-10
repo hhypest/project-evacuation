@@ -62,7 +62,7 @@ if (-not $SkipTemplates) {
   $archive = [IO.Compression.ZipFile]::OpenRead($templatesArchive)
   try {
     foreach ($entry in $archive.Entries) {
-      if ($entry.FullName -match '^templates/(version.txt|linux_(debug|release).x86_64|windows_(debug|release)_x86_64.exe)$') {
+      if ($entry.FullName -match '^templates/(version.txt|linux_(debug|release).x86_64|windows_(debug|release)_x86_64(_console)?.exe)$') {
         [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, (Join-Path $destination ([IO.Path]::GetFileName($entry.FullName))), $true)
       }
     }

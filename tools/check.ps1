@@ -46,6 +46,12 @@ try {
   $report = Invoke-CheckedGodot -Arguments @('--headless', '--path', '.', '--script', 'tests/run_tests.gd', '--', '--suite', 'all')
   if ($report -notmatch 'TEST_RESULT total=([1-9]\d*) failed=0') { throw "Missing nonempty successful test report: $report" }
   Write-Output $report
+  foreach ($cadence in @(30, 144)) {
+    $report = Invoke-CheckedGodot -Arguments @('--headless', '--fixed-fps', "$cadence", '--path', '.', '--script', 'tests/run_tests.gd', '--', '--suite', 'all')
+    if ($report -notmatch 'TEST_RESULT total=([1-9]\d*) failed=0') { throw "Missing successful cadence=$cadence report: $report" }
+    Write-Output "Render cadence=$cadence (headless, physics remains 60 Hz)"
+    Write-Output $report
+  }
   if (-not $SkipRunnerSelfCheck) {
     $null = Invoke-CheckedGodot -ExpectedExit 1 -Arguments @('--headless', '--path', '.', '--script', 'tests/run_tests.gd', '--', '--suite', 'unit', '--self-test-failure')
     $null = Invoke-CheckedGodot -ExpectedExit 2 -Arguments @('--headless', '--path', '.', '--script', 'tests/run_tests.gd', '--', '--suite', 'unknown')

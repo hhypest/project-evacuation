@@ -24,7 +24,27 @@ try {
   Copy-Item -LiteralPath LICENSE,THIRD_PARTY_NOTICES.md -Destination builds
   New-Item -ItemType Directory -Path builds/content -Force | Out-Null
   Copy-Item -LiteralPath content/licenses -Destination builds/content -Recurse -Force
-  Get-FileHash -LiteralPath builds/evacuation.exe,builds/evacuation.x86_64 -Algorithm SHA256 | Format-Table Hash,Path
+  $sourceCommit = (& git rev-parse HEAD | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0 -or $sourceCommit -notmatch '^[0-9a-f]{40}$') { throw 'Cannot identify the source commit.' }
+  $sourceTree = (& git rev-parse 'HEAD^{tree}' | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0 -or $sourceTree -notmatch '^[0-9a-f]{40}$') { throw 'Cannot identify the source tree.' }
+  $trackedStatus = (& git status --porcelain --untracked-files=no | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0 -or $trackedStatus) { throw 'Export provenance requires a clean tracked working tree.' }
+  # The presets exclude these development directories. Any other untracked resource could enter
+  # all_resources and would make the commit/tree manifest an inaccurate description of the pack.
+  $untrackedGame = @(& git ls-files --others --exclude-standard | Where-Object { $_ -notmatch '^(docs|tests|tools|asset_sources|\.github)/' })
+  if ($LASTEXITCODE -ne 0 -or $untrackedGame.Count -gt 0) { throw "Untracked game inputs are not covered by the source commit: $untrackedGame" }
+  $hashes = Get-FileHash -LiteralPath builds/evacuation.exe,builds/evacuation.console.exe,builds/evacuation.x86_64 -Algorithm SHA256
+  $outputs = [ordered]@{}
+  foreach ($entry in $hashes) { $outputs[[IO.Path]::GetFileName($entry.Path)] = $entry.Hash.ToLowerInvariant() }
+  [ordered]@{
+    schema_version = 1
+    source_commit = $sourceCommit
+    source_tree = $sourceTree
+    godot_version = $lock.cli_version
+    outputs_sha256 = $outputs
+  } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath builds/build-manifest.json -Encoding utf8
+  $hashes | Format-Table Hash,Path
 } finally {
   Pop-Location
 }
