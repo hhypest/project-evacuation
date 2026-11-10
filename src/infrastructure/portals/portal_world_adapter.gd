@@ -160,16 +160,28 @@ func teleport(body_id: StringName, destination: Transform3D, linear: Vector3, an
 				visual.reset_transit()
 
 
-func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> void:
+func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> bool:
+	var current: Vector3
+	if body_id == PLAYER_ID and is_instance_valid(_player):
+		current = _player.center()
+	else:
+		var found: CarryRigidBody = _bodies.get(body_id)
+		if not is_instance_valid(found):
+			return false
+		current = found.global_position
+	if not exit_free(body_id, destination, [], current):
+		return false
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		_player.portal_place(destination, linear)
-		return
+		return true
 	var body: CarryRigidBody = _bodies.get(body_id)
 	if is_instance_valid(body):
 		body.global_transform = destination
 		body.linear_velocity = linear
 		body.sleeping = false
 		body.reset_physics_interpolation()
+		return true
+	return false
 
 
 func close() -> void:

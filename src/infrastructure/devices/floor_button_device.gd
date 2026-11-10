@@ -81,35 +81,36 @@ func definition() -> DeviceDefinition:
 
 
 ## Supported load in kilograms after the last completed physics step.
-func measure(player: CharacterBody3D, player_mass: float) -> float:
+func measure(player: PlayerMotor, player_mass: float) -> float:
 	var up: Vector3 = global_basis.y.normalized()
-	var supported: Dictionary[int, RigidBody3D] = {}
-	var candidates: Array[RigidBody3D] = []
+	var supported: Dictionary[int, CarryRigidBody] = {}
+	var candidates: Array[CarryRigidBody] = []
 	for body: Node3D in _sensor.get_overlapping_bodies():
-		var rigid: RigidBody3D = body as RigidBody3D
+		var rigid: CarryRigidBody = body as CarryRigidBody
 		if rigid == null or rigid.freeze:
 			continue
-		if rigid is CarryRigidBody and (rigid as CarryRigidBody).is_carried():
+		if rigid.is_carried():
 			continue
 		candidates.append(rigid)
 	var grew: bool = true
 	while grew:
 		grew = false
-		for body: RigidBody3D in candidates:
+		for body: CarryRigidBody in candidates:
 			if supported.has(body.get_instance_id()):
 				continue
 			for other: Node3D in body.get_colliding_bodies():
-				var resting_on_plate: bool = other == plate
-				var stacked: bool = other is RigidBody3D and supported.has(other.get_instance_id()) \
-					and (body.global_position - other.global_position).dot(up) > 0.05
+				var resting_on_plate: bool = other == plate and body.supported_by(plate, up)
+				var support: CarryRigidBody = other as CarryRigidBody
+				var stacked: bool = support != null and supported.has(support.get_instance_id()) \
+					and body.supported_by(support, up)
 				if resting_on_plate or stacked:
 					supported[body.get_instance_id()] = body
 					grew = true
 					break
 	var total: float = 0.0
-	for body: RigidBody3D in supported.values():
+	for body: CarryRigidBody in supported.values():
 		total += body.mass
-	if player != null and player.is_on_floor():
+	if player != null and player.has_floor_support():
 		for index: int in range(player.get_slide_collision_count()):
 			var contact: KinematicCollision3D = player.get_slide_collision(index)
 			if contact.get_normal().dot(player.up_direction) < 0.7:

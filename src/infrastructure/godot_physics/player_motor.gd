@@ -18,6 +18,8 @@ var _wanted_scale: float = 1.0
 var _gravity_scale: float = 1.0
 ## CharacterBody support belongs to its last move_and_slide, not a newly placed pose.
 var _support_valid: bool = true
+var _support_pose: Transform3D
+var _support_up: Vector3 = Vector3.UP
 ## True while a new field direction waits for free space to turn the capsule.
 var reorientation_blocked: bool = false
 
@@ -62,6 +64,16 @@ func portal_shape() -> CapsuleShape3D:
 	return _shape
 
 
+func has_floor_support() -> bool:
+	return _support_valid and is_on_floor() and global_transform.is_equal_approx(_support_pose) \
+		and up_direction.is_equal_approx(_support_up)
+
+
+func _invalidate_support() -> void:
+	_support_valid = false
+	mode = MovementStep.Mode.AIR
+
+
 ## The portal pose is centred on the capsule, not at its feet. Preserve the mapped up/momentum until
 ## the next step samples the field at the exit before moving; the old floor/ladder is no longer support.
 func portal_place(pose: Transform3D, motion: Vector3) -> void:
@@ -70,8 +82,7 @@ func portal_place(pose: Transform3D, motion: Vector3) -> void:
 	global_position = pose.origin - up_direction * (_shape.height * 0.5)
 	velocity = motion
 	_wanted_up = up_direction
-	mode = MovementStep.Mode.AIR
-	_support_valid = false
+	_invalidate_support()
 	_ladder_lock = profile.ladder_detach_seconds
 	reset_physics_interpolation()
 
@@ -94,6 +105,8 @@ func step(command: MovementCommand, delta: float) -> void:
 	var desired_velocity: Vector3 = velocity
 	move_and_slide()
 	_support_valid = true
+	_support_pose = global_transform
+	_support_up = up_direction
 	_push_props(desired_velocity, delta)
 
 
@@ -122,10 +135,9 @@ func _apply_field() -> void:
 	global_basis = turned
 	global_position = destination
 	up_direction = _wanted_up
+	_invalidate_support()
 	_gravity_scale = _wanted_scale
 	reorientation_blocked = false
-	if mode == MovementStep.Mode.LADDER:
-		mode = MovementStep.Mode.AIR
 
 
 ## Smallest rotation taking from -> to; a half turn uses the given perpendicular hint as its axis.
@@ -144,7 +156,7 @@ func _update_stance(wants_crouch: bool) -> void:
 		return
 	var height: float = profile.crouched_height if wants_crouch else profile.standing_height
 	var offset: float = 0.0
-	if not _support_valid or not is_on_floor():
+	if not has_floor_support():
 		offset = _shape.height - height
 	var destination: Vector3 = global_position + up_direction * offset
 	if not wants_crouch:
@@ -167,7 +179,7 @@ func _update_stance(wants_crouch: bool) -> void:
 func _observe() -> MovementObservation:
 	var observation: MovementObservation = MovementObservation.new()
 	observation.velocity = velocity
-	observation.grounded = _support_valid and is_on_floor()
+	observation.grounded = has_floor_support()
 	observation.crouched = crouched
 	observation.up = up_direction
 	observation.gravity_scale = _gravity_scale

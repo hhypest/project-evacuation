@@ -11,6 +11,7 @@ class World:
 	var barriers: Dictionary[StringName, bool] = {}
 	var excluded: Array[StringName] = []
 	var straddles: Dictionary[StringName, StringName] = {}
+	var reject_recovery: bool = false
 
 	func _init() -> void:
 		pair.id = &"pair"
@@ -49,11 +50,14 @@ class World:
 				state.linear_velocity = linear
 				state.angular_velocity = angular
 
-	func hold(id: StringName, pose: Transform3D, linear: Vector3) -> void:
+	func hold(id: StringName, pose: Transform3D, linear: Vector3) -> bool:
+		if reject_recovery:
+			return false
 		for state: PortalBodyState in states:
 			if state.id == id:
 				state.transform = pose
 				state.linear_velocity = linear
+		return true
 
 
 func suite_name() -> StringName:
@@ -185,6 +189,37 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("releasing a companion still behind the exit materialises it on the original side",
 		world.moved == [&"player", &"cube", &"cube"] and world.pair.a.local(cube.transform.origin).z > 0.5
 		and straddled == &""))
+	world = _world()
+	world.refused = &"player"
+	world.reject_recovery = true
+	use_case = AdvancePortals.new(world, 7)
+	var original: Transform3D = world.states[1].transform
+	use_case.prepare(7, 1.0 / 60.0)
+	results.append(TestOutcome.new("a refused recovery leaves body and aperture unchanged and requests a chamber reset",
+		use_case.recovery_required and use_case.recovery_body_id == &"player"
+		and world.states[1].transform == original and world.barriers.is_empty()))
+	results.append(TestOutcome.new("an unrecoverable portal scope cannot process further crossing commands",
+		use_case.step(7, 1).is_empty() and world.moved.is_empty()))
+	world = World.new()
+	player = PortalBodyState.new()
+	player.id = &"traveller"
+	player.half_extents = Vector3(0.3, 0.9, 0.3)
+	world.states = [player]
+	use_case = AdvancePortals.new(world, 7)
+	for index: int in range(10000):
+		var entry: PortalPlane = world.pair.a if index % 2 == 0 else world.pair.b
+		player.linear_velocity = entry.transform.basis * Vector3(0, 0, -4)
+		player.transform = entry.transform * Transform3D(Basis.IDENTITY, Vector3(0, 0, 0.2))
+		use_case.step(7, index * 2 + 1)
+		player.transform.origin = entry.transform * Vector3(0, 0, -0.1)
+		use_case.step(7, index * 2 + 2)
+	var latest: PortalTransfer = use_case.transfers.back()
+	results.append(TestOutcome.new("ten thousand crossings keep bounded diagnostics and monotonic crossing IDs",
+		use_case.crossing_count == 10000 and use_case.blocked_count == 0
+		and use_case.transfers.size() == AdvancePortals.HISTORY_LIMIT and latest.crossing_id == 10000))
+	use_case.reset()
+	results.append(TestOutcome.new("explicit reset clears bounded portal diagnostics and recovery state",
+		use_case.transfers.is_empty() and use_case.crossing_count == 0 and not use_case.recovery_required))
 	return results
 
 

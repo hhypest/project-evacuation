@@ -119,6 +119,8 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	var field: GravityZone = _gravity.at(_player.center())
 	_player.set_gravity(field.up(), field.strength / _gravity.base().strength)
 	_portals.prepare(_generation, delta)
+	if _portals.recovery_required:
+		return
 	_player.step(command, delta)
 	_camera.align_to(_player.up_direction, delta)
 	_camera.global_position = _player.eye_position()
@@ -175,6 +177,10 @@ func gravity() -> SampleGravity:
 
 func portals() -> AdvancePortals:
 	return _portals
+
+
+func needs_recovery() -> bool:
+	return _portals != null and _portals.recovery_required
 
 
 func _close_portals() -> void:
