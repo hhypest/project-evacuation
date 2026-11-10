@@ -21,6 +21,10 @@
 
 Канон — [библия мира](design/lore/world-bible.md), художественное изложение — [редакция 4](design/lore/outline-v4.md), прежние тексты — [архив](design/lore/archive/README.md). Все содержат спойлеры.
 
+## Аудит и технический долг
+
+[Архитектурный аудит и code review 2026-11-10](maintenance/architecture-audit-2026-11-10.md) · [предложенный план устранения](maintenance/technical-debt-plan-2026-11-10.md).
+
 ## Сопровождение документации
 
 [Основные источники и порядок обновления](maintenance/README.md) · [карта переноса](maintenance/inventory.md) · [план DOC-01…DOC-05](documentation-rework.md).
