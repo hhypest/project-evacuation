@@ -69,10 +69,10 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	before = _scope.portals().transfers.size()
 	_launch(cube, a, 0.9, 6.0)
 	await _until_transfer(before, 60)
-	var refused: bool = _scope.portals().transfers.size() > before and _scope.portals().transfers.back().blocked
+	var refused: bool = _pair.surface_a.blocked or (_scope.portals().transfers.size() > before and _scope.portals().transfers.back().blocked)
 	await _ticks(10)
 	results.append(TestOutcome.new("an occupied exit refuses the transfer and keeps the cube in front of A",
-		refused and a.local(cube.global_position).z > 0.0 and cube.global_position.distance_to(b.transform.origin) > 3.0,
+		refused and a.local(cube.global_position).z >= 0.49 and cube.global_position.distance_to(b.transform.origin) > 3.0,
 		"refused %s, at A %s" % [refused, a.local(cube.global_position)]))
 	_place(blocker, Vector3(0.5, 0.55, 3.0), Vector3.ZERO)
 	await _press_power()
@@ -102,7 +102,10 @@ func _frustum() -> TestOutcome:
 		# A's +X maps to B's -X: image left is the exit's +X side.
 		var world: Vector3 = exit * Vector3(-corner.x * surface.half_size.x, corner.y * surface.half_size.y, 0)
 		var pixel: Vector2 = surface.camera.unproject_position(world)
-		var expected: Vector2 = Vector2((corner.x + 1.0) * 0.5 * size.x, (1.0 - corner.y) * 0.5 * size.y)
+		var patch: Rect2 = surface.view_region
+		var point: Vector2 = corner * surface.half_size
+		var expected: Vector2 = Vector2((point.x - patch.position.x) / patch.size.x * size.x,
+			(patch.end.y - point.y) / patch.size.y * size.y)
 		worst = maxf(worst, pixel.distance_to(expected))
 	var depth: float = (surface.camera.global_transform.affine_inverse() * exit.origin).z
 	return TestOutcome.new("the portal camera frames the exit opening exactly with the near plane on it",

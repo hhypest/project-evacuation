@@ -70,7 +70,9 @@ func open(scene: PackedScene, generation: int) -> bool:
 		_abort_open()
 		return false
 	_portal_world = PortalWorldAdapter.new()
-	_portal_world.configure(level)
+	if not _portal_world.configure(level, player, _carry):
+		_abort_open()
+		return false
 	_portals = AdvancePortals.new(_portal_world, generation)
 	if not _portals.ready():
 		push_error("Chamber portals rejected: " + "; ".join(_portals.errors))
@@ -116,6 +118,7 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	# Field power comes from the previous puzzle tick, like every other device output.
 	var field: GravityZone = _gravity.at(_player.center())
 	_player.set_gravity(field.up(), field.strength / _gravity.base().strength)
+	_portals.prepare(_generation, delta)
 	_player.step(command, delta)
 	_camera.align_to(_player.up_direction, delta)
 	_camera.global_position = _player.eye_position()
@@ -138,7 +141,17 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	_carry.step(carry_input)
 	_ghost.present(_carry.preview)
 	_puzzle.step(_generation, _tick_id)
-	_portals.step(_generation, _tick_id)
+	var passages: Array[PortalTransfer] = _portals.step(_generation, _tick_id)
+	for passage: PortalTransfer in passages:
+		if passage.body_id == PortalWorldAdapter.PLAYER_ID and not passage.blocked:
+			# Presentation stays in the coordinator: the physics adapter cannot depend on LookCamera.
+			_camera.frame = (passage.rotation * _camera.frame).orthonormalized()
+			_camera.global_basis = (passage.rotation * _camera.global_basis).orthonormalized()
+			_camera.reset_physics_interpolation()
+			_carry.portal_reframe(passage.rotation)
+	_camera.global_position = _player.eye_position()
+	# Portal commits can invalidate the pre-transfer placement preview in this same tick.
+	_ghost.present(_carry.preview)
 
 
 func held_prop_id() -> StringName:

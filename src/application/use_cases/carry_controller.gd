@@ -99,6 +99,19 @@ func suspend() -> void:
 	_world.cancel_pending()
 
 
+func portal_reframe(rotation: Basis) -> void:
+	_facing = rotation * _facing
+	_separated_seconds = 0.0
+	_placing = false
+	preview = null
+
+
+func drop_for_portal(id: StringName) -> void:
+	if state.held_id == id:
+		_world.release_for_portal(id)
+		_forget()
+
+
 func close() -> void:
 	_scope_id = -1
 	_world.close()

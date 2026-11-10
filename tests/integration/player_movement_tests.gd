@@ -224,6 +224,24 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("air strafe changes physical velocity while airborne",
 		not _player.is_on_floor() and _player.velocity.x < before_strafe - 0.5))
 	await _close(tree)
+	for jump: bool in [false, true]:
+		_open(tree, Vector3(0, 0.05, 10))
+		command = MovementCommand.new()
+		await _ticks(tree, command, 20)
+		var grounded_before: bool = _player.is_on_floor()
+		var pose: Transform3D = Transform3D(Basis.IDENTITY, Vector3(0, 6, 10))
+		_player.portal_place(pose, Vector3(2, 4, 0))
+		command.jump_requested = jump
+		await _ticks(tree, command, 1)
+		results.append(TestOutcome.new("portal placement discards old support and preserves airborne momentum (jump=%s)" % jump,
+			grounded_before and _player.mode == MovementStep.Mode.AIR
+			and _player.velocity.y > 3.5 and _player.velocity.y < 4.0 and _player.velocity.x > 1.9,
+			str(_player.velocity)))
+		command.jump_requested = false
+		await _ticks(tree, command, 100)
+		results.append(TestOutcome.new("destination contacts restore real floor support after placement (jump=%s)" % jump,
+			_player.is_on_floor() and _player.mode == MovementStep.Mode.GROUND))
+		await _close(tree)
 	return results
 
 

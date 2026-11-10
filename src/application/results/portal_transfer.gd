@@ -9,3 +9,6 @@ var pair_id: StringName = &""
 var entry_id: StringName = &""
 var exit_id: StringName = &""
 var blocked: bool = false
+var companion_id: StringName = &""
+var detached_id: StringName = &""
+var rotation: Basis = Basis.IDENTITY

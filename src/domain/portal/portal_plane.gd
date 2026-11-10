@@ -31,6 +31,11 @@ func validate() -> PackedStringArray:
 	if not (half_size.x > 0.1 and half_size.y > 0.1 and is_finite(half_size.x) and is_finite(half_size.y)):
 		errors.append("portal '%s' opening must be larger than 0.2 m" % id)
 	var scale: Vector3 = transform.basis.get_scale()
-	if not scale.is_equal_approx(Vector3.ONE) or transform.basis.determinant() < 0.0:
+	var basis: Basis = transform.basis
+	if not scale.is_equal_approx(Vector3.ONE) or basis.determinant() < 0.0 \
+			or absf(basis.x.dot(basis.y)) > 0.00001 or absf(basis.x.dot(basis.z)) > 0.00001 \
+			or absf(basis.y.dot(basis.z)) > 0.00001:
 		errors.append("portal '%s' transform must be orthonormal without scale or mirroring" % id)
+	if not transform.origin.is_finite():
+		errors.append("portal '%s' position must be finite" % id)
 	return errors

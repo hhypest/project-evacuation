@@ -74,6 +74,24 @@ func cancel_pending() -> void:
 	_pending = null
 
 
+func release_for_portal() -> void:
+	cancel_pending()
+	if _held:
+		_let_go(Vector3.ZERO)
+
+
+func portal_place(pose: Transform3D, linear: Vector3, angular: Vector3) -> void:
+	var rotation: Basis = pose.basis * global_basis.inverse()
+	if _pending != null:
+		_pending.impulse = rotation * _pending.impulse
+		_pending.carrier_velocity = rotation * _pending.carrier_velocity
+	global_transform = pose
+	linear_velocity = linear
+	angular_velocity = angular
+	sleeping = false
+	reset_physics_interpolation()
+
+
 func close() -> void:
 	_scope_id = -1
 	if _held:
