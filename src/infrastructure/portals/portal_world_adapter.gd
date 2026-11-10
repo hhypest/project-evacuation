@@ -13,6 +13,7 @@ var _visuals: Array[PortalPropVisual] = []
 var _space_owner: Node3D
 var _player: PlayerMotor
 var _carry: CarryController
+var _view_world: PortalViewWorld
 
 
 func configure(level: Node3D, player: PlayerMotor = null, carry: CarryController = null) -> bool:
@@ -20,7 +21,7 @@ func configure(level: Node3D, player: PlayerMotor = null, carry: CarryController
 	_player = player
 	_carry = carry
 	_collect(level)
-	if _bodies.has(PLAYER_ID):
+	if _bodies.has(PLAYER_ID) or _pairs.size() > 1:
 		return false
 	var surfaces: Array[PortalSurface] = []
 	for pair: PortalPairDevice in _pairs:
@@ -33,6 +34,9 @@ func configure(level: Node3D, player: PlayerMotor = null, carry: CarryController
 			level.add_child(visual)
 			visual.configure(body, surfaces)
 			_visuals.append(visual)
+		_view_world = PortalViewWorld.new()
+		level.add_child(_view_world)
+		_view_world.configure(level, _pairs[0])
 	return true
 
 
@@ -160,7 +164,7 @@ func teleport(body_id: StringName, destination: Transform3D, linear: Vector3, an
 				visual.reset_transit()
 
 
-func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> bool:
+func hold(body_id: StringName, destination: Transform3D, linear: Vector3, former_carrier: StringName = &"") -> bool:
 	var current: Transform3D
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		current = Transform3D(_player.global_basis, _player.center())
@@ -171,8 +175,11 @@ func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> boo
 		current = found.global_transform
 	# cast_motion sweeps translation, not rotation. Recovery keeps the body's current frame so
 	# neither a stored approach nor a caller can hide a rotation through intervening geometry.
+	var excluded: Array[StringName] = []
+	if former_carrier == PLAYER_ID and body_id != PLAYER_ID and _carry != null:
+		excluded.append(PLAYER_ID)
 	if not destination.basis.is_equal_approx(current.basis) \
-			or not exit_free(body_id, destination, [], current.origin):
+			or not exit_free(body_id, destination, excluded, current.origin):
 		return false
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		_player.portal_place(destination, linear)
@@ -181,11 +188,18 @@ func hold(body_id: StringName, destination: Transform3D, linear: Vector3) -> boo
 	if is_instance_valid(body):
 		body.cancel_pending()
 		body.portal_place(destination, linear, body.angular_velocity)
+		if not excluded.is_empty():
+			# A refused companion can occupy its former carrier's space temporarily, like an ordinary
+			# release. The carry adapter restores the pair only after separation, without solver impulses.
+			_carry.drop_for_portal(body_id)
 		return true
 	return false
 
 
 func close() -> void:
+	if is_instance_valid(_view_world):
+		_view_world.queue_free()
+	_view_world = null
 	for visual: PortalPropVisual in _visuals:
 		if is_instance_valid(visual):
 			visual.queue_free()

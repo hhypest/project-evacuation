@@ -1,9 +1,7 @@
 class_name PortalSurface
 extends Node3D
-## One side of a portal pair: frame, live membrane and its own SubViewport camera. The view uses an off-axis
-## frustum whose near plane is exactly the partner's opening, so geometry behind the exit never leaks into the
-## image (Godot 4.7 has no oblique near plane). Portal cameras do not see live membranes: inside a portal
-## view the other portals show a stable stub (no recursion in 0.1.0).
+## One side of a portal pair: frame, live membrane and a native screen-space SubViewport camera.
+## PortalViewWorld clips opaque geometry at the exit. Cameras never see live membranes (no recursion).
 
 ## Render layer of live membranes (seen by the player camera only).
 const MEMBRANE_LAYER: int = 1 << 1
@@ -55,7 +53,7 @@ func _ready() -> void:
 	add_child(viewport)
 	camera = Camera3D.new()
 	camera.name = "Camera"
-	camera.cull_mask = ALL_LAYERS & ~MEMBRANE_LAYER
+	camera.cull_mask = PortalViewWorld.VIEW_LAYERS[0 if name == &"A" else 1]
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	viewport.add_child(camera)
 	var quad: QuadMesh = QuadMesh.new()
@@ -154,19 +152,20 @@ func _process(_delta: float) -> void:
 		camera.environment = environment
 
 
-## Virtual eye = M * viewer; the camera faces straight out of the partner, and its off-axis frustum frames
-## exactly the partner's opening with the near plane on it.
+## The complete mapped viewer pose and matching projection keep one texture pixel per screen pixel.
 func place_camera(viewer: Transform3D, visible: Rect2 = Rect2()) -> void:
+	var native: Vector2i = PortalViewGeometry.target_size(_screen_size())
+	if viewport.size != native:
+		viewport.size = native
 	var exit: Transform3D = partner.global_transform.orthonormalized()
-	var eye: Vector3 = PortalMath.map_point(global_transform.orthonormalized(), exit, viewer.origin)
-	var view: Transform3D = Transform3D(exit.basis * PortalMath.H, eye)
-	camera.global_transform = view
-	var centre: Vector3 = view.affine_inverse() * exit.origin
-	var near: float = maxf(0.0001, -centre.z)
-	var requested: Rect2 = visible if visible.has_area() else Rect2(-half_size, half_size * 2.0)
-	view_region = PortalViewGeometry.fit_aspect(requested, float(viewport.size.x) / viewport.size.y)
-	camera.set_frustum(view_region.size.y, Vector2(centre.x, centre.y) + view_region.get_center(), near, 400.0)
-	_live.set_shader_parameter(&"aperture_crop", PortalViewGeometry.uv_region(view_region, half_size))
+	camera.global_transform = PortalMath.map_transform(global_transform.orthonormalized(), exit, viewer)
+	var source: Camera3D = get_viewport().get_camera_3d()
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.keep_aspect = source.keep_aspect if source != null else Camera3D.KEEP_HEIGHT
+	camera.fov = source.fov if source != null else 75.0
+	camera.near = 0.001
+	camera.far = source.far if source != null else 400.0
+	view_region = visible if visible.has_area() else Rect2(-half_size, half_size * 2.0)
 	_live.set_shader_parameter(&"portal_origin", global_position)
 	_live.set_shader_parameter(&"portal_right", global_basis.x.normalized())
 	_live.set_shader_parameter(&"portal_up", global_basis.y.normalized())
@@ -176,7 +175,9 @@ func place_camera(viewer: Transform3D, visible: Rect2 = Rect2()) -> void:
 
 func _screen_size() -> Vector2i:
 	var owner_viewport: Viewport = get_viewport()
+	if DisplayServer.get_name() == "headless":
+		return Vector2i(owner_viewport.get_visible_rect().size)
 	# Window.size is physical pixels even when canvas_items scales the HUD's logical coordinates.
-	if owner_viewport is Window:
+	if owner_viewport is Window and (owner_viewport as Window).size.x > 0 and (owner_viewport as Window).size.y > 0:
 		return (owner_viewport as Window).size
-	return Vector2i(owner_viewport.get_texture().get_size())
+	return Vector2i(owner_viewport.get_visible_rect().size)

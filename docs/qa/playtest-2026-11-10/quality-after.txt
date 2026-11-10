@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.351 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+PORTAL_NATIVE_LIGHT floor_luminance=0.251
+QUALITY_RUNTIME renderer=vulkan GPU=NVIDIA GeForce RTX 4070 Ti SUPER
+QUALITY side=A yaw=0.18 edges=165 target=(1280, 720)
+QUALITY side=A yaw=0.65 edges=148 target=(1280, 720)
+QUALITY side=A yaw=1.05 edges=116 target=(1280, 720)
+QUALITY side=A yaw=1.25 edges=107 target=(1280, 720)
+QUALITY side=B yaw=0.18 edges=165 target=(1280, 720)
+QUALITY side=B yaw=0.65 edges=168 target=(1280, 720)
+QUALITY side=B yaw=1.05 edges=119 target=(1280, 720)
+QUALITY side=B yaw=1.25 edges=111 target=(1280, 720)
+PORTAL_NATIVE_PASSED

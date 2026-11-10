@@ -162,8 +162,7 @@ func _walk_with_cube(main: SessionBootstrap, lab: Node3D, pair: PortalPairDevice
 		"mouse throws once in the exit frame after the player passage")
 
 
-## An unshaded checker at the exit gives a repeatable sharpness check. First render the old whole
-## aperture strategy, then the visible patch at native window size, with the exact same eye and target.
+## An unshaded checker checks close detail. The separate portal_view_smoke covers both sides and yaw.
 func _close_quality(pair: PortalPairDevice, player: PlayerMotor, camera: LookCamera, capture: String) -> bool:
 	var target: MeshInstance3D = MeshInstance3D.new()
 	var quad: QuadMesh = QuadMesh.new()
@@ -185,27 +184,17 @@ func _close_quality(pair: PortalPairDevice, player: PlayerMotor, camera: LookCam
 	for _frame: int in range(4):
 		await process_frame
 	var surface: PortalSurface = pair.surface_a
-	surface.set_process(false)
-	surface.viewport.size = Vector2i(720, 1080)
-	surface.place_camera(camera.global_transform)
-	for _frame: int in range(4):
-		await process_frame
-	await RenderingServer.frame_post_draw
-	var whole: int = _edges(root.get_texture().get_image())
-	if not _capture(capture.get_basename() + "-quality-whole.png"):
-		return false
-	surface.set_process(true)
 	for _frame: int in range(6):
 		await process_frame
 	await RenderingServer.frame_post_draw
 	var cropped: int = _edges(root.get_texture().get_image())
 	var visible_area: float = surface.view_region.get_area()
-	print("PORTAL_VIEW_DETAIL whole=%d cropped=%d patch=%s target=%s" % [whole, cropped, surface.view_region, surface.viewport.size])
+	print("PORTAL_VIEW_DETAIL edges=%d patch=%s target=%s" % [cropped, surface.view_region, surface.viewport.size])
 	if not _capture(capture.get_basename() + "-quality-crop.png"):
 		return false
 	target.queue_free()
-	return _check(cropped >= 20 and cropped > whole * 2 and visible_area < 0.1,
-		"near yawed view preserves checker detail instead of magnifying the whole-aperture image")
+	return _check(cropped >= 20 and visible_area < 0.1 and surface.viewport.size == PortalViewGeometry.target_size(root.size),
+		"near view preserves checker detail at native resolution")
 
 
 func _edges(image: Image) -> int:

@@ -1,6 +1,6 @@
 class_name ProfilerHud
 extends CanvasLayer
-## Development-only overlay. Not part of the game's diegetic interface; never takes mouse/focus.
+## Opt-in diagnostic overlay, including release. Not the diegetic interface; never takes mouse/focus.
 
 signal panel_toggled(visible_now: bool)
 signal record_toggled()
@@ -41,10 +41,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
 	if key == null or not key.pressed or key.echo or key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
 		return
-	if key.physical_keycode == KEY_F3:
+	var code: Key = key.physical_keycode if key.physical_keycode != KEY_NONE else key.keycode
+	if code == KEY_F3:
 		set_panel_visible(not panel_visible)
 		get_viewport().set_input_as_handled()
-	elif key.physical_keycode == KEY_F4:
+	elif code == KEY_F4:
 		set_panel_visible(true)
 		record_toggled.emit()
 		get_viewport().set_input_as_handled()

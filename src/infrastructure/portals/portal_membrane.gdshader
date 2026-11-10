@@ -2,7 +2,6 @@ shader_type spatial;
 render_mode unshaded, cull_disabled;
 
 uniform sampler2D portal_image : source_color, filter_linear, repeat_disable;
-uniform vec4 aperture_crop = vec4(0.0, 0.0, 1.0, 1.0);
 uniform vec3 portal_origin = vec3(0.0);
 uniform vec3 portal_right = vec3(1.0, 0.0, 0.0);
 uniform vec3 portal_up = vec3(0.0, 1.0, 0.0);
@@ -27,9 +26,9 @@ void fragment() {
 	vec3 offset = point - portal_origin;
 	vec2 local = vec2(dot(offset, portal_right), dot(offset, portal_up));
 	if (any(greaterThan(abs(local), portal_half))) { discard; }
-	vec2 aperture_uv = vec2(local.x / portal_half.x + 1.0, 1.0 - local.y / portal_half.y) * 0.5;
-	vec2 sample_uv = (aperture_uv - aperture_crop.xy) / aperture_crop.zw;
-	ALBEDO = texture(portal_image, clamp(sample_uv, vec2(0.0), vec2(1.0))).rgb;
+	// The mapped camera has the viewer's projection and orientation: each screen ray already
+	// addresses the matching render-target pixel, including grazing views and the near plane.
+	ALBEDO = texture(portal_image, SCREEN_UV).rgb;
 	vec4 clip = PROJECTION_MATRIX * VIEW_MATRIX * vec4(point, 1.0);
 	// Real aperture depth preserves occlusion by cubes/frame; only the last near-plane sliver is
 	// clamped (Vulkan reverse-Z), so the portal stays visible until the eye actually crosses it.

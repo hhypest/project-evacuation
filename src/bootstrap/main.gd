@@ -57,8 +57,7 @@ func get_session_status() -> SessionStatus:
 
 func _configure_profiler() -> void:
 	var requested: bool = "--profile" in OS.get_cmdline_user_args()
-	if not OS.is_debug_build() and not requested:
-		return
+	# F3/F4 are an explicit opt-in in release too. Hidden diagnostics do not process or time viewports.
 	_profiler = RuntimeProfiler.new()
 	_profiler.name = "RuntimeProfiler"
 	add_child(_profiler)

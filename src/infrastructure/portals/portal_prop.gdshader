@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode cull_back, diffuse_burley, specular_schlick_ggx;
 
 instance uniform vec4 portal_clip_plane = vec4(0.0);
+instance uniform vec4 portal_second_clip = vec4(0.0, 0.0, 0.0, 1.0);
 varying vec3 portal_world;
 
 uniform vec4 albedo_color : source_color = vec4(1.0);
@@ -28,7 +29,7 @@ void vertex() {
 }
 
 void fragment() {
-	if (dot(vec4(portal_world, 1.0), portal_clip_plane) < 0.0) {
+	if (dot(vec4(portal_world, 1.0), portal_clip_plane) < 0.0 || dot(vec4(portal_world, 1.0), portal_second_clip) < 0.0) {
 		discard;
 	}
 	vec2 uv = UV * uv_scale.xy + uv_offset.xy;

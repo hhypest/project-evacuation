@@ -1,0 +1,9 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FAIL one E lifts a cube off a plate without moving the camera (distance=1.2) held=true position=(-2.5, 0.475, -1.499999)
+FAIL one E lifts a cube off a plate without moving the camera (distance=1.6) held=true position=(-2.5, 0.475, -1.499999)
+FAIL one E lifts a cube off a plate without moving the camera (distance=2.0) held=true position=(-2.5, 0.475, -1.499999)
+FAIL a cube beside a field entrance cannot trap the player in the old orientation up=(0.0, 1.0, 0.0) blocked=true at=(0.0, 0.000278, 0.0)
+FAIL a refused inserted companion beside its carrier drops safely without resetting the chamber recovery=true body=portal.cube.a player=(-5.0, 0.900875, -2.541039) cube=(-5.000175, 0.723699, -3.521999) held=false
+PASS repeated close turns with CubeA never request a chamber reset laps=12 recovery=false body= held=true
+PASS repeated close turns with CubeHeavy never request a chamber reset laps=12 recovery=false body= held=true
