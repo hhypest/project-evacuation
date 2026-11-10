@@ -307,6 +307,18 @@ func cancel_pending() -> void:
 			body.cancel_pending()
 
 
+func release_for_portal(id: StringName) -> void:
+	var body: CarryRigidBody = _body(id)
+	if body == null:
+		return
+	body.release_for_portal()
+	if _overlaps_player(body):
+		if body not in _separating:
+			_separating.append(body)
+	else:
+		_unpair(body)
+
+
 func close() -> void:
 	_open = false
 	for body: CarryRigidBody in _bodies.values():

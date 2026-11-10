@@ -6,6 +6,22 @@ extends RefCounted
 
 ## Distance in front of the exit a transferred body must reach before that exit may send it back.
 const GUARD_CLEARANCE: float = 0.1
+## Metres: the standard frame is 0.4 m deep; the local barrier is 0.04 m deep.
+const FRAME_HALF_DEPTH: float = 0.2
+const BARRIER_HALF_DEPTH: float = 0.02
+const ENTRY_CLEARANCE: float = 0.02
+const CONTACT_TOLERANCE: float = 0.001
+
+
+static func projected_extent(basis: Basis, half: Vector3) -> Vector3:
+	return basis.x.abs() * half.x + basis.y.abs() * half.y + basis.z.abs() * half.z
+
+
+static func fits(plane: PortalPlane, pose: Transform3D, half: Vector3) -> bool:
+	var local: Transform3D = plane.transform.affine_inverse() * pose
+	var extent: Vector3 = projected_extent(local.basis, half)
+	return absf(local.origin.x) + extent.x <= plane.half_size.x + CONTACT_TOLERANCE * 2.0 \
+		and absf(local.origin.y) + extent.y <= plane.half_size.y + CONTACT_TOLERANCE * 2.0
 
 
 static func crosses(plane: PortalPlane, previous: Vector3, current: Vector3) -> bool:

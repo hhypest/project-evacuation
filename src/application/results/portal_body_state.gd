@@ -8,5 +8,8 @@ var linear_velocity: Vector3 = Vector3.ZERO
 var angular_velocity: Vector3 = Vector3.ZERO
 ## Largest half extent of the body, metres.
 var extent: float = 0.5
-## Held bodies are not transferred in SKL-08; carry integration is SKL-09.
+var half_extents: Vector3 = Vector3.ONE * 0.5
+var is_player: bool = false
+## A held body crosses together with its carrier, never independently before the carrier crosses.
+var carrier_id: StringName = &""
 var held: bool = false

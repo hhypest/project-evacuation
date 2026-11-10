@@ -45,4 +45,7 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 	var tiny: PortalPlane = PortalPlane.make(&"", a, Vector2(0.05, 1.0))
 	results.append(TestOutcome.new("portal validation rejects scale, an empty ID and a tiny opening",
 		scaled.validate().size() == 1 and tiny.validate().size() == 2, ", ".join(scaled.validate() + tiny.validate())))
+	var shear: PortalPlane = PortalPlane.make(&"shear", Transform3D(Basis(Vector3.RIGHT, Vector3(0.5, sqrt(0.75), 0), Vector3.BACK), Vector3.ZERO), Vector2.ONE)
+	results.append(TestOutcome.new("normalised column lengths do not hide shear in an authored portal",
+		shear.validate().size() == 1))
 	return results

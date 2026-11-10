@@ -2,8 +2,8 @@ class_name PortalLabBuilder
 extends ChamberBuilder
 ## SKL-08 portal experiment: one stationary pair in two real wall openings at 90° to each other. A faces +Z
 ## in the north wall, B faces -X in the east wall; both fronts face the main room. A cube pushed or thrown
-## into one opening comes out of the other with rotated velocity. The player passes the openings
-## physically without transfer until SKL-09.
+## into one opening comes out of the other with rotated velocity. SKL-09 adds the player, its held cube,
+## local exit barriers and a split visual body at the two apertures.
 
 const HALF_SIZE: Vector2 = Vector2(0.8, 1.2)
 const A_AT: Vector3 = Vector3(-5.0, 1.2, -3.0)
@@ -31,7 +31,7 @@ func _ready() -> void:
 	_cube("CubeHeavy", &"portal.cube.heavy", Vector3(0.5, 0.55, 3.0), 20.0)
 	_sign("Портал A · бросьте куб в проём — он выйдет из B\nпереключатель выключает пару", Vector3(-5.0, 3.0, A_AT.z + 0.2))
 	_sign("Портал B", Vector3(B_AT.x - 0.2, 3.0, B_AT.z), -90.0)
-	_sign("Эксперимент SKL-08: игрок пока проходит проём без переноса", Vector3(0, 2.6, 7.5), 180.0)
+	_sign("Порталы: пройдите сами или с кубом\nзанятый выход блокирует проход", Vector3(0, 2.6, 7.5), 180.0)
 	_lamp(Vector3(-2.0, 4.5, 1.0), 14.0, 1.6)
 	_lamp(Vector3(4.0, 4.5, 3.0), 10.0, 1.2)
 

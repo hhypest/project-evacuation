@@ -30,8 +30,10 @@ func show_output(on: bool, _delta: float) -> void:
 func state() -> PortalPairState:
 	var result: PortalPairState = PortalPairState.new()
 	result.id = stable_id
-	result.a = PortalPlane.make(StringName(String(stable_id) + ".a"), surface_a.global_transform.orthonormalized(), half_size)
-	result.b = PortalPlane.make(StringName(String(stable_id) + ".b"), surface_b.global_transform.orthonormalized(), half_size)
+	# Preserve the authored transform until validation: orthonormalising here would silently hide
+	# scale/shear and make physics, the opening and the image disagree.
+	result.a = PortalPlane.make(StringName(String(stable_id) + ".a"), surface_a.global_transform, half_size)
+	result.b = PortalPlane.make(StringName(String(stable_id) + ".b"), surface_b.global_transform, half_size)
 	result.powered = surface_a.powered
 	return result
 

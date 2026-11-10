@@ -56,6 +56,23 @@ func center() -> Vector3:
 	return global_position + up_direction * (_shape.height * 0.5)
 
 
+func portal_shape() -> CapsuleShape3D:
+	return _shape
+
+
+## The portal pose is centred on the capsule, not at its feet. Preserve the mapped up/momentum until
+## the next step samples the field at the exit before moving; the old floor/ladder is no longer support.
+func portal_place(pose: Transform3D, motion: Vector3) -> void:
+	global_basis = pose.basis.orthonormalized()
+	up_direction = global_basis.y.normalized()
+	global_position = pose.origin - up_direction * (_shape.height * 0.5)
+	velocity = motion
+	_wanted_up = up_direction
+	mode = MovementStep.Mode.AIR
+	_ladder_lock = profile.ladder_detach_seconds
+	reset_physics_interpolation()
+
+
 func step(command: MovementCommand, delta: float) -> void:
 	_apply_field()
 	_ladder_lock = maxf(0.0, _ladder_lock - delta)

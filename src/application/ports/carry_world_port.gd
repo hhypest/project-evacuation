@@ -50,5 +50,10 @@ func cancel_pending() -> void:
 	pass
 
 
+## Coordinator-only portal phase: no throw or delayed placement may survive this forced safe drop.
+func release_for_portal(_id: StringName) -> void:
+	pass
+
+
 func close() -> void:
 	pass
