@@ -123,17 +123,39 @@ func _apply_field() -> void:
 	var middle: Vector3 = center()
 	var turn: Basis = _shortest_turn(up_direction, _wanted_up, global_basis.x)
 	var turned: Basis = (turn * global_basis).orthonormalized()
-	var destination: Vector3 = middle - _wanted_up * half
 	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
 	query.shape = _shape
-	query.transform = Transform3D(turned, middle)
 	query.collision_mask = collision_mask
 	query.exclude = [get_rid()]
-	if not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var free: bool = false
+	# Turning about the centre can extend the capsule into a cube beside the entrance. Try moving
+	# toward the new up by at most its cylindrical half-length, then a normal step-height lift.
+	# Both the upright translation and the intermediate rotation poses must be free.
+	for attempt: int in range(9):
+		var lift: Vector3 = _wanted_up * ((half - _shape.radius + profile.stance_clearance) * float(attempt) / 4.0) \
+			if attempt <= 4 else up_direction * (profile.step_height * float(attempt - 4) / 4.0)
+		query.transform = Transform3D(global_basis, middle)
+		query.motion = lift
+		if attempt > 0:
+			var sweep: PackedFloat32Array = space.cast_motion(query)
+			if sweep.size() != 2 or sweep[0] < 1.0:
+				continue
+		query.motion = Vector3.ZERO
+		free = true
+		for sample: int in range(1, 13):
+			query.transform = Transform3D(global_basis.slerp(turned, float(sample) / 12.0), middle + lift)
+			if not space.intersect_shape(query, 1).is_empty():
+				free = false
+				break
+		if free:
+			middle += lift
+			break
+	if not free:
 		reorientation_blocked = true
 		return
 	global_basis = turned
-	global_position = destination
+	global_position = middle - _wanted_up * half
 	up_direction = _wanted_up
 	_invalidate_support()
 	_gravity_scale = _wanted_scale

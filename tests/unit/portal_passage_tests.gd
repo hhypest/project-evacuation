@@ -50,7 +50,7 @@ class World:
 				state.linear_velocity = linear
 				state.angular_velocity = angular
 
-	func hold(id: StringName, pose: Transform3D, linear: Vector3) -> bool:
+	func hold(id: StringName, pose: Transform3D, linear: Vector3, _former_carrier: StringName = &"") -> bool:
 		if reject_recovery:
 			return false
 		for state: PortalBodyState in states:

@@ -225,7 +225,17 @@ func _recover(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParamete
 			if separation.length() > push.length():
 				push = separation
 		if push.length() <= 0.000001:
-			break
+			if points.is_empty():
+				break
+			# Exact resting contact has coincident point pairs: their difference has no normal.
+			# Ask the contact query for it instead of leaving a newly acquired cube glued in place.
+			query.margin = _profile.clearance
+			var contact: Dictionary = space.get_rest_info(query)
+			query.margin = 0.0
+			if typeof(contact.get("normal")) != TYPE_VECTOR3:
+				break
+			var normal: Vector3 = contact["normal"]
+			push = normal.normalized() * _profile.clearance
 		recovered += push + push.normalized() * 0.002
 	return recovered
 
@@ -313,6 +323,8 @@ func release_for_portal(id: StringName) -> void:
 		return
 	body.release_for_portal()
 	if _overlaps_player(body):
+		body.add_collision_exception_with(_player)
+		_player.add_collision_exception_with(body)
 		if body not in _separating:
 			_separating.append(body)
 	else:

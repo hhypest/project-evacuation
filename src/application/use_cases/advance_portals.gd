@@ -258,13 +258,14 @@ func _hold(entry: PortalPlane, body: PortalBodyState) -> bool:
 	var velocity: Vector3 = entry.transform.basis.inverse() * body.linear_velocity
 	velocity.z = maxf(0.0, velocity.z)
 	var held_at: Transform3D = entry.transform * local
-	if not _world.hold(body.id, held_at, entry.transform.basis * velocity):
+	var carrier: StringName = body.carrier_id if not body.carrier_id.is_empty() else _held_carriers.get(body.id, &"")
+	if not _world.hold(body.id, held_at, entry.transform.basis * velocity, carrier):
 		var saved: PortalRecoveryPose = _safe_poses.get(body.id)
 		var restored: Transform3D = body.transform
 		if saved != null:
 			restored.origin = saved.transform.origin
 		if saved == null or saved.entry_id != entry.id \
-				or not _world.hold(body.id, restored, entry.transform.basis * velocity):
+				or not _world.hold(body.id, restored, entry.transform.basis * velocity, carrier):
 			recovery_required = true
 			recovery_body_id = body.id
 			return false

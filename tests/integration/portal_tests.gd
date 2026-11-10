@@ -88,28 +88,28 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	return results
 
 
-## The off-axis frustum must frame exactly the partner opening: its four corners project to the four
-## corners of the portal image, and the near plane lies on the opening.
+## A screen-space portal must preserve the viewer's rays after the complete rigid transform.
 func _frustum() -> TestOutcome:
 	var surface: PortalSurface = _pair.surface_a
 	var viewer: Transform3D = Transform3D(Basis(Vector3.UP, 0.4) * Basis(Vector3.RIGHT, -0.15), Vector3(-3.2, 1.7, 2.6))
+	var source: Camera3D = _lab.get_node("Camera") as Camera3D
+	source.global_transform = viewer
 	surface.place_camera(viewer)
 	var exit: Transform3D = _pair.surface_b.global_transform
 	var size: Vector2 = Vector2(surface.viewport.size)
+	var screen: Vector2 = source.get_viewport().get_visible_rect().size
 	var worst: float = 0.0
 	var corners: Array[Vector2] = [Vector2(-1, 1), Vector2(1, 1), Vector2(-1, -1), Vector2(1, -1)]
 	for corner: Vector2 in corners:
 		# A's +X maps to B's -X: image left is the exit's +X side.
 		var world: Vector3 = exit * Vector3(-corner.x * surface.half_size.x, corner.y * surface.half_size.y, 0)
 		var pixel: Vector2 = surface.camera.unproject_position(world)
-		var patch: Rect2 = surface.view_region
-		var point: Vector2 = corner * surface.half_size
-		var expected: Vector2 = Vector2((point.x - patch.position.x) / patch.size.x * size.x,
-			(patch.end.y - point.y) / patch.size.y * size.y)
-		worst = maxf(worst, pixel.distance_to(expected))
-	var depth: float = (surface.camera.global_transform.affine_inverse() * exit.origin).z
-	return TestOutcome.new("the portal camera frames the exit opening exactly with the near plane on it",
-		worst < 1.0 and is_equal_approx(-depth, surface.camera.near), "worst %.3f px, near %.3f, depth %.3f" % [worst, surface.camera.near, -depth])
+		var original: Vector3 = PortalMath.map_point(exit, surface.global_transform, world)
+		var expected: Vector2 = source.unproject_position(original) / screen
+		worst = maxf(worst, (pixel / size).distance_to(expected))
+	return TestOutcome.new("native portal pixels follow the same projected rays as the viewer",
+		worst < 0.0001 and surface.camera.global_transform.is_equal_approx(PortalMath.map_transform(surface.global_transform, exit, viewer)),
+		"normalised projection error %.6f" % worst)
 
 
 func _launch(body: RigidBody3D, plane: PortalPlane, distance: float, speed: float) -> void:

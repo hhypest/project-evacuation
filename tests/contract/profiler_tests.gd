@@ -45,6 +45,29 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(directory))
 	results.append(await _publication_continuity(tree))
+	var hud: ProfilerHud = ProfilerHud.new()
+	tree.root.add_child(hud)
+	var key: InputEventKey = InputEventKey.new()
+	key.keycode = KEY_F3
+	key.pressed = true
+	Input.parse_input_event(key)
+	Input.flush_buffered_events()
+	results.append(TestOutcome.new("F3 also accepts a logical function key without a physical keycode", hud.panel_visible))
+	var before: bool = hud.panel_visible
+	key = InputEventKey.new()
+	key.keycode = KEY_F3
+	key.pressed = true
+	key.ctrl_pressed = true
+	Input.parse_input_event(key)
+	Input.flush_buffered_events()
+	results.append(TestOutcome.new("modified function keys do not toggle diagnostics", hud.panel_visible == before))
+	key = InputEventKey.new()
+	key.keycode = KEY_F3
+	key.pressed = false
+	Input.parse_input_event(key)
+	Input.flush_buffered_events()
+	hud.queue_free()
+	await tree.process_frame
 	return results
 
 

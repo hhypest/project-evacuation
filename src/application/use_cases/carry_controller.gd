@@ -107,8 +107,8 @@ func portal_reframe(rotation: Basis) -> void:
 
 
 func drop_for_portal(id: StringName) -> void:
+	_world.release_for_portal(id)
 	if state.held_id == id:
-		_world.release_for_portal(id)
 		_forget()
 
 

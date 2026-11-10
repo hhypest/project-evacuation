@@ -15,6 +15,8 @@ var frame: Basis = Basis.IDENTITY
 func _ready() -> void:
 	# Portal stubs exist only for portal cameras (layer 20); the player sees live membranes.
 	set_cull_mask_value(20, false)
+	set_cull_mask_value(18, false)
+	set_cull_mask_value(19, false)
 
 
 func apply_look(delta_pixels: Vector2) -> void:

@@ -29,6 +29,22 @@ func _run() -> void:
 	await _tree.process_frame
 	if not _check(main.get_session_status().can_start and _tree.paused, "usable main menu"):
 		return
+	var profiler: RuntimeProfiler = main.get_node_or_null("RuntimeProfiler") as RuntimeProfiler
+	var panel: ProfilerHud = main.get_node_or_null("ProfilerHud") as ProfilerHud
+	if not _check(profiler != null and panel != null and not profiler.is_processing(), "release diagnostics are available but inactive without launch flags"):
+		return
+	_key(KEY_F3)
+	if not _check(panel.panel_visible and profiler.is_processing() and _tree.paused, "release F3 opens diagnostics without changing pause"):
+		return
+	_key(KEY_F4)
+	if not _check(profiler.recording, "release F4 starts CSV without launch flags"):
+		return
+	await _tree.process_frame
+	_key(KEY_F4)
+	if not _check(not profiler.recording and FileAccess.file_exists(profiler.report_path), "release F4 stops and flushes CSV"):
+		return
+	DirAccess.remove_absolute(profiler.report_path)
+	_key(KEY_F3)
 	var hud: FoundationHud = main.get_node("FoundationHud") as FoundationHud
 	hud.start_requested.emit()
 	var scope: LevelScope = main.get_node("LevelScope") as LevelScope
