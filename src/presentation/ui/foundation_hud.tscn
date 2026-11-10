@@ -81,7 +81,7 @@ text = "Выход"
 
 [node name="Note" type="Label" parent="Center/Menu/Margin/Stack"]
 layout_mode = 2
-text = "WASD — движение · Shift — ходьба · Space — прыжок\nCtrl — приседание · E — взять/отпустить, нажать кнопку · ЛКМ — бросить\nМышь — обзор · Esc — пауза · R — перезапуск"
+text = "WASD — движение · Shift — бег · Alt — ходьба · Space — прыжок\nCtrl — приседание · E — взять/отпустить, нажать кнопку · ЛКМ — бросить\nМышь — обзор · Esc — пауза · R — перезапуск"
 
 [node name="GameHint" type="Label" parent="."]
 unique_name_in_owner = true
