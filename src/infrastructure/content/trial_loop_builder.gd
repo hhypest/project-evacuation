@@ -24,6 +24,10 @@ const PLINTH_Y: float = 3.7
 const DOOR_Z: float = -13.0
 const DOOR_X: float = 2.5
 
+@export var chamber_height: float = HEIGHT
+## Optional side access for the unified proving ground; legacy fixture remains closed.
+@export var side_entry: int = 0
+
 
 func _ready() -> void:
 	_envelope()
@@ -31,18 +35,18 @@ func _ready() -> void:
 	_logic(&"loop.not", DeviceDefinition.Kind.NOT, [&"loop.receiver"], Vector3(-HALF_WIDTH + 0.08, 2.2, -2.0), 1.0, 90.0)
 	_floor_emitter()
 	_ceiling_receiver()
-	_field(&"loop.field", Vector3(-HALF_WIDTH + 2.0, HEIGHT * 0.5, BEAM_Z), Vector3(HEIGHT, 4.0, 7.0), -90.0, [&"loop.not"])
+	_field(&"loop.field", Vector3(-HALF_WIDTH + 2.0, chamber_height * 0.5, BEAM_Z), Vector3(chamber_height, 4.0, 7.0), -90.0, [&"loop.not"])
 	# Guide rails on the wall above the turning height keep a climbing player in the beam line.
 	for side: float in [-1.0, 1.0]:
 		_box(Vector3(0.5, 1.5, 0.1), Vector3(-HALF_WIDTH + 0.25, 2.25, BEAM_Z + side * 0.5), WALL_COLOR, "Rail")
 	_box(Vector3(PLINTH_DEPTH, PLINTH_FACE, PLINTH_FACE), Vector3(-HALF_WIDTH + PLINTH_DEPTH * 0.5, PLINTH_Y, BEAM_Z), WALL_COLOR, "Plinth")
 	_wall_plate()
 	_cube("CubeA", &"loop.cube", Vector3(2.0, CUBE_EDGE * 0.5 + 0.05, -4.5), 10.0, CUBE_EDGE)
-	_partition(HALF_WIDTH, DOOR_Z, HEIGHT, DOOR_X, &"loop.door", [&"loop.plate"])
+	_partition(HALF_WIDTH, DOOR_Z, chamber_height, DOOR_X, &"loop.door", [&"loop.plate"])
 	_sign("Камера «Петля»", Vector3(DOOR_X, 4.6, DOOR_Z + 0.2))
 	_sign("Схема: источник → эмиттер\nприёмник → НЕ → поле к стене\nкнопка на стене → дверь", Vector3(-1.2, 4.6, DOOR_Z + 0.2))
 	_sign("Камера пройдена", Vector3(DOOR_X, 2.4, Z_BACK + 0.2))
-	for at: Vector3 in [Vector3(0, HEIGHT - 0.4, -1.5), Vector3(0, HEIGHT - 0.4, -8.5), Vector3(2.0, 3.6, -14.5)]:
+	for at: Vector3 in [Vector3(0, chamber_height - 0.4, -1.5), Vector3(0, chamber_height - 0.4, -8.5), Vector3(2.0, 3.6, -14.5)]:
 		_lamp(at, 11.0, 1.4)
 
 
@@ -66,9 +70,17 @@ func _envelope() -> void:
 		_box(Vector3(lip, 0.06, SHAFT), Vector3(BEAM_X + side * (SHAFT - lip) * 0.5, -0.03, BEAM_Z), collar)
 		_box(Vector3(OPENING, 0.06, lip), Vector3(BEAM_X, -0.03, BEAM_Z + side * (SHAFT - lip) * 0.5), collar)
 	for side: float in [-1.0, 1.0]:
-		_box(Vector3(0.3, HEIGHT, length), Vector3(side * (HALF_WIDTH + 0.15), HEIGHT * 0.5, middle))
+		if int(side) == side_entry:
+			# Four-metre opening centred at local z=-6, aligned with the bay's corridor entrance.
+			for span: Vector2 in [Vector2(-16, -8), Vector2(-4, 4)]:
+				_box(Vector3(0.3, chamber_height, span.y - span.x),
+					Vector3(side * (HALF_WIDTH + 0.15), chamber_height * 0.5, (span.x + span.y) * 0.5))
+			_box(Vector3(0.3, chamber_height - 3.4, 4),
+				Vector3(side * (HALF_WIDTH + 0.15), 3.4 + (chamber_height - 3.4) * 0.5, -6))
+		else:
+			_box(Vector3(0.3, chamber_height, length), Vector3(side * (HALF_WIDTH + 0.15), chamber_height * 0.5, middle))
 	for z: float in [Z_FRONT + 0.15, Z_BACK - 0.15]:
-		_box(Vector3(HALF_WIDTH * 2.0 + 0.6, HEIGHT, 0.3), Vector3(0, HEIGHT * 0.5, z))
+		_box(Vector3(HALF_WIDTH * 2.0 + 0.6, chamber_height, 0.3), Vector3(0, chamber_height * 0.5, z))
 
 
 ## Emitter sunk in the shaft, firing straight up. The muzzle sits 0.2 m below the floor: a ray starting
@@ -86,11 +98,11 @@ func _floor_emitter() -> void:
 
 ## Receiver hung under a bracket at the top of the wall, facing down the beam.
 func _ceiling_receiver() -> void:
-	_box(Vector3(2.1, 0.3, 0.8), Vector3(-HALF_WIDTH + 1.05, HEIGHT + 0.125, BEAM_Z), WALL_COLOR, "Bracket")
+	_box(Vector3(2.1, 0.3, 0.8), Vector3(-HALF_WIDTH + 1.05, chamber_height + 0.125, BEAM_Z), WALL_COLOR, "Bracket")
 	var receiver: ReceiverDevice = ReceiverDevice.new()
 	receiver.name = node_name(&"loop.receiver")
 	receiver.stable_id = &"loop.receiver"
-	receiver.position = Vector3(BEAM_X, HEIGHT - 0.15, BEAM_Z)
+	receiver.position = Vector3(BEAM_X, chamber_height - 0.15, BEAM_Z)
 	receiver.rotation_degrees = Vector3(90, 0, 0)
 	add_child(receiver)
 

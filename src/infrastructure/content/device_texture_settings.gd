@@ -1,6 +1,6 @@
 class_name DeviceTextureSettings
 extends Resource
-## Build/import profile for the four concept devices. The import tool updates this with the .import files.
+## Build/import profile for concept devices and door art. The import tool updates this with .import files.
 
 @export_enum("Source:0", "2K:2048") var max_size: int = 0
 

@@ -4,7 +4,7 @@ extends Node
 
 @export var catalog: LevelCatalog = preload("res://content/definitions/level_catalog.tres")
 ## Chamber loaded by start/restart; selecting a level in the menu replaces it.
-@export var chamber_scene: PackedScene = preload("res://content/levels/foundation_lab.tscn")
+@export var chamber_scene: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
 
 @onready var _hud: FoundationHud = $FoundationHud
 @onready var _input: SessionInput = $SessionInput

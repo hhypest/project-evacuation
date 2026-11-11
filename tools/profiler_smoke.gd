@@ -77,7 +77,7 @@ func _run() -> void:
 	# New portal viewports must be registered, and freed viewports must be safe across a restart.
 	var menu: FoundationHud = main.get_node("FoundationHud") as FoundationHud
 	menu.menu_requested.emit()
-	menu.level_requested.emit(3)
+	menu.level_requested.emit(0)
 	_key(KEY_F4)
 	# One half-second interval discovers deferred children; the next publishes their counters.
 	await create_timer(1.3, true).timeout

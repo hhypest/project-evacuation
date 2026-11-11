@@ -1,50 +1,15 @@
 [gd_resource type="Resource" script_class="LevelCatalog" format=3]
 
-[ext_resource type="Script" path="res://src/infrastructure/content/level_entry.gd" id="1_cdh8c"]
-[ext_resource type="PackedScene" path="res://content/levels/foundation_lab.tscn" id="2_4x4hj"]
-[ext_resource type="PackedScene" path="res://content/levels/trial_logic.tscn" id="3_jg408"]
-[ext_resource type="PackedScene" path="res://content/levels/trial_beam_gravity.tscn" id="4_jvbau"]
-[ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="5_2bktj"]
-[ext_resource type="PackedScene" path="res://content/levels/portal_lab.tscn" id="6_portal"]
-[ext_resource type="PackedScene" path="res://content/levels/trial_loop.tscn" id="7_loop"]
-[ext_resource type="PackedScene" path="res://content/levels/stacking_lab.tscn" id="8_stack"]
+[ext_resource type="Script" path="res://src/infrastructure/content/level_entry.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/levels/mechanics_lab.tscn" id="2"]
+[ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="3"]
 
-[sub_resource type="Resource" id="Resource_lh027"]
-script = ExtResource("1_cdh8c")
-title = "Полигон: все механики"
-summary = "Движение, перенос, кнопки, логика, луч и гравитация в отдельных отсеках."
-scene = ExtResource("2_4x4hj")
-
-[sub_resource type="Resource" id="Resource_0tet8"]
-script = ExtResource("1_cdh8c")
-title = "Испытание 1: кнопки и логика"
-summary = "Три лёгкие комнаты: плита, И с таймером, защёлка с задержкой."
-scene = ExtResource("3_jg408")
-
-[sub_resource type="Resource" id="Resource_2tiam"]
-script = ExtResource("1_cdh8c")
-title = "Испытание 2: луч и гравитация"
-summary = "Три лёгкие комнаты: освободить луч, уронить куб полем, подняться по стене."
-scene = ExtResource("4_jvbau")
-
-[sub_resource type="Resource" id="Resource_portal"]
-script = ExtResource("1_cdh8c")
-title = "Эксперимент: порталы"
-summary = "Вид и проход через пару, перенос игрока и удерживаемого куба, защита занятого выхода."
-scene = ExtResource("6_portal")
-
-[sub_resource type="Resource" id="Resource_loop"]
-script = ExtResource("1_cdh8c")
-title = "Пример: камера «Петля»"
-summary = "Одна идея на готовых механиках: луч, НЕ, поле к стене, кнопка на стене. Подсказок нет."
-scene = ExtResource("7_loop")
-
-[sub_resource type="Resource" id="Resource_stack"]
-script = ExtResource("1_cdh8c")
-title = "Эксперимент: постановка кубов"
-summary = "Силуэт показывает, куда встанет куб: на кнопку или на другой куб. Лестница из трёх кубов на уступ 2,2 м."
-scene = ExtResource("8_stack")
+[sub_resource type="Resource" id="UnifiedLab"]
+script = ExtResource("1")
+title = "Единый полигон: все механики"
+summary = "Хаб и шесть независимых отсеков: движение, перенос, устройства, оптика, гравитация и порталы. R сбрасывает весь полигон."
+scene = ExtResource("2")
 
 [resource]
-script = ExtResource("5_2bktj")
-entries = Array[ExtResource("1_cdh8c")]([SubResource("Resource_lh027"), SubResource("Resource_0tet8"), SubResource("Resource_2tiam"), SubResource("Resource_portal"), SubResource("Resource_loop"), SubResource("Resource_stack")])
+script = ExtResource("3")
+entries = Array[ExtResource("1")]([SubResource("UnifiedLab")])

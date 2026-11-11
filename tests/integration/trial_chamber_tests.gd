@@ -26,7 +26,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 			opened.append(CATALOG.entries[index].title)
 		await _close()
 	results.append(TestOutcome.new("every menu level opens with a valid device network, gravity fields and portals",
-		opened.size() == CATALOG.entries.size() and opened.size() >= 4, ", ".join(opened)))
+		opened.size() == CATALOG.entries.size() and opened.size() == 1, ", ".join(opened)))
 	results.append_array(await _trial_logic())
 	results.append_array(await _trial_beam_gravity())
 	results.append_array(await _trial_loop())
@@ -35,7 +35,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 
 func _trial_logic() -> Array[TestOutcome]:
 	var results: Array[TestOutcome] = []
-	await _open(CATALOG.scene(1))
+	await _open(preload("res://content/levels/trial_logic.tscn"))
 	var plate_a: Node3D = _node("t1_plate_a")
 	_place(_node("CubeA") as RigidBody3D, plate_a.global_position + Vector3(0, 0.65, 0))
 	await _ticks(40)
@@ -77,7 +77,7 @@ func _trial_logic() -> Array[TestOutcome]:
 
 func _trial_beam_gravity() -> Array[TestOutcome]:
 	var results: Array[TestOutcome] = []
-	await _open(CATALOG.scene(2))
+	await _open(preload("res://content/levels/trial_beam_gravity.tscn"))
 	await _ticks(30)
 	var emitter: EmitterDevice = _node("t2_emitter") as EmitterDevice
 	var blocked: bool = emitter.powered and not _output(&"t2.receiver") and not _output(&"t2.door.a")
@@ -117,7 +117,7 @@ func _trial_beam_gravity() -> Array[TestOutcome]:
 
 func _trial_loop() -> Array[TestOutcome]:
 	var results: Array[TestOutcome] = []
-	await _open(CATALOG.scene(4))
+	await _open(preload("res://content/levels/trial_loop.tscn"))
 	await _ticks(30)
 	var idle: bool = _output(&"loop.receiver") and not _output(&"loop.field") and not _output(&"loop.door")
 	results.append(TestOutcome.new("loop: at rest the beam reaches the receiver, the field is off and the door shut",

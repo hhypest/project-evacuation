@@ -2,15 +2,12 @@ class_name DoorDevice
 extends PuzzleDeviceNode
 ## Chamber door: a human frame with two sliding leaves. The network decides "should be open";
 ## this adapter only moves the leaves and refuses to close onto a player or a prop in the doorway.
-## Art: the leaves are a Meshy model (content/models/devices/door, turned round for the right leaf); the frame is
-## its exact collision boxes dressed in the project's panel, dark-metal and hazard-stripe materials (a
-## generated frame never kept the passage open). Collisions are unchanged.
+## DEV-12/13 art: a modular Meshy frame with a repaired open aperture and two sliding leaves.
+## Primitive collision boxes and the obstruction rule remain independent of the decorative models.
 
 const LEAF_MODEL: PackedScene = preload("res://content/models/devices/door/door_leaf.gltf")
 const LEAF_MODEL_SIZE: Vector3 = Vector3(1.0, 2.6, 0.15)
-const FRAME_PANEL: BaseMaterial3D = preload("res://content/materials/surfaces/panel_light.tres")
-const FRAME_DARK: BaseMaterial3D = preload("res://content/materials/surfaces/metal_dark.tres")
-const HAZARD: BaseMaterial3D = preload("res://content/materials/surfaces/hazard_stripes.tres")
+const FRAME_MODEL: PackedScene = preload("res://content/models/devices/door_frame/door_frame.gltf")
 
 @export var opening: Vector2 = Vector2(2.0, 2.6)
 @export var thickness: float = 0.3
@@ -27,26 +24,26 @@ var _lamp: MeshInstance3D
 func _ready() -> void:
 	var half: float = opening.x * 0.5
 	var frame_color: Color = Color(0.88, 0.86, 0.82)
-	var panel: BaseMaterial3D = _triplanar(FRAME_PANEL, 1.0)
 	for side: float in [-1.0, 1.0]:
 		var post: StaticBody3D = static_box(Vector3(0.3, opening.y + 0.4, thickness + 0.1), frame_color,
 			Vector3(side * (half + 0.15), (opening.y + 0.4) * 0.5, 0))
-		_dress(post, panel)
+		_hide_box_visual(post)
 		add_child(post)
-		# Dark guide rail lining the passage edge, where the leaves run.
-		var rail: MeshInstance3D = box_mesh(Vector3(0.04, opening.y, thickness + 0.12), DARK)
-		rail.material_override = _triplanar(FRAME_DARK, 0.5)
-		rail.position = Vector3(side * (half + 0.02), opening.y * 0.5, 0)
-		add_child(rail)
 	var lintel: StaticBody3D = static_box(Vector3(opening.x + 0.6, 0.4, thickness + 0.1), frame_color,
 		Vector3(0, opening.y + 0.2, 0))
-	_dress(lintel, panel)
+	_hide_box_visual(lintel)
 	add_child(lintel)
-	for face: float in [-1.0, 1.0]:
-		var stripe: MeshInstance3D = box_mesh(Vector3(opening.x + 0.6, 0.16, 0.01), Color(0.88, 0.42, 0.18))
-		stripe.material_override = _triplanar(HAZARD, 0.5)
-		stripe.position = Vector3(0, opening.y + 0.2, face * ((thickness + 0.1) * 0.5 + 0.006))
-		add_child(stripe)
+	var frame: Node3D = FRAME_MODEL.instantiate() as Node3D
+	frame.name = "FrameModel"
+	frame.scale.z = (thickness + 0.1) / 0.4
+	for side: float in [-1.0, 1.0]:
+		var post: Node3D = frame.get_node("LeftPost" if side < 0 else "RightPost") as Node3D
+		post.position.x = side * (half + 0.15)
+		post.scale.y = opening.y / 2.6
+	var top: Node3D = frame.get_node("Lintel") as Node3D
+	top.position.y = opening.y
+	top.scale.x = (opening.x + 0.6) / 2.6
+	add_child(frame)
 	_lamp = box_mesh(Vector3(0.12, 0.12, 0.02), DARK)
 	_lamp.position = Vector3(half + 0.15, opening.y + 0.2, thickness * 0.5 + 0.06)
 	add_child(_lamp)
@@ -85,20 +82,12 @@ func _ready() -> void:
 	add_child(_doorway)
 
 
-## Replaces the flat colour of a frame box with a project surface material.
-func _dress(box: StaticBody3D, material: BaseMaterial3D) -> void:
+## Keep the exact primitive collision but render the new modular frame instead of its old box visual.
+func _hide_box_visual(box: StaticBody3D) -> void:
 	for child: Node in box.get_children():
 		var visual: MeshInstance3D = child as MeshInstance3D
 		if visual != null:
-			visual.material_override = material
-
-
-## A copy of a surface material mapped triplanar, one texture tile per `tile` metres, so it fits any box.
-static func _triplanar(source: BaseMaterial3D, tile: float) -> BaseMaterial3D:
-	var material: BaseMaterial3D = source.duplicate() as BaseMaterial3D
-	material.uv1_triplanar = true
-	material.uv1_scale = Vector3.ONE / tile
-	return material
+			visual.visible = false
 
 
 func definition() -> DeviceDefinition:
