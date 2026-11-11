@@ -155,14 +155,14 @@ flowchart TB
 
 **Реализованные границы:** `CarryWorldPort` → `CarryPhysicsAdapter`, `PuzzleWorldPort` → `PuzzleWorldAdapter`, `GravityWorldPort` → `GravityWorldAdapter`, `PortalWorldPort` → `PortalWorldAdapter`. Сценарии `CarryController`, `AdvancePuzzle`, `SampleGravity`, `AdvancePortals` работают с DTO; `LevelScope` связывает их с Godot. Каталог пока конкретный `LevelCatalog`, без отдельного `LevelCatalogPort`.
 
-Следующая таблица — примеры **целевых** контрактов, не перечень существующих классов. В частности, SaveRepository, PlatformPort и RestoreCheckpointUseCase ещё отсутствуют:
+Таблица описывает контракты по мере их внедрения. `SaveRepository` обслуживает первую контрольную точку. `PlatformPort` и `RestoreCheckpointUseCase` остаются целевыми контрактами.
 
 | Порт / сценарий | Вход | Выход / эффект | Реализация |
 | --- | --- | --- | --- |
 | `PhysicsObservationPort` | `TickId`, список нужных ID | `WorldObservation` | Контакты, положение и скорости из Godot/Jolt |
 | `SpatialQueryPort` | `BeamQuery`, `ExitClearanceQuery` | `BeamHit`, `ClearanceResult` | Запросы пространства Godot с масками коллизий |
 | `PhysicsCommandPort` | `PhysicsCommandBatch` | `CommandReceipt` | Импульсы, поля, переносы в допустимой фазе физики |
-| `SaveRepository` | `SaveSnapshot` либо `SaveSlotId` | `SaveWriteResult` / `SaveLoadResult` | Файловый адаптер с проверкой схемы |
+| `SaveRepository` | `SaveSnapshot` при записи | `SaveResult.Code` при записи, `SaveResult` при чтении | Файловый адаптер с проверкой схемы |
 | `LevelCatalogPort` | `LevelId` | `LevelLoadResult` | Проверка Resource/сцен, создание DTO |
 | `PlatformPort` | `AchievementId` или событие релиза | Типизированный результат | Локальная no-op реализация; Steam — опционально |
 | `InteractUseCase` | `InteractionCommand` | `InteractionResult` | Проверка дистанции/состояния, команда устройству |
@@ -180,10 +180,10 @@ flowchart TB
 
 ### Жизненный цикл уровня
 
-1. `SessionBootstrap` (`main.gd`) создаёт сервисы сессии и использует `LevelCatalog`; хранилища сохранений пока нет.
+1. `SessionBootstrap` (`main.gd`) создаёт сервисы сессии, использует `LevelCatalog` и читает последнюю контрольную точку через `SaveRepository`.
 2. `LevelScope` создаёт `PackedScene`, проверяет Player/Camera, строит сеть устройств, адаптеры переноса, гравитации и порталов.
 3. Физические узлы и представления регистрируются по стабильным ID. До окончания регистрации ввод и симуляция уровня не активируются.
-4. Scope внедряет порты и применяет начальное состояние. Сохранённого/checkpoint-состояния пока нет — [граница текущей реализации](content-and-saves.md).
+4. Scope внедряет порты и применяет начальное состояние. Загрузка точки входа открывает новую камеру со стартовым состоянием. [Сохранения и восстановление](content-and-saves.md).
 5. После подтверждения готовности открываются ввод, обновление сети и управление телами.
 6. При выходе закрывается ввод, останавливается выдача команд, освобождается удерживаемый объект, снимаются подписки и очищаются отложенные эффекты.
 7. Новый уровень получает новый scope; команды предыдущего поколения уровня игнорируются по `scope_id`.

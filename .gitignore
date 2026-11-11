@@ -1,6 +1,7 @@
 .godot/
 builds/
 /logs/
+/saves/
 work/
 *.tmp
 *.log

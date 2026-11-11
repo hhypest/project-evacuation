@@ -6,6 +6,7 @@
 
 [sub_resource type="Resource" id="UnifiedLab"]
 script = ExtResource("1")
+level_id = &"mechanics_lab"
 title = "Единый полигон: все механики"
 summary = "Хаб и семь отсеков: движение, перенос, устройства, оптика, гравитация, порталы, динамический свет и тени. R сбрасывает весь полигон."
 scene = ExtResource("2")

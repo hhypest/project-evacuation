@@ -2,6 +2,7 @@ class_name FoundationHud
 extends CanvasLayer
 
 signal start_requested()
+signal load_checkpoint_requested()
 ## A chamber from the level list; index 0 is the start button itself.
 signal level_requested(index: int)
 signal pause_requested()
@@ -12,6 +13,7 @@ signal quit_requested()
 @onready var _menu: PanelContainer = %Menu
 @onready var _heading: Label = %Heading
 @onready var _status: Label = %Status
+@onready var _load_button: Button = %LoadCheckpointButton
 @onready var _start_button: Button = %StartButton
 @onready var _resume_button: Button = %ResumeButton
 @onready var _restart_button: Button = %RestartButton
@@ -26,6 +28,7 @@ var _last_focused: bool = false
 
 
 func _ready() -> void:
+	_load_button.pressed.connect(load_checkpoint_requested.emit)
 	_start_button.pressed.connect(level_requested.emit.bind(0))
 	_level_buttons = [_start_button]
 	_resume_button.pressed.connect(pause_requested.emit)
@@ -54,7 +57,7 @@ func set_levels(titles: PackedStringArray) -> void:
 		_level_buttons.append(button)
 
 
-func show_session(status: SessionStatus, runtime_label: String, problem: String) -> void:
+func show_session(status: SessionStatus, runtime_label: String, problem: String, has_checkpoint: bool) -> void:
 	var in_menu: bool = status.phase == SessionLifecycle.Phase.READY
 	var paused: bool = status.phase == SessionLifecycle.Phase.PAUSED
 	_menu.visible = in_menu or paused
@@ -69,6 +72,8 @@ func show_session(status: SessionStatus, runtime_label: String, problem: String)
 	for button: Button in _level_buttons:
 		button.visible = in_menu
 		button.disabled = not status.can_start
+	_load_button.visible = in_menu and has_checkpoint
+	_load_button.disabled = not status.can_start
 	_resume_button.visible = paused
 	_resume_button.disabled = not status.can_resume
 	_restart_button.visible = paused
@@ -78,7 +83,10 @@ func show_session(status: SessionStatus, runtime_label: String, problem: String)
 		if status.accepts_gameplay:
 			get_viewport().gui_release_focus()
 		elif in_menu and status.can_start:
-			_start_button.grab_focus()
+			if has_checkpoint:
+				_load_button.grab_focus()
+			else:
+				_start_button.grab_focus()
 		elif paused and status.can_resume:
 			_resume_button.grab_focus()
 	_last_phase = status.phase
