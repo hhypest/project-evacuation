@@ -226,9 +226,18 @@ func _view_clipping() -> Array[TestOutcome]:
 		parts.append(mesh)
 	renderer.refresh()
 	var proxy: MeshInstance3D
+	var clipped_shadow: MeshInstance3D
+	var hidden_shadow: MeshInstance3D
 	for child: Node in renderer.get_children():
 		var mesh: MeshInstance3D = child as MeshInstance3D
-		if mesh != null and mesh.mesh == parts[2].mesh and mesh.layers == PortalViewWorld.VIEW_LAYERS[0]:
+		if mesh == null or mesh.layers & PortalViewWorld.VIEW_LAYERS[0] == 0:
+			continue
+		if mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+			if mesh.mesh == parts[2].mesh:
+				clipped_shadow = mesh
+			elif mesh.mesh == parts[1].mesh:
+				hidden_shadow = mesh
+		elif mesh.mesh == parts[2].mesh:
 			proxy = mesh
 	var player_camera: LookCamera = lab.get_node("Camera") as LookCamera
 	var lamp: Light3D = lab.get_node("KeyLight") as Light3D
@@ -240,11 +249,15 @@ func _view_clipping() -> Array[TestOutcome]:
 	results.append(TestOutcome.new("portal cameras retain the room lights as well as their receiver masks",
 		lamp.layers & PortalViewWorld.VIEW_MASK == PortalViewWorld.VIEW_MASK
 		and lamp.light_cull_mask & PortalViewWorld.VIEW_MASK == PortalViewWorld.VIEW_MASK))
+	results.append(TestOutcome.new("geometry clipped out of a portal view still casts shadows there",
+		clipped_shadow != null and hidden_shadow != null and clipped_shadow.visible and hidden_shadow.visible
+		and (clipped_shadow.layers | hidden_shadow.layers) & ~PortalViewWorld.VIEW_MASK == 0))
 	parts[2].queue_free()
 	await _tree.process_frame
 	renderer.refresh()
 	await _tree.process_frame
-	results.append(TestOutcome.new("removing a clipped object also removes its render-only proxy", not is_instance_valid(proxy)))
+	results.append(TestOutcome.new("removing a clipped object also removes its color and shadow copies",
+		not is_instance_valid(proxy) and not is_instance_valid(clipped_shadow)))
 	renderer.get_parent().remove_child(renderer)
 	results.append(TestOutcome.new("closing portal presentation restores original light and mesh layers",
 		lamp.layers == 1 and parts[0].layers == 1))
