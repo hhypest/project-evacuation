@@ -80,20 +80,20 @@ func _run() -> void:
 		return
 	_key(KEY_ESCAPE)
 	_key(KEY_ESCAPE, false)
-	var plate: FloorButtonDevice = lab.get_node("PuzzleLab/lab_plate") as FloorButtonDevice
-	var door: DoorDevice = lab.get_node("PuzzleLab/lab_door_plate") as DoorDevice
+	var plate: FloorButtonDevice = lab.get_node("Devices/qa_devices_plate") as FloorButtonDevice
+	var door: DoorDevice = lab.get_node("Devices/qa_devices_door_plate") as DoorDevice
 	cube.portal_place(Transform3D(Basis.IDENTITY, plate.global_position + Vector3(0, 0.7, 0)), Vector3.ZERO, Vector3.ZERO)
 	await _ticks(100)
-	if not _check(scope.puzzle().network.output(&"lab.plate") and door.is_open(), "real load drives network and door"):
+	if not _check(scope.puzzle().network.output(&"qa.devices.plate") and door.is_open(), "real load drives network and door"):
 		return
 	hud.menu_requested.emit()
-	hud.level_requested.emit(3)
+	hud.level_requested.emit(0)
 	scope = main.get_node("LevelScope") as LevelScope
 	lab = scope.get_child(0) as Node3D
 	player = lab.get_node("Player") as PlayerMotor
 	camera = lab.get_node("Camera") as LookCamera
-	cube = lab.get_node("CubeA") as CarryRigidBody
-	var pair: PortalPairDevice = lab.get_node("portal_pair") as PortalPairDevice
+	cube = lab.get_node("Portals/Fixture/CubeA") as CarryRigidBody
+	var pair: PortalPairDevice = lab.get_node("Portals/Fixture/portal_pair") as PortalPairDevice
 	var a: PortalPlane = pair.state().a
 	player.global_position = a.transform * Vector3(0, -1.15, 1.5)
 	cube.portal_place(Transform3D(Basis.IDENTITY, a.transform * Vector3(0, -0.65, 0.75)), Vector3.ZERO, Vector3.ZERO)
@@ -130,7 +130,7 @@ func _run() -> void:
 	scope = main.get_node("LevelScope") as LevelScope
 	lab = scope.get_child(0) as Node3D
 	player = lab.get_node("Player") as PlayerMotor
-	pair = lab.get_node("portal_pair") as PortalPairDevice
+	pair = lab.get_node("Portals/Fixture/portal_pair") as PortalPairDevice
 	await _ticks(10)
 	a = pair.state().a
 	var b: PortalPlane = pair.state().b

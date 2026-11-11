@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cqirhak5jcuep"
-path.s3tc="res://.godot/imported/wall_button_body_normal.png-26dea95579f95f0bcd146b9b08098420.s3tc.ctex"
+uid="uid://b6bn4b05xfh5v"
+path.s3tc="res://.godot/imported/wall_switch_body_normal.jpg-9f41d186fefb3e6d4be5fb78f908dc8e.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://content/models/devices/wall_button/wall_button_body_normal.png"
-dest_files=["res://.godot/imported/wall_button_body_normal.png-26dea95579f95f0bcd146b9b08098420.s3tc.ctex"]
+source_file="res://content/models/devices/wall_switch/wall_switch_body_normal.jpg"
+dest_files=["res://.godot/imported/wall_switch_body_normal.jpg-9f41d186fefb3e6d4be5fb78f908dc8e.s3tc.ctex"]
 
 [params]
 

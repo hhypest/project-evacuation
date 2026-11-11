@@ -10,7 +10,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	create_timer(45.0, true, false, true).timeout.connect(_on_timeout)
+	# The unified level includes all six bays and live portal views; allow cold software-Vulkan startup.
+	create_timer(180.0, true, false, true).timeout.connect(_on_timeout)
 	var info: RuntimeInfo = RuntimeProbe.new().read()
 	if not _check(ValidateRuntime.new().execute(info).is_empty(), "real Vulkan runtime required"):
 		return
@@ -41,7 +42,7 @@ func _run() -> void:
 		return
 	for _tick: int in range(150):
 		await physics_frame
-	var player: PlayerMotor = main.get_node("LevelScope/FoundationLab/Player") as PlayerMotor
+	var player: PlayerMotor = main.get_node("LevelScope/MechanicsLab/Player") as PlayerMotor
 	if not _check(player != null, "physical player"):
 		return
 	var origin: Vector3 = player.position
@@ -68,7 +69,7 @@ func _run() -> void:
 	TestInputEvents.key(KEY_W, false)
 	for _tick: int in range(60):
 		await physics_frame
-	var camera: LookCamera = main.get_node("LevelScope/FoundationLab/Camera") as LookCamera
+	var camera: LookCamera = main.get_node("LevelScope/MechanicsLab/Camera") as LookCamera
 	if not _check(camera != null, "first-person look camera"):
 		return
 	var before: Vector3 = camera.rotation
@@ -108,8 +109,8 @@ func _run() -> void:
 		await physics_frame
 	await RenderingServer.frame_post_draw
 	var carry_scope: LevelScope = main.get_node("LevelScope") as LevelScope
-	var carry_camera: LookCamera = carry_scope.get_node("FoundationLab/Camera") as LookCamera
-	var cube: CarryRigidBody = carry_scope.get_node("FoundationLab/TestCube") as CarryRigidBody
+	var carry_camera: LookCamera = carry_scope.get_node("MechanicsLab/Camera") as LookCamera
+	var cube: CarryRigidBody = carry_scope.get_node("MechanicsLab/TestCube") as CarryRigidBody
 	TestInputEvents.key(KEY_W)
 	for _tick: int in range(30):
 		await physics_frame
@@ -141,12 +142,12 @@ func _run() -> void:
 	if not _capture(capture):
 		return
 	# Devices (SKL-04/05): the fixture moves the player to the timed wall button, the press is a real E event.
-	var lab: Node3D = carry_scope.get_node("FoundationLab/PuzzleLab") as Node3D
-	var button: WallButtonDevice = lab.get_node("lab_button_timed") as WallButtonDevice
-	var door: DoorDevice = lab.get_node("lab_door_timed") as DoorDevice
+	var lab: Node3D = carry_scope.get_node("MechanicsLab") as Node3D
+	var button: WallButtonDevice = lab.get_node("Devices/qa_devices_timed") as WallButtonDevice
+	var door: DoorDevice = lab.get_node("Devices/qa_devices_door_timed") as DoorDevice
 	if not _check(button != null and door != null, "device lab with wall button and door"):
 		return
-	var lab_player: PlayerMotor = carry_scope.get_node("FoundationLab/Player") as PlayerMotor
+	var lab_player: PlayerMotor = carry_scope.get_node("MechanicsLab/Player") as PlayerMotor
 	var front: Vector3 = button.global_basis.z.normalized()
 	lab_player.global_position = Vector3(button.global_position.x, 0.05, button.global_position.z) + front * 1.3
 	for _tick: int in range(20):
@@ -165,9 +166,9 @@ func _run() -> void:
 	if not _capture(capture.get_basename() + "-devices.png"):
 		return
 	# Beam (SKL-06): E on the toggle powers the emitter; the receiver must accept the traced beam.
-	var beam_button: WallButtonDevice = lab.get_node("lab_button_beam") as WallButtonDevice
-	var emitter: EmitterDevice = lab.get_node("lab_emitter") as EmitterDevice
-	var beam_door: DoorDevice = lab.get_node("lab_door_beam") as DoorDevice
+	var beam_button: WallButtonDevice = lab.get_node("Optics/qa_optics_toggle") as WallButtonDevice
+	var emitter: EmitterDevice = lab.get_node("Optics/qa_optics_emitter") as EmitterDevice
+	var beam_door: DoorDevice = lab.get_node("Optics/qa_optics_door") as DoorDevice
 	if not _check(beam_button != null and emitter != null and beam_door != null, "beam bay"):
 		return
 	var beam_front: Vector3 = beam_button.global_basis.z.normalized()
@@ -181,7 +182,7 @@ func _run() -> void:
 		await physics_frame
 	if not _check(emitter.powered and beam_door.is_open(), "E on the beam toggle powers the emitter and the receiver opens its door"):
 		return
-	var beam_receiver: ReceiverDevice = lab.get_node("lab_receiver") as ReceiverDevice
+	var beam_receiver: ReceiverDevice = lab.get_node("Optics/qa_optics_receiver") as ReceiverDevice
 	carry_camera.look_at(beam_receiver.global_position + Vector3(0, 0.5, 0))
 	for _tick: int in range(3):
 		await physics_frame
@@ -190,11 +191,11 @@ func _run() -> void:
 		return
 	# Placement (ADR-0012): a held cube aimed at the floor button shows its silhouette; E sets it there,
 	# and a second cube aimed at the first is set on top. Two 5 kg cubes press the 8 kg plate.
-	var plate: FloorButtonDevice = lab.get_node("lab_plate") as FloorButtonDevice
-	var cube_a: CarryRigidBody = lab.get_node("CubeA") as CarryRigidBody
-	var cube_b: CarryRigidBody = lab.get_node("CubeB") as CarryRigidBody
-	var ghost: CarryGhost = carry_scope.get_node("FoundationLab/CarryGhost") as CarryGhost
-	var plate_door: DoorDevice = lab.get_node("lab_door_plate") as DoorDevice
+	var plate: FloorButtonDevice = lab.get_node("Devices/qa_devices_plate") as FloorButtonDevice
+	var cube_a: CarryRigidBody = lab.get_node("Devices/PlateCubeA") as CarryRigidBody
+	var cube_b: CarryRigidBody = lab.get_node("Devices/PlateCubeB") as CarryRigidBody
+	var ghost: CarryGhost = carry_scope.get_node("MechanicsLab/CarryGhost") as CarryGhost
+	var plate_door: DoorDevice = lab.get_node("Devices/qa_devices_door_plate") as DoorDevice
 	if not _check(plate != null and cube_a != null and cube_b != null and ghost != null and plate_door != null,
 			"placement bay"):
 		return
@@ -234,8 +235,8 @@ func _run() -> void:
 			and not ghost.visible, "E sets the cubes square on the plate and on each other; the plate opens its door"):
 		return
 	# Gravity (SKL-07): E powers the wall field; the player stepping in turns and stands on the wall.
-	var gravity_button: WallButtonDevice = lab.get_node("lab_button_gravity") as WallButtonDevice
-	var field: GravityFieldDevice = lab.get_node("lab_field") as GravityFieldDevice
+	var gravity_button: WallButtonDevice = lab.get_node("Gravity/qa_gravity_toggle") as WallButtonDevice
+	var field: GravityFieldDevice = lab.get_node("Gravity/qa_gravity_field") as GravityFieldDevice
 	if not _check(gravity_button != null and field != null, "gravity bay"):
 		return
 	var gravity_front: Vector3 = gravity_button.global_basis.z.normalized()
@@ -281,6 +282,8 @@ func _check(condition: bool, message: String) -> bool:
 		printerr("GPU_SMOKE_FAILED: " + message)
 		_finished = true
 		quit(1)
+	else:
+		print("GPU_SMOKE_PASS: " + message)
 	return condition
 
 

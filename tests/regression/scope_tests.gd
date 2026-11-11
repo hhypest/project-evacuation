@@ -2,7 +2,7 @@ class_name ScopeTests
 extends TestSuite
 
 const MAIN: PackedScene = preload("res://src/bootstrap/main.tscn")
-const LAB: PackedScene = preload("res://content/levels/foundation_lab.tscn")
+const LAB: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
 
 
 func suite_name() -> StringName:
@@ -34,12 +34,13 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		tree.root.remove_child(main)
 		main.queue_free()
 		return results + [TestOutcome.new("keyboard menu starts a chamber", false)]
-	var cube: RigidBody3D = scope.get_node("FoundationLab/TestCube") as RigidBody3D
-	var camera: LookCamera = scope.get_node("FoundationLab/Camera") as LookCamera
+	var cube: RigidBody3D = scope.get_node("MechanicsLab/TestCube") as RigidBody3D
+	var camera: LookCamera = scope.get_node("MechanicsLab/Camera") as LookCamera
 	if cube == null or camera == null:
 		tree.root.remove_child(main)
 		main.queue_free()
 		return results + [TestOutcome.new("chamber has cube and first-person camera", false)]
+	var initial_cube_transform: Transform3D = cube.transform
 	results.append(TestOutcome.new("keyboard menu starts a running first generation",
 		main.get_session_status().accepts_gameplay and main.get_session_status().generation == 1))
 	var before_look: Vector3 = camera.rotation
@@ -98,11 +99,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await tree.process_frame
 	TestInputEvents.key(KEY_R, false)
 	var next_scope: LevelScope = main.get_node_or_null("LevelScope") as LevelScope
-	var fresh_cube: RigidBody3D = main.get_node_or_null("LevelScope/FoundationLab/TestCube") as RigidBody3D
+	var fresh_cube: RigidBody3D = main.get_node_or_null("LevelScope/MechanicsLab/TestCube") as RigidBody3D
 	results.append(TestOutcome.new("restart from pause replaces scope once despite key echo",
 		not tree.paused and not is_instance_valid(scope) and next_scope != null
 		and main.get_session_status().generation == lost_generation + 1
-		and fresh_cube != null and fresh_cube.position.y > 2.5
+		and fresh_cube != null and fresh_cube.position.distance_to(initial_cube_transform.origin) < 0.1
 		and input.take_frame().move_axis == Vector2.ZERO))
 	TestInputEvents.key(KEY_W, false)
 	TestInputEvents.key(KEY_ESCAPE)

@@ -1,0 +1,510 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-11",
+  "source_commit": "948aba23b6d932280b61933ed0b428e602073bdc",
+  "generated_ai_content": true,
+  "provider": "Meshy API, project owner account",
+  "license": "MIT; existing owner decision for content/models/devices; reference images not redistributed",
+  "spend_limit_credits": 150,
+  "initial_estimate_credits": 100,
+  "consumed_credits": 100,
+  "charged_retries": 0,
+  "texture_policy": "4K base color and normal, native 2K metallic/roughness, Source default; reversible 2K import profile",
+  "normalizer_blender_version": "4.3.2",
+  "art_acceptance": "pending owner review",
+  "assets": [
+    {
+      "concept_id": "DEV-03",
+      "operation": "textures_only",
+      "provider_task_id": "01a1ca00-5f86-7522-9395-c1e373f57c09",
+      "provider_status": "SUCCEEDED",
+      "requested_settings": {
+        "input_task_id": "01a1c952-6200-7441-bb77-73eb68bf4437",
+        "ai_model": "meshy-7",
+        "enable_original_uv": true,
+        "enable_pbr": true,
+        "texture_resolution": "4k",
+        "target_formats": [
+          "glb"
+        ],
+        "text_style_prompt": "Preserve the existing industrial design and UV layout: ivory light-grey painted metal, restrained matte safety-orange markings, graphite hardware, realistic restrained wear. All lamps and screens unlit, dark and non-emissive. No letters, numbers, logos or invented symbols. Do not paint lighting or cast shadows into the base color."
+      },
+      "consumed_credits": 10,
+      "raw_glb_sha256": "41eceb78c0cc1fb01499ada6a5c63a65121e6cca7d0fce0ebe4307950c2798c1",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 22361,
+          "min": [
+            -0.18000000715255737,
+            -0.25,
+            -0.07999999821186066
+          ],
+          "max": [
+            0.18000000715255737,
+            0.25,
+            0.1599999964237213
+          ]
+        },
+        {
+          "name": "Key",
+          "triangles": 558,
+          "min": [
+            -0.05190142244100571,
+            -0.05870802327990532,
+            0.07177320867776871
+          ],
+          "max": [
+            0.05224398151040077,
+            0.064729705452919,
+            0.09866639971733093
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/wall_button/wall_button_body.bin",
+          "bytes": 1110580,
+          "sha256": "d192c47f7a89ad8b4bd80938eb3ebfe38a44478771cbfa04e2594c28f571038d"
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body.gltf",
+          "bytes": 3333,
+          "sha256": "197b4efd489fee6466fa4b2f7907e82adcaa810842b7c005c088fa9802813165"
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_base_color.jpg",
+          "bytes": 7985881,
+          "sha256": "82cbc21737f4ac1407e78661134a2921aaf455433fc4eb9d69d945d53dbdcc09",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_metallic_roughness.jpg",
+          "bytes": 1467654,
+          "sha256": "4cc85b8bcb7e125c437a5bdd6f1eb5c1628ed9f27fc313a677d5064abc83721d",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_normal.jpg",
+          "bytes": 6185808,
+          "sha256": "7e68204af3bd47f8c27fe7a8ae341c7348a8ebbd867d026402816ed7e1257ac0",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ],
+      "validation": {
+        "reproduced_bytes": true,
+        "degenerate_triangles": 0,
+        "finite_uv_positions_unit_normals": true,
+        "original_mesh_buffer_unchanged": true,
+        "provider_original_uv_unchanged": true,
+        "returned_provider_mesh_not_used": true
+      }
+    },
+    {
+      "concept_id": "DEV-04",
+      "operation": "textures_only",
+      "provider_task_id": "01a1ca00-69c6-7744-b31b-eef70540966f",
+      "provider_status": "SUCCEEDED",
+      "requested_settings": {
+        "input_task_id": "01a1c952-7de5-754a-bf76-a109bd3fceb1",
+        "ai_model": "meshy-7",
+        "enable_original_uv": true,
+        "enable_pbr": true,
+        "texture_resolution": "4k",
+        "target_formats": [
+          "glb"
+        ],
+        "text_style_prompt": "Preserve the existing industrial design and UV layout: ivory light-grey painted metal, restrained matte safety-orange markings, graphite hardware, realistic restrained wear. All lamps and screens unlit, dark and non-emissive. No letters, numbers, logos or invented symbols. Do not paint lighting or cast shadows into the base color."
+      },
+      "consumed_credits": 10,
+      "raw_glb_sha256": "c44c0e8dfbf01c7e5b274c43886a9fb5cee0b60bbecb2e72b5f7be19cccdbed3",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 19818,
+          "min": [
+            -0.1599999964237213,
+            -0.25,
+            -0.07999999821186066
+          ],
+          "max": [
+            0.1599999964237213,
+            0.25,
+            0.11796556413173676
+          ]
+        },
+        {
+          "name": "Lever",
+          "triangles": 3546,
+          "min": [
+            -0.04716478417171141,
+            -0.09792184485192514,
+            0.0600021836159105
+          ],
+          "max": [
+            0.04681817313181261,
+            0.16499297665362145,
+            0.15999999789496014
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.bin",
+          "bytes": 1023280,
+          "sha256": "0fe36af64953b1d7d916c9d61e1597a74584afc6c295daf866198efc85c5c9e9"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.gltf",
+          "bytes": 3447,
+          "sha256": "0865a141ba37050131089dac0c7dd11ea3dea10cc4bd362d3d2ff35303ad72a3"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_base_color.jpg",
+          "bytes": 9214098,
+          "sha256": "d38c34b1ae0223753dff03b7c6531ab182bbf583705fdff72f933004d877e9b6",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_metallic_roughness.jpg",
+          "bytes": 1985505,
+          "sha256": "7de1a49c0375b113cd731b3d8a19025bbdc3cedcc9b93e9ccb3b450ca8964b02",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_normal.jpg",
+          "bytes": 7031728,
+          "sha256": "16304613ce04ca2245e5e780b81a60783bfb2e89dc9019b456b6d4cc21b511dd",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ],
+      "validation": {
+        "reproduced_bytes": true,
+        "degenerate_triangles": 0,
+        "finite_uv_positions_unit_normals": true,
+        "original_mesh_buffer_unchanged": true,
+        "provider_original_uv_unchanged": true,
+        "returned_provider_mesh_not_used": true
+      }
+    },
+    {
+      "concept_id": "DEV-07",
+      "operation": "textures_only",
+      "provider_task_id": "01a1ca00-6e42-7664-8b86-73daf034b077",
+      "provider_status": "SUCCEEDED",
+      "requested_settings": {
+        "input_task_id": "01a1c952-9a29-7496-84b6-8fcb2dcfcadc",
+        "ai_model": "meshy-7",
+        "enable_original_uv": true,
+        "enable_pbr": true,
+        "texture_resolution": "4k",
+        "target_formats": [
+          "glb"
+        ],
+        "text_style_prompt": "Preserve the existing industrial design and UV layout: ivory light-grey painted metal, restrained matte safety-orange markings, graphite hardware, realistic restrained wear. All lamps and screens unlit, dark and non-emissive. No letters, numbers, logos or invented symbols. Do not paint lighting or cast shadows into the base color."
+      },
+      "consumed_credits": 10,
+      "raw_glb_sha256": "9b33fa308954970c47541037e94f7fc085e05fc91263ae3140d49cad8cdd73bc",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 14307,
+          "min": [
+            -0.2199999988079071,
+            -0.2199999988079071,
+            -0.07999999821186066
+          ],
+          "max": [
+            0.2199999988079071,
+            0.2199999988079071,
+            0.07999999821186066
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/logic_box/logic_box.bin",
+          "bytes": 968292,
+          "sha256": "02aef588cae382d03fc150921dee3ef59d967dbebc2c112cf65a328e905cded9"
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box.gltf",
+          "bytes": 2159,
+          "sha256": "1716dd954c88f390f48eb5d36862f5ef04281a014950afc427d6ed917b7a26b0"
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_base_color.jpg",
+          "bytes": 6818418,
+          "sha256": "3af0d341cb21e29c3e4b76b81836acd8fc43f89001d2f35b15f868d0b1c453ea",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_metallic_roughness.jpg",
+          "bytes": 1877196,
+          "sha256": "f6a128afeced90e6c0b34a7b11d40a9a903e6e4abad4f1ffb3991e6e67b962a8",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_normal.jpg",
+          "bytes": 5711999,
+          "sha256": "80e36dea677337803bcebeec1139c221eae181de8bde2b1c96531779b15ee8ca",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ],
+      "validation": {
+        "reproduced_bytes": true,
+        "degenerate_triangles": 0,
+        "finite_uv_positions_unit_normals": true,
+        "original_mesh_buffer_unchanged": true,
+        "provider_original_uv_unchanged": true,
+        "returned_provider_mesh_not_used": true
+      }
+    },
+    {
+      "concept_id": "DEV-12",
+      "operation": "blender_exact_boolean",
+      "provider_task_id": "01a1ca00-70cf-7643-b4e2-777d0b90824a",
+      "provider_status": "SUCCEEDED",
+      "requested_settings": {
+        "ai_model": "meshy-7.1",
+        "model_type": "standard",
+        "geometry_resolution": "2k",
+        "should_texture": true,
+        "enable_pbr": true,
+        "texture_resolution": "4k",
+        "image_enhancement": false,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 25000,
+        "target_formats": [
+          "glb"
+        ],
+        "texture_prompt": "Preserve the existing industrial design and UV layout: ivory light-grey painted metal, restrained matte safety-orange markings, graphite hardware, realistic restrained wear. All lamps and screens unlit, dark and non-emissive. No letters, numbers, logos or invented symbols. Do not paint lighting or cast shadows into the base color."
+      },
+      "consumed_credits": 35,
+      "raw_glb_sha256": "da21067b5bdde58d5f442a738704a9fb6ac56b805cf23dedd39194af2023f36e",
+      "parts": [
+        {
+          "name": "LeftPost",
+          "triangles": 7887,
+          "min": [
+            -1.9483447313308715,
+            0.0,
+            -0.19982746243476868
+          ],
+          "max": [
+            -0.9062284171581267,
+            2.5999999046325684,
+            0.19043518602848053
+          ]
+        },
+        {
+          "name": "RightPost",
+          "triangles": 9079,
+          "min": [
+            0.9104130804538726,
+            0.0005760084604844451,
+            -0.20000000298023224
+          ],
+          "max": [
+            1.9393060445785522,
+            2.5999999046325684,
+            0.20000000298023224
+          ]
+        },
+        {
+          "name": "Lintel",
+          "triangles": 6056,
+          "min": [
+            -1.623288869857788,
+            2.6,
+            -0.12757745385169983
+          ],
+          "max": [
+            1.4515118598937988,
+            3.063217169046402,
+            0.11851490288972855
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/door_frame/door_frame.bin",
+          "bytes": 1105736,
+          "sha256": "4569657eaca8e973f1a9ce2a1618be65e05262730e5bab14ef6722cca379baad"
+        },
+        {
+          "path": "content/models/devices/door_frame/door_frame.gltf",
+          "bytes": 4664,
+          "sha256": "8ac53b8afe0592cf0a98f16e61312a5c598ce5f6ce2ec0c3241d2a1d244efaa9"
+        },
+        {
+          "path": "content/models/devices/door_frame/door_frame_base_color.jpg",
+          "bytes": 9857693,
+          "sha256": "d2504d62ec87a233ce2cd0811f5fe22ea339c4dadd54649881a52a9f4c23d77e",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/door_frame/door_frame_metallic_roughness.jpg",
+          "bytes": 2588818,
+          "sha256": "f261b13a0ca8be4e38c925d46dba5f928f0ffbf2f52e01530f43592d7836917d",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/door_frame/door_frame_normal.png",
+          "bytes": 16690891,
+          "sha256": "4d2ab928f0f2c4411629d9b87be9ebae8b61b0eb9cc878d52f1bc1520f136931",
+          "format": "PNG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ],
+      "validation": {
+        "reproduced_bytes": true,
+        "degenerate_triangles": 0,
+        "finite_uv_positions_unit_normals": true
+      },
+      "reference": {
+        "filename": "DEV-12.jpg",
+        "sha256": "2b1689eb340ac4c482cbf78f39d056284573679d31bfab69220b483eefd975ea"
+      }
+    },
+    {
+      "concept_id": "DEV-13",
+      "operation": "door_leaf",
+      "provider_task_id": "01a1ca00-769a-76f0-8ab0-73fec0470ed7",
+      "provider_status": "SUCCEEDED",
+      "requested_settings": {
+        "ai_model": "meshy-7.1",
+        "model_type": "standard",
+        "geometry_resolution": "2k",
+        "should_texture": true,
+        "enable_pbr": true,
+        "texture_resolution": "4k",
+        "image_enhancement": false,
+        "should_remesh": true,
+        "topology": "triangle",
+        "target_polycount": 15000,
+        "target_formats": [
+          "glb"
+        ],
+        "texture_prompt": "Preserve the existing industrial design and UV layout: ivory light-grey painted metal, restrained matte safety-orange markings, graphite hardware, realistic restrained wear. All lamps and screens unlit, dark and non-emissive. No letters, numbers, logos or invented symbols. Do not paint lighting or cast shadows into the base color."
+      },
+      "consumed_credits": 35,
+      "raw_glb_sha256": "a02634902d08eeb42876b1e4f741002fbb1797f25cf7d9594c7abddafbff0e43",
+      "parts": [
+        {
+          "name": "Leaf",
+          "triangles": 12977,
+          "min": [
+            -0.5,
+            -1.2999999523162842,
+            -0.07500000298023224
+          ],
+          "max": [
+            0.5,
+            1.2999999523162842,
+            0.07500000298023224
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/door/door_leaf.bin",
+          "bytes": 965964,
+          "sha256": "916b236ee4739fb9aa943dc5c197088f84d8cbba9daf8d92e2fc70f3a8ba401f"
+        },
+        {
+          "path": "content/models/devices/door/door_leaf.gltf",
+          "bytes": 2129,
+          "sha256": "30b6a9d7f7476e91aa81e6c153a26f9d615c7ac249e05a223a6b79547452102c"
+        },
+        {
+          "path": "content/models/devices/door/door_leaf_base_color.jpg",
+          "bytes": 8121617,
+          "sha256": "7ec7edbc815dd5937ed1747e4e7363a3e2a3975bd5a86df78a622f9585f7aca4",
+          "format": "JPEG",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/door/door_leaf_metallic_roughness.jpg",
+          "bytes": 1987867,
+          "sha256": "71870c5c58ba9ac48255c96b5c740a8806fbe29eb49b7eeca0e53c6aaf5a09e7",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/door/door_leaf_normal.png",
+          "bytes": 12863527,
+          "sha256": "37d919c04b15db94a8f369f5b55300d882c4fa0f11f1b3b9e3a0873fd916963e",
+          "format": "PNG",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ],
+      "validation": {
+        "reproduced_bytes": true,
+        "degenerate_triangles": 0,
+        "finite_uv_positions_unit_normals": true
+      },
+      "reference": {
+        "filename": "DEV-13.jpg",
+        "sha256": "debd9c029afb181330e031cb03fa8f1b8f3a092bf822aa9a76b4136b46c29474"
+      }
+    }
+  ]
+}

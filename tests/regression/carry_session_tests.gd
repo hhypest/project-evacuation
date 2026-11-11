@@ -16,9 +16,9 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	TestInputEvents.key(KEY_ENTER)
 	TestInputEvents.key(KEY_ENTER, false)
 	var scope: LevelScope = main.get_node("LevelScope") as LevelScope
-	var player: PlayerMotor = scope.get_node("FoundationLab/Player") as PlayerMotor
-	var camera: LookCamera = scope.get_node("FoundationLab/Camera") as LookCamera
-	var cube: CarryRigidBody = scope.get_node("FoundationLab/TestCube") as CarryRigidBody
+	var player: PlayerMotor = scope.get_node("MechanicsLab/Player") as PlayerMotor
+	var camera: LookCamera = scope.get_node("MechanicsLab/Camera") as LookCamera
+	var cube: CarryRigidBody = scope.get_node("MechanicsLab/TestCube") as CarryRigidBody
 	player.position = Vector3(0, 0.05, 3)
 	for _tick: int in range(100):
 		await tree.physics_frame
@@ -55,9 +55,9 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	TestInputEvents.key(KEY_R)
 	TestInputEvents.key(KEY_R, false)
 	scope = main.get_node("LevelScope") as LevelScope
-	player = scope.get_node("FoundationLab/Player") as PlayerMotor
-	camera = scope.get_node("FoundationLab/Camera") as LookCamera
-	cube = scope.get_node("FoundationLab/TestCube") as CarryRigidBody
+	player = scope.get_node("MechanicsLab/Player") as PlayerMotor
+	camera = scope.get_node("MechanicsLab/Camera") as LookCamera
+	cube = scope.get_node("MechanicsLab/TestCube") as CarryRigidBody
 	player.position = Vector3(0, 0.05, 3)
 	for _tick: int in range(100):
 		await tree.physics_frame

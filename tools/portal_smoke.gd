@@ -1,10 +1,9 @@
 extends SceneTree
-## Vulkan check of the portal view and traversal: opens "Эксперимент: порталы" through the menu,
+## Vulkan check of the portal view and traversal: opens the unified proving ground through the menu,
 ## captures both split halves and close-view detail, then crosses with a held cube via session input.
 ## Software Vulkan is a render witness; a person still has to check comfort/performance on real hardware.
 
 const MAIN: PackedScene = preload("res://src/bootstrap/main.tscn")
-const PORTAL_LEVEL: int = 3
 var _finished: bool = false
 
 
@@ -24,17 +23,18 @@ func _run() -> void:
 		if main.get_session_status().can_start:
 			break
 		await process_frame
-	var button: Button = main.find_child("LevelButton%d" % PORTAL_LEVEL, true, false) as Button
-	if not _check(main.get_session_status().can_start and button != null, "menu offers the portal experiment"):
+	var button: Button = main.find_child("StartButton", true, false) as Button
+	if not _check(main.get_session_status().can_start and button != null, "menu offers the unified proving ground"):
 		return
 	button.pressed.emit()
 	for _tick: int in range(60):
 		await physics_frame
-	var lab: Node3D = main.get_node_or_null("LevelScope/PortalLab") as Node3D
+	var level: Node3D = main.get_node_or_null("LevelScope/MechanicsLab") as Node3D
+	var lab: Node3D = level.get_node("Portals/Fixture") as Node3D if level != null else null
 	if not _check(lab != null, "portal experiment level loaded"):
 		return
-	var player: PlayerMotor = lab.get_node("Player") as PlayerMotor
-	var camera: LookCamera = lab.get_node("Camera") as LookCamera
+	var player: PlayerMotor = main.get_node("LevelScope/MechanicsLab/Player") as PlayerMotor
+	var camera: LookCamera = level.get_node("Camera") as LookCamera
 	var pair: PortalPairDevice = lab.get_node("portal_pair") as PortalPairDevice
 	if not _check(pair.state().powered, "portal pair powered"):
 		return
@@ -112,7 +112,7 @@ func _walk_with_cube(main: SessionBootstrap, lab: Node3D, pair: PortalPairDevice
 	if not _check(main.get_session_status().accepts_gameplay, "window focus enables session input"):
 		return false
 	var scope: LevelScope = main.get_node("LevelScope") as LevelScope
-	var player: PlayerMotor = lab.get_node("Player") as PlayerMotor
+	var player: PlayerMotor = main.get_node("LevelScope/MechanicsLab/Player") as PlayerMotor
 	var cube: CarryRigidBody = lab.get_node("CubeA") as CarryRigidBody
 	var a: Transform3D = pair.surface_a.global_transform
 	player.global_transform = Transform3D(Basis.IDENTITY, Vector3(a.origin.x, 0.05, a.origin.z + 1.5))
