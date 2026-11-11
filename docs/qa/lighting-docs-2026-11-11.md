@@ -29,7 +29,7 @@
 python tools/check_docs.py
 ```
 
-Экспорт выполняется после фиксации чистого исходного дерева; результат будет записан отдельным уточнением QA.
+`tools/export.ps1`: Windows Vulkan и Linux Vulkan успешно собраны с notices и manifest от чистого коммита `0f9c9d2ed8e93e9203d9f1f547c2fbbe1166ce4d` (tree `465a5fc4c0cff376792ebebc3846a189b998eb77`). Последующие уточнения затрагивают только документы. Linux release: **16/16**, `EXPORTED_GAMEPLAY_SMOKE_PASSED`; отрицательный сценарий вернул ожидаемый exit 1. Ошибок/предупреждений в успешном runtime-прогоне нет. Windows бинарник собран, но на этой Linux-среде не запускался.
 
 ## Изображения
 
