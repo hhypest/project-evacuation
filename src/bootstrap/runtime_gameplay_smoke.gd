@@ -29,6 +29,15 @@ func _run() -> void:
 	await _tree.process_frame
 	if not _check(main.get_session_status().can_start and _tree.paused, "usable main menu"):
 		return
+	var journal: String = main.get_session_log_path()
+	var log_text: String = FileAccess.get_file_as_string(journal)
+	if not _check(journal.get_base_dir() == RuntimeLog.game_directory()
+			and "SYSTEM_INFO" in log_text and "SESSION_READY" in log_text, "session log beside the executable contains startup diagnostics"):
+		return
+	printerr("RUNTIME_SMOKE_LOG_STREAM")
+	if not _check("[STDERR] RUNTIME_SMOKE_LOG_STREAM" in FileAccess.get_file_as_string(journal),
+			"the session log captures standard error"):
+		return
 	var profiler: RuntimeProfiler = main.get_node_or_null("RuntimeProfiler") as RuntimeProfiler
 	var panel: ProfilerHud = main.get_node_or_null("ProfilerHud") as ProfilerHud
 	if not _check(profiler != null and panel != null and not profiler.is_processing(), "release diagnostics are available but inactive without launch flags"):
@@ -41,7 +50,8 @@ func _run() -> void:
 		return
 	await _tree.process_frame
 	_key(KEY_F4)
-	if not _check(not profiler.recording and FileAccess.file_exists(profiler.report_path), "release F4 stops and flushes CSV"):
+	if not _check(not profiler.recording and FileAccess.file_exists(profiler.report_path)
+			and profiler.report_path.get_base_dir() == RuntimeLog.game_directory(), "release F4 flushes CSV beside the session log"):
 		return
 	DirAccess.remove_absolute(profiler.report_path)
 	_key(KEY_F3)
@@ -144,6 +154,10 @@ func _run() -> void:
 	await _ticks(8)
 	if not _check(main.get_session_status().generation == generation + 2 and main.get_session_status().accepts_gameplay
 			and not is_instance_valid(scope), "unrecoverable portal geometry resets the complete chamber generation"):
+		return
+	log_text = FileAccess.get_file_as_string(journal)
+	if not _check("CHAMBER_RECOVERY body=@portal.player level=res://content/levels/mechanics_lab.tscn generation=" in log_text,
+			"portal recovery records body, level and generation in the session log"):
 		return
 	_finished = true
 	print("EXPORTED_GAMEPLAY_SMOKE_PASSED checks=%d Godot=%s CPU_ONLY" % [_checks, Engine.get_version_info()["string"]])

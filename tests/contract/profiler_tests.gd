@@ -25,6 +25,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		not profiler.is_processing() and not profiler.recording))
 	var directory: String = "res://work/profiler-test-%d" % Time.get_ticks_usec()
 	profiler.level_label = "Тест, CSV"
+	profiler.generation = 7
 	var opened: bool = profiler.start_recording(directory)
 	await tree.create_timer(0.65, true).timeout
 	profiler.stop_recording()
@@ -34,7 +35,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	var row: PackedStringArray = file.get_csv_line() if file != null else PackedStringArray()
 	results.append(TestOutcome.new("profiler writes a nonempty UTF-8 CSV with quoted level names",
 		opened and header == RuntimeProfiler.HEADER and row.size() == header.size()
-		and row[1] == "Тест, CSV" and row[8].to_float() > 0.0))
+		and row[1] == "Тест, CSV" and row[8].to_float() > 0.0
+		and row[header.find("generation")] == "7" and row[header.find("active_viewports")] == "0"))
 	if file != null:
 		file.close()
 	var refused: bool = not profiler.start_recording("res://project.godot/profiles")

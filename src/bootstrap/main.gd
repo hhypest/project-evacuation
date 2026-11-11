@@ -14,12 +14,15 @@ var _runtime: RuntimeInfo
 var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
+var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_log = RuntimeLog.new()
+	_log.start()
 	_hud.start_requested.connect(_on_start_requested)
 	_hud.level_requested.connect(_on_level_requested)
 	if catalog != null:
@@ -29,10 +32,17 @@ func _ready() -> void:
 	_hud.menu_requested.connect(_on_menu_requested)
 	_hud.quit_requested.connect(_on_quit_requested)
 	_window = get_window()
+	_runtime = RuntimeProbe.new().read()
+	if not _runtime.headless and "--windowed" in OS.get_cmdline_user_args():
+		_window.mode = Window.MODE_WINDOWED
+		_window.size = _window.content_scale_size
 	_window.focus_entered.connect(_on_focus_entered)
 	_window.focus_exited.connect(_on_focus_exited)
 	_window.close_requested.connect(_on_quit_requested)
-	_runtime = RuntimeProbe.new().read()
+	if not _runtime.headless:
+		_window.size_changed.connect(_log_display)
+		_log_display.call_deferred()
+	_log.report_system(_runtime, RuntimeProfiler.SETTINGS.profile_label())
 	var errors: PackedStringArray = ValidateRuntime.new().execute(_runtime, true)
 	_session.configure_runtime(errors.is_empty())
 	_session.set_focus(_runtime.headless or _window.has_focus())
@@ -55,11 +65,20 @@ func get_session_status() -> SessionStatus:
 	return _session.get_status()
 
 
+func get_session_log_path() -> String:
+	return _log.path if _log != null else ""
+
+
+func _log_display() -> void:
+	_log.report_display(_window)
+
+
 func _configure_profiler() -> void:
 	var requested: bool = "--profile" in OS.get_cmdline_user_args()
 	# F3/F4 are an explicit opt-in in release too. Hidden diagnostics do not process or time viewports.
 	_profiler = RuntimeProfiler.new()
 	_profiler.name = "RuntimeProfiler"
+	_profiler.log_directory = _log.directory
 	add_child(_profiler)
 	_profiler_hud = ProfilerHud.new()
 	_profiler_hud.name = "ProfilerHud"
@@ -83,7 +102,11 @@ func _physics_process(delta: float) -> void:
 	if _scope != null and _session.get_status().accepts_gameplay:
 		_scope.apply_input(_input.take_frame(), delta)
 		if _scope.needs_recovery():
-			print("CHAMBER_RECOVERY body=%s" % _scope.portals().recovery_body_id)
+			var portals: AdvancePortals = _scope.portals()
+			print("CHAMBER_RECOVERY body=%s level=%s generation=%d crossings=%d blocked=%d" % [
+				portals.recovery_body_id, chamber_scene.resource_path, _session.get_status().generation,
+				portals.crossing_count, portals.blocked_count
+			])
 			_on_restart_requested()
 
 
@@ -143,6 +166,7 @@ func _replace_scope() -> void:
 	_scope.name = "LevelScope"
 	add_child(_scope)
 	if not _scope.open(chamber_scene, _session.get_status().generation):
+		printerr("LEVEL_LOAD_FAILED path=" + (chamber_scene.resource_path if chamber_scene != null else "<empty>"))
 		_drop_scope()
 		_session.return_to_menu()
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
@@ -158,15 +182,21 @@ func _drop_scope() -> void:
 
 func _sync_session() -> void:
 	var status: SessionStatus = _session.get_status()
+	var level: String = chamber_scene.resource_path if _scope != null else "menu"
 	if is_instance_valid(_profiler):
-		_profiler.level_label = chamber_scene.resource_path if _scope != null else "menu"
+		_profiler.level_label = level
+		_profiler.generation = status.generation
+	print("SESSION_STATE phase=%s generation=%d focused=%s level=%s" % [
+		SessionLifecycle.Phase.keys()[status.phase], status.generation, status.focused, level
+	])
 	if not status.accepts_gameplay and _scope != null:
 		_scope.suspend_carry()
 	get_tree().paused = status.phase in [SessionLifecycle.Phase.READY, SessionLifecycle.Phase.PAUSED]
 	_input.set_gameplay_enabled(status.accepts_gameplay, status.generation)
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"
-	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц" % [
-		_runtime.engine_version, mode, _runtime.physics_backend
+	var notice: String = "\n" + _log.notice if not _log.notice.is_empty() else ""
+	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [
+		_runtime.engine_version, mode, _runtime.physics_backend, notice
 	], _problem)
 
 
@@ -178,4 +208,9 @@ func _exit_tree() -> void:
 		_window.focus_entered.disconnect(_on_focus_entered)
 		_window.focus_exited.disconnect(_on_focus_exited)
 		_window.close_requested.disconnect(_on_quit_requested)
+		if _window.size_changed.is_connected(_log_display):
+			_window.size_changed.disconnect(_log_display)
 	get_tree().paused = false
+	if _log != null:
+		print("SESSION_END")
+		_log.close()

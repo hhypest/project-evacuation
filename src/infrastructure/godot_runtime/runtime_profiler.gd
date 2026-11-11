@@ -12,9 +12,11 @@ const HEADER: PackedStringArray = ["elapsed_s", "level", "paused", "focused", "t
 	"width", "height", "frames", "fps", "frame_mean_ms", "frame_p95_ms", "frame_max_ms",
 	"process_ms", "physics_ms", "render_cpu_ms", "render_gpu_ms", "draw_calls", "primitives",
 	"texture_bytes", "video_bytes", "static_bytes", "gpu", "renderer", "viewports", "godot_version",
-	"physics_hz", "vsync_mode", "fps_limit"]
+	"physics_hz", "vsync_mode", "fps_limit", "generation", "active_viewports"]
 
 var level_label: String = "menu"
+var generation: int = 0
+var log_directory: String = RuntimeLog.game_directory()
 var latest: ProfilerSample = ProfilerSample.new()
 var recording: bool = false
 var report_path: String = ""
@@ -34,6 +36,7 @@ var _file: FileAccess
 var _window_paused: bool = false
 var _window_focused: bool = false
 var _window_level: String = "menu"
+var _window_generation: int = 0
 
 
 func _ready() -> void:
@@ -49,40 +52,38 @@ func set_panel_visible(enabled: bool) -> void:
 	_emit_status()
 
 
-func start_recording(directory: String = "user://profiles") -> bool:
+func start_recording(directory: String = "") -> bool:
 	if recording:
 		return true
 	last_error = ""
-	var absolute: String = ProjectSettings.globalize_path(directory)
+	report_path = ""
+	var absolute: String = ProjectSettings.globalize_path(log_directory if directory.is_empty() else directory)
 	var ancestor: String = absolute
 	while not DirAccess.dir_exists_absolute(ancestor):
 		if FileAccess.file_exists(ancestor):
-			last_error = "Путь отчёта проходит через файл: " + ancestor
-			_emit_status()
+			_recording_error("Путь отчёта проходит через файл: " + ancestor)
 			return false
 		var parent: String = ancestor.get_base_dir()
 		if parent == ancestor:
 			break
 		ancestor = parent
 	if DirAccess.make_dir_recursive_absolute(absolute) != OK:
-		last_error = "Не удалось создать папку отчётов: " + absolute
-		_emit_status()
+		_recording_error("Не удалось создать папку отчётов: " + absolute)
 		return false
-	var stamp: String = Time.get_datetime_string_from_system().replace(":", "-")
-	report_path = absolute.path_join("profile-%s-%d.csv" % [stamp, Time.get_ticks_usec()])
-	_file = FileAccess.open(report_path, FileAccess.WRITE)
+	var stamp: String = Time.get_datetime_string_from_system(true).replace(":", "-")
+	var candidate: String = absolute.path_join("profile-%sZ-%d-%d.csv" % [stamp, OS.get_process_id(), Time.get_ticks_usec()])
+	_file = FileAccess.open(candidate, FileAccess.WRITE)
 	if _file == null:
-		last_error = "Не удалось открыть отчёт: " + error_string(FileAccess.get_open_error())
-		_emit_status()
+		_recording_error("Не удалось открыть отчёт: " + error_string(FileAccess.get_open_error()))
 		return false
 	_file.store_csv_line(HEADER)
 	_file.flush()
 	if _file.get_error() != OK:
-		last_error = "Не удалось записать заголовок отчёта"
 		_file.close()
 		_file = null
-		_emit_status()
+		_recording_error("Не удалось записать заголовок отчёта")
 		return false
+	report_path = candidate
 	recording = true
 	# Start a new frame window; a recording never inherits earlier menu/idle samples.
 	_reset_window()
@@ -100,13 +101,15 @@ func stop_recording() -> void:
 		_file.flush()
 		_file.close()
 		_file = null
+		print("PROFILE_STOPPED " + report_path)
 	_sync_active()
 	_emit_status()
 
 
 func _process(_delta: float) -> void:
 	# Do not mix loading/menu/pause/focus transitions into a window labelled as steady gameplay.
-	if get_tree().paused != _window_paused or get_window().has_focus() != _window_focused or level_label != _window_level:
+	if get_tree().paused != _window_paused or get_window().has_focus() != _window_focused or level_label != _window_level \
+			or generation != _window_generation:
 		_reset_window()
 	var now: int = Time.get_ticks_usec()
 	if _last_us == 0:
@@ -137,10 +140,13 @@ func _publish_window() -> void:
 	latest.elapsed_s = float(Time.get_ticks_usec() - _started_us) / 1000000.0
 	latest.level = level_label
 	latest.texture_profile = SETTINGS.profile_label()
-	latest.viewport_size = get_viewport().get_visible_rect().size
+	latest.generation = generation
+	latest.viewport_size = get_viewport().get_visible_rect().size if _headless else get_window().size
 	for viewport: Viewport in _viewports:
 		if is_instance_valid(viewport):
 			latest.viewport_count += 1
+			if not viewport is SubViewport or (viewport as SubViewport).render_target_update_mode != SubViewport.UPDATE_DISABLED:
+				latest.active_viewport_count += 1
 	latest.engine_version = RuntimeProbe.new().read().engine_version
 	latest.physics_hz = Engine.physics_ticks_per_second
 	latest.fps_limit = Engine.max_fps
@@ -173,7 +179,8 @@ func _write_sample() -> void:
 		str(latest.process_ms), str(latest.physics_ms), str(latest.render_cpu_ms), str(latest.render_gpu_ms),
 		str(latest.draw_calls), str(latest.primitives), str(latest.texture_bytes), str(latest.video_bytes),
 		str(latest.static_bytes), latest.gpu, latest.renderer, str(latest.viewport_count), latest.engine_version,
-		str(latest.physics_hz), str(latest.vsync_mode), str(latest.fps_limit)]))
+		str(latest.physics_hz), str(latest.vsync_mode), str(latest.fps_limit),
+		str(latest.generation), str(latest.active_viewport_count)]))
 	_file.flush()
 	if _file.get_error() != OK:
 		last_error = "Ошибка записи CSV: " + error_string(_file.get_error())
@@ -181,6 +188,13 @@ func _write_sample() -> void:
 		_file.close()
 		_file = null
 		_sync_active()
+		printerr("PROFILE_WRITE_FAILED " + last_error)
+
+
+func _recording_error(message: String) -> void:
+	last_error = message
+	printerr("PROFILE_WRITE_FAILED " + message)
+	_emit_status()
 
 
 func _sync_active() -> void:
@@ -228,6 +242,7 @@ func _reset_window(discard_timestamp: bool = true) -> void:
 	_window_paused = get_tree().paused
 	_window_focused = get_window().has_focus()
 	_window_level = level_label
+	_window_generation = generation
 
 
 func _emit_status() -> void:
