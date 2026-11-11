@@ -56,9 +56,7 @@
  "samplers": [
   {
    "magFilter": 9729,
-   "minFilter": 9987,
-   "wrapS": 10497,
-   "wrapT": 10497
+   "minFilter": 9987
   }
  ],
  "images": [
@@ -69,7 +67,7 @@
    "uri": "logic_box_metallic_roughness.jpg"
   },
   {
-   "uri": "logic_box_normal.jpg"
+   "uri": "logic_box_normal.png"
   }
  ],
  "textures": [
@@ -89,32 +87,32 @@
  "buffers": [
   {
    "uri": "logic_box.bin",
-   "byteLength": 569748
+   "byteLength": 968292
   }
  ],
  "bufferViews": [
   {
    "buffer": 0,
    "byteOffset": 0,
-   "byteLength": 141840,
+   "byteLength": 298728,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 141840,
-   "byteLength": 141840,
+   "byteOffset": 298728,
+   "byteLength": 298728,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 283680,
-   "byteLength": 94560,
+   "byteOffset": 597456,
+   "byteLength": 199152,
    "target": 34962
   },
   {
    "buffer": 0,
-   "byteOffset": 378240,
-   "byteLength": 191508,
+   "byteOffset": 796608,
+   "byteLength": 171684,
    "target": 34963
   }
  ],
@@ -122,7 +120,7 @@
   {
    "bufferView": 0,
    "componentType": 5126,
-   "count": 11820,
+   "count": 24894,
    "type": "VEC3",
    "min": [
     -0.2199999988079071,
@@ -138,19 +136,19 @@
   {
    "bufferView": 1,
    "componentType": 5126,
-   "count": 11820,
+   "count": 24894,
    "type": "VEC3"
   },
   {
    "bufferView": 2,
    "componentType": 5126,
-   "count": 11820,
+   "count": 24894,
    "type": "VEC2"
   },
   {
    "bufferView": 3,
    "componentType": 5125,
-   "count": 47877,
+   "count": 42921,
    "type": "SCALAR"
   }
  ]

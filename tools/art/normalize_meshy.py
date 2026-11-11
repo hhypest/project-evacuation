@@ -1,5 +1,5 @@
 """Turns a raw Meshy GLB into a game-ready glTF: exact game size, pivot, and (for the floor button) a
-separate moving plate. Textures are written next to the .gltf as their original JPEG bytes, so Godot
+separate moving plate. Textures are written next to the .gltf as their original JPEG/PNG bytes, so Godot
 imports them once as ordinary textures instead of duplicating them inside a .glb.
 
 Usage:
@@ -19,6 +19,8 @@ wall_button_key — the push key turned to face +Z, 0.1 m wide (it fits the hous
 wall_switch_lever — the lever turned so the arm points up (+Y) from its pivot hub; the hub centre is
          the origin and the axle runs along Z, so the device turns it about Z.
 logic_box — the junction box housing of LogicDevice, centred, lid towards +Z.
+wall_button_concept / wall_switch_concept — recovered DEV-03/04 models; split the moving key or
+         handle from the fixed housing, sharing its textures. The switch hinge runs along X.
 door_leaf — one sliding leaf of DoorDevice, centred; the device mirrors it for the other side.
 emitter_body / receiver_body — scaled per axis to the EmitterDevice housing (lens towards -Z) and the
          ReceiverDevice plate (dish towards +Z), centred on the node.
@@ -195,6 +197,37 @@ def split_concept_plate(vertices: np.ndarray, triangles: np.ndarray, top: float)
     return np.array(frame), np.array(plate)
 
 
+def split_box(vertices: np.ndarray, triangles: np.ndarray, low: np.ndarray,
+              high: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Clip against the measured moving part's volume, preserving UVs at every cut edge."""
+    fixed, moving = [], []
+    for triangle in vertices[triangles]:
+        rest = list(triangle)
+        for axis in range(3):
+            for limit, below in ((low[axis], True), (high[axis], False)):
+                outside = clip(rest, axis, limit, below)
+                fixed.extend(fan(outside) if len(outside) >= 3 else [])
+                rest = clip(rest, axis, limit, not below)
+                if len(rest) < 3:
+                    break
+            if len(rest) < 3:
+                break
+        if len(rest) >= 3:
+            moving.extend(fan(rest))
+    cleaned = []
+    for part in (fixed, moving):
+        soup = np.array(part)
+        if soup.size:
+            edges = soup[:, 1:, :3] - soup[:, :1, :3]
+            # A later region can share a plane with an earlier cut. Do not export zero-area fans
+            # formed by duplicate boundary vertices (nor numerical slivers at that boundary).
+            soup = soup[np.linalg.norm(np.cross(edges[:, 0], edges[:, 1]), axis=1) > 1e-10]
+        if not len(soup):
+            raise ValueError("Empty wall-device part; remeasure the input before normalising")
+        cleaned.append(soup)
+    return cleaned[0], cleaned[1]
+
+
 def build_gltf(name: str, parts: dict[str, np.ndarray], gltf_in: dict, textures: dict[str, str]) -> tuple[dict, bytes]:
     blob = bytearray()
     views, accessors, meshes, nodes = [], [], [], []
@@ -249,8 +282,37 @@ def main() -> None:
     uv = accessor(gltf, blob, primitive["attributes"]["TEXCOORD_0"]).astype(np.float64)
     triangles = accessor(gltf, blob, primitive["indices"]).reshape(-1, 3)
     low, high = position.min(axis=0), position.max(axis=0)
+    translations: dict[str, list[float]] = {}
 
-    if mode == "cube":
+    if mode in ("wall_button_concept", "wall_switch_concept"):
+        switch = mode == "wall_switch_concept"
+        name = "wall_switch_body" if switch else "wall_button_body"
+        # These bounds belong to the recovered tasks recorded in wall-devices-2026-11-11.json.
+        # DEV-03: key under the fixed safety cover. DEV-04: distal handle ahead of the fixed hinge.
+        raw = np.hstack([position, normal, uv])
+        if switch:
+            # The outer orange grip and its upper arm move; the black cams and side brackets stay put.
+            fixed, arm = split_box(raw, triangles, np.array([-0.18, 0.25, 0.10]), np.array([0.18, 0.75, 0.65]))
+            fixed_rows = fixed.reshape(-1, 8)
+            fixed, grip = split_box(fixed_rows, np.arange(len(fixed_rows)).reshape(-1, 3),
+                                    np.array([-0.18, -0.46, 0.40]), np.array([0.18, 0.25, 0.65]))
+            moving = np.concatenate([arm, grip])
+        else:
+            fixed, moving = split_box(raw, triangles, np.array([-0.19, -0.225, 0.08]), np.array([0.19, 0.245, 0.235]))
+        scale = np.array([0.32 if switch else 0.36, 0.5, 0.24]) / (high - low)
+        offset = np.array([-(low[0] + high[0]) * 0.5 * scale[0],
+                           -(low[1] + high[1]) * 0.5 * scale[1], -0.08 - low[2] * scale[2]])
+        moving_name = "Lever" if switch else "Key"
+        pivot = np.array([0.0, 0.33, 0.07]) * scale + offset if switch else np.zeros(3)
+        parts = {}
+        for part, soup in (("Body", fixed), (moving_name, moving)):
+            flat = soup.reshape(-1, 8)
+            flat[:, :3] = flat[:, :3] * scale + offset - (pivot if part == "Lever" else 0.0)
+            flat[:, 3:6] = scale_normals(flat[:, 3:6], scale)
+            parts[part] = flat.reshape(-1, 3, 8)
+        if switch:
+            translations["Lever"] = pivot.tolist()
+    elif mode == "cube":
         name = "ballast_cube"
         scale = 1.0 / (high - low)
         offset = -(low + high) * 0.5
@@ -327,6 +389,9 @@ def main() -> None:
         (out_dir / file_name).write_bytes(image_bytes(gltf, blob, texture))
         textures[key] = file_name
     document, binary = build_gltf(name, parts, gltf, textures)
+    for node in document["nodes"]:
+        if node["name"] in translations:
+            node["translation"] = translations[node["name"]]
     (out_dir / f"{name}.bin").write_bytes(binary)
     (out_dir / f"{name}.gltf").write_text(json.dumps(document, indent=1), encoding="utf-8")
     for part, soup in parts.items():
