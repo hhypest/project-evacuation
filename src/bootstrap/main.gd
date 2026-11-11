@@ -6,6 +6,9 @@ extends Node
 ## Chamber loaded by start/restart; selecting a level in the menu replaces it.
 @export var chamber_scene: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
 
+## Injected for session tests. A game launched from the main scene opens the real portable store.
+var save_repository: SaveRepository
+
 @onready var _hud: FoundationHud = $FoundationHud
 @onready var _input: SessionInput = $SessionInput
 
@@ -14,6 +17,8 @@ var _runtime: RuntimeInfo
 var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
+var _continue_level: LevelEntry
+var _checkpoint_notice: String = ""
 var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
@@ -24,6 +29,7 @@ func _ready() -> void:
 	_log = RuntimeLog.new()
 	_log.start()
 	_hud.start_requested.connect(_on_start_requested)
+	_hud.load_checkpoint_requested.connect(_on_load_checkpoint_requested)
 	_hud.level_requested.connect(_on_level_requested)
 	if catalog != null:
 		_hud.set_levels(catalog.titles())
@@ -46,6 +52,9 @@ func _ready() -> void:
 	var errors: PackedStringArray = ValidateRuntime.new().execute(_runtime, true)
 	_session.configure_runtime(errors.is_empty())
 	_session.set_focus(_runtime.headless or _window.has_focus())
+	if save_repository == null and get_tree().current_scene == self and not "--runtime-smoke" in OS.get_cmdline_user_args():
+		save_repository = JsonSaveRepository.new()
+	_refresh_checkpoint()
 	if not errors.is_empty():
 		_problem = "Запуск остановлен:\n" + "\n".join(errors)
 		push_error("Runtime validation failed: " + "; ".join(errors))
@@ -111,17 +120,74 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_start_requested() -> void:
-	if _session.start():
-		_replace_scope()
-		_sync_session()
+	_start_chamber(chamber_scene)
 
 
 func _on_level_requested(index: int) -> void:
-	var scene: PackedScene = catalog.scene(index) if catalog != null else null
-	if scene == null:
+	var item: LevelEntry = catalog.entry(index) if catalog != null else null
+	if item == null or item.scene == null:
+		return
+	var id: StringName = item.level_id if catalog.find_level(item.level_id) == item else &""
+	_start_chamber(item.scene, id)
+
+
+func _on_load_checkpoint_requested() -> void:
+	if not _session.get_status().can_start:
+		return
+	_refresh_checkpoint()
+	if _continue_level == null:
+		_sync_session()
+		return
+	var item: LevelEntry = _continue_level
+	_start_chamber(item.scene)
+	if _scope != null:
+		print("CHECKPOINT_LOADED level=%s checkpoint=%s" % [item.level_id, SaveSnapshot.ENTRY_ID])
+
+
+func _start_chamber(scene: PackedScene, level_id: StringName = &"") -> void:
+	if not _session.start():
 		return
 	chamber_scene = scene
-	_on_start_requested()
+	_replace_scope()
+	if _scope != null and save_repository != null and not level_id.is_empty():
+		var version: String = str(ProjectSettings.get_setting("application/config/version"))
+		var result: SaveResult.Code = save_repository.write_checkpoint(SaveSnapshot.new(level_id, version))
+		_refresh_checkpoint()
+		if result == SaveResult.Code.OK:
+			print("CHECKPOINT_READY level=%s checkpoint=%s" % [level_id, SaveSnapshot.ENTRY_ID])
+		else:
+			_checkpoint_notice = "Не удалось сохранить вход в камеру. " + _checkpoint_error(result)
+			printerr("CHECKPOINT_WRITE_FAILED level=%s code=%s" % [level_id, SaveResult.Code.keys()[result]])
+	_sync_session()
+
+
+func _refresh_checkpoint() -> void:
+	_continue_level = null
+	_checkpoint_notice = ""
+	if save_repository == null:
+		return
+	var result: SaveResult = save_repository.read_checkpoint()
+	if result.code == SaveResult.Code.MISSING:
+		return
+	if result.code != SaveResult.Code.OK:
+		_checkpoint_notice = _checkpoint_error(result.code)
+		return
+	_continue_level = catalog.find_level(result.snapshot.level_id) if catalog != null else null
+	if _continue_level == null:
+		_checkpoint_notice = "Уровень из сохранения недоступен в этой сборке."
+		return
+	var notice: String = "Доступна предыдущая контрольная точка. " if result.recovered else ""
+	_checkpoint_notice = notice + "Продолжение открывает камеру с точки входа."
+
+
+func _checkpoint_error(code: SaveResult.Code) -> String:
+	match code:
+		SaveResult.Code.INVALID:
+			return "Файл контрольной точки повреждён."
+		SaveResult.Code.UNSUPPORTED:
+			return "Версия сохранения не поддерживается этой сборкой."
+		_:
+			return "Проверьте доступ к папке saves рядом с игрой."
 
 
 func _on_pause_requested() -> void:
@@ -138,6 +204,7 @@ func _on_restart_requested() -> void:
 func _on_menu_requested() -> void:
 	if _session.return_to_menu():
 		_drop_scope()
+		_refresh_checkpoint()
 		_sync_session()
 
 
@@ -195,9 +262,13 @@ func _sync_session() -> void:
 	_input.set_gameplay_enabled(status.accepts_gameplay, status.generation)
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"
 	var notice: String = "\n" + _log.notice if not _log.notice.is_empty() else ""
+	var messages: PackedStringArray = []
+	for message: String in [_problem, _checkpoint_notice]:
+		if not message.is_empty():
+			messages.append(message)
 	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [
 		_runtime.engine_version, mode, _runtime.physics_backend, notice
-	], _problem)
+	], "\n".join(messages), _continue_level != null)
 
 
 func _exit_tree() -> void:

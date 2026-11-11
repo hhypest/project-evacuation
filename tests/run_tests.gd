@@ -16,8 +16,8 @@ func _run() -> void:
 		return
 	var suites: Array[TestSuite] = [
 		SessionTests.new(), SessionControllerTests.new(), InputBufferTests.new(),
-		MovementRulesTests.new(), CarryTests.new(), PuzzleNetworkTests.new(), PuzzleTickTests.new(), GravityRulesTests.new(), PortalMathTests.new(), PortalPassageTests.new(), PortalViewTests.new(), RuntimeTests.new(), ProfilerTests.new(), CarryContentTests.new(), PhysicsTests.new(), ScopeLoadTests.new(),
-		AuditPhysicsTests.new(), PlaytestRegressionTests.new(), PlayerMovementTests.new(), CarryPhysicsTests.new(), CarryPlacementTests.new(), PuzzleDeviceTests.new(), BeamDeviceTests.new(), GravityFieldTests.new(), TrialChamberTests.new(), UnifiedLabTests.new(), PortalTests.new(), PortalTraversalTests.new(), ScopeTests.new(), CarrySessionTests.new(),
+		MovementRulesTests.new(), CarryTests.new(), PuzzleNetworkTests.new(), PuzzleTickTests.new(), GravityRulesTests.new(), PortalMathTests.new(), PortalPassageTests.new(), PortalViewTests.new(), RuntimeTests.new(), CheckpointRepositoryTests.new(), ProfilerTests.new(), CarryContentTests.new(), PhysicsTests.new(), ScopeLoadTests.new(),
+		AuditPhysicsTests.new(), PlaytestRegressionTests.new(), PlayerMovementTests.new(), CarryPhysicsTests.new(), CarryPlacementTests.new(), PuzzleDeviceTests.new(), BeamDeviceTests.new(), GravityFieldTests.new(), TrialChamberTests.new(), UnifiedLabTests.new(), PortalTests.new(), PortalTraversalTests.new(), ScopeTests.new(), CarrySessionTests.new(), CheckpointSessionTests.new(),
 	]
 	var count: int = 0
 	var failed: int = 0
