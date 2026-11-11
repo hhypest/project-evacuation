@@ -44,18 +44,18 @@ func _run() -> void:
 				roofs.append(roof)
 				roof.visible = false
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 91
+	camera.size = 116
 	camera.global_position = Vector3(45, 95, 5)
-	camera.look_at(Vector3(0, 0, -36))
+	camera.look_at(Vector3(0, 0, -47))
 	await _capture("overview")
 	for roof: MeshInstance3D in roofs:
 		roof.visible = true
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 65
-	var bays: Array[String] = ["Movement", "Carry", "Devices", "Optics", "Gravity", "Portals"]
+	var bays: Array[String] = ["Movement", "Carry", "Devices", "Optics", "Gravity", "Portals", "Lighting"]
 	for name: String in bays:
 		var bay: Node3D = level.get_node(name) as Node3D
-		var side: float = 1.0 if bay.position.x < 0 else -1.0
+		var side: float = (bay as MechanicsBayBuilder).entrance_side
 		camera.global_position = bay.to_global(Vector3(side * 10, 1.65, 2))
 		camera.look_at(bay.to_global(Vector3(0, 1.4, -3)))
 		await _capture(name.to_lower())

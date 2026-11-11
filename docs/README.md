@@ -23,8 +23,8 @@
 
 ## Аудит и технический долг
 
-[Архитектурный аудит и code review 2026-11-10](maintenance/architecture-audit-2026-11-10.md) · [предложенный план устранения](maintenance/technical-debt-plan-2026-11-10.md).
+[Архитектурный аудит и code review 2026-11-10](maintenance/architecture-audit-2026-11-10.md) · [исходный план устранения](maintenance/technical-debt-plan-2026-11-10.md). Программные TD-01…07 реализованы; ручная/аппаратная TD-08 открыта — [результат стабилизации](qa/technical-debt-stabilization-2026-11-10.md), [текущий статус](status.md).
 
 ## Сопровождение документации
 
-[Основные источники и порядок обновления](maintenance/README.md) · [карта переноса](maintenance/inventory.md) · [план DOC-01…DOC-05](documentation-rework.md).
+[Основные источники и порядок обновления](maintenance/README.md) · [карта переноса](maintenance/inventory.md) · [план DOC-01…DOC-05](documentation-rework.md) · [сверка с кодом 2026-11-11](maintenance/codebase-sync-2026-11-11.md).

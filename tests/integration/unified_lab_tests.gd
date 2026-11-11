@@ -29,16 +29,18 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_player = _level.get_node("Player") as PlayerMotor
 	_camera = _level.get_node("Camera") as LookCamera
 	await _ticks(25)
-	results.append(TestOutcome.new("six named independent bays and exactly one portal pair load",
+	results.append(TestOutcome.new("seven named independent bays and exactly one portal pair load",
 		_level.get_node_or_null("Movement") != null and _level.get_node_or_null("Carry") != null
 		and _level.get_node_or_null("Devices") != null and _level.get_node_or_null("Optics") != null
 		and _level.get_node_or_null("Gravity") != null
+		and _level.get_node_or_null("Lighting") != null
 		and _level.find_children("*", "PortalPairDevice", true, false).size() == 1))
 	var routes_clear: bool = true
 	for z: float in [-14.0, -40.0, -66.0]:
 		for side: float in [-1.0, 1.0]:
 			routes_clear = _clear_path(Vector3(0, 0.05, -2), Vector3(0, 0.05, z)) and routes_clear
 			routes_clear = _clear_path(Vector3(0, 0.05, z), Vector3(side * 4, 0.05, z)) and routes_clear
+	routes_clear = _clear_path(Vector3(0, 0.05, -76), Vector3(0, 0.05, -86)) and routes_clear
 	results.append(TestOutcome.new("a full-height player capsule has an unobstructed route to every bay", routes_clear))
 	var space: PhysicsDirectSpaceState3D = _level.get_world_3d().direct_space_state
 	var pool: Node3D = _level.get_node("Movement/Water") as Node3D
@@ -113,14 +115,49 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(90)
 	results.append(TestOutcome.new("the translated combined bench holds its beam-NOT-field-wall-plate feedback loop",
 		_output(&"loop.field") and _output(&"loop.plate") and _output(&"loop.door") and not _output(&"loop.receiver")))
+	var lighting: MechanicsLightingBay = _level.get_node("Lighting") as MechanicsLightingBay
+	var before: Vector3 = lighting.point.position
+	for frame: int in range(3):
+		await tree.process_frame
+	results.append(TestOutcome.new("the lighting bench moves a live point light with both shadow casters enabled",
+		not before.is_equal_approx(lighting.point.position) and lighting.point.visible and lighting.spot.visible
+		and lighting.point.shadow_enabled and lighting.spot.shadow_enabled))
+	await _press(lighting.get_node("qa_lighting_stop") as Node3D)
+	before = lighting.point.position
+	await _ticks(5)
+	results.append(TestOutcome.new("the interaction ray toggles STOP and holds the light for a same-view comparison",
+		lighting.motion_stopped and before.is_equal_approx(lighting.point.position)))
+	await _press(lighting.get_node("qa_lighting_point") as Node3D)
+	results.append(TestOutcome.new("the point-light switch does not turn off the spot or alter other bay circuits",
+		not lighting.point.visible and lighting.spot.visible and _output(&"qa.optics.toggle")))
+	await _press(lighting.get_node("qa_lighting_spot") as Node3D)
+	results.append(TestOutcome.new("the spotlight switch independently disables the second source", not lighting.spot.visible))
+	await _press(lighting.get_node("qa_lighting_shadows") as Node3D)
+	results.append(TestOutcome.new("the shadows switch disables both shadow maps without changing the stopped phase",
+		not lighting.point.shadow_enabled and not lighting.spot.shadow_enabled
+		and before.is_equal_approx(lighting.point.position)))
+	await _press(lighting.get_node("qa_lighting_stop") as Node3D)
+	before = lighting.point.position
+	tree.paused = true
+	for frame: int in range(3):
+		await tree.process_frame
+	var paused_light: bool = before.is_equal_approx(lighting.point.position)
+	tree.paused = false
+	for frame: int in range(3):
+		await tree.process_frame
+	results.append(TestOutcome.new("pause freezes the moving light and explicit resume lets it move again",
+		paused_light and not before.is_equal_approx(lighting.point.position)))
 	_scope.close()
 	await tree.process_frame
 	_scope = LevelScope.new()
 	tree.root.add_child(_scope)
 	var reopened: bool = _scope.open(LAB, GENERATION + 1)
+	var fresh_light: MechanicsLightingBay = _scope.get_child(0).get_node("Lighting") as MechanicsLightingBay
 	results.append(TestOutcome.new("reopening rebuilds all bays with original cube positions and unpowered test switches",
 		reopened and not _scope.puzzle().network.output(&"qa.optics.toggle")
-		and not _scope.puzzle().network.output(&"qa.devices.plate")))
+		and not _scope.puzzle().network.output(&"qa.devices.plate")
+		and not fresh_light.motion_stopped and fresh_light.point.visible and fresh_light.spot.visible
+		and fresh_light.point.shadow_enabled and fresh_light.spot.shadow_enabled))
 	_scope.close()
 	await tree.process_frame
 	return results

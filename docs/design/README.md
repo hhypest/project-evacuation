@@ -4,6 +4,7 @@
 
 | Результат | Основной документ | Следующий шаг |
 | --- | --- | --- |
+| Изменить текущий тестовый уровень | [Единый полигон](puzzles/mechanics-lab.md) | [Комната света и теней](puzzles/lighting-room.md), [игровые проверки](../testing.md) |
 | Собрать играбельную камеру | [Процесс сборки](authoring.md) | [Карточка](puzzle-template.md), [пример «Петля»](puzzles/loop.md) |
 | Выбрать ритм и размер | [Ритм уровней](level-structure.md), [геометрия](level-layout.md) | [Метрики игрока и устройств](level-metrics.md) |
 | Спланировать сектор | [Принятые принципы](level-construction.md) | [Оценка производства](campaign-budget.md), [подгрузка](../architecture/segments.md) |
