@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://k7ik8553dii"
-path.s3tc="res://.godot/imported/wall_button_key_base_color.jpg-427966aadf23f6279e18ce2bddb0f53f.s3tc.ctex"
+uid="uid://dr2dxapgu201k"
+path.s3tc="res://.godot/imported/logic_box_normal.png-2db61e193a87e67e20d31cd53ad220f6.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://content/models/devices/wall_button/wall_button_key_base_color.jpg"
-dest_files=["res://.godot/imported/wall_button_key_base_color.jpg-427966aadf23f6279e18ce2bddb0f53f.s3tc.ctex"]
+source_file="res://content/models/devices/logic_box/logic_box_normal.png"
+dest_files=["res://.godot/imported/logic_box_normal.png-2db61e193a87e67e20d31cd53ad220f6.s3tc.ctex"]
 
 [params]
 
@@ -22,7 +22,7 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
@@ -38,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

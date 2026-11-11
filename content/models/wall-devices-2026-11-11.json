@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-11",
+  "source_commit": "844842f42e7533e5c196e7c93144b660717cc552",
+  "generated_ai_content": true,
+  "provider": "Meshy API, account controlled by project owner",
+  "approved_budget_credits": 105,
+  "recovered_tasks_consumed_credits": 105,
+  "new_generation_requests_this_session": 0,
+  "additional_credits_this_session": 0,
+  "license": "MIT; existing owner decision for content/models/devices; 2D references are not redistributed",
+  "art_acceptance": "pending owner review",
+  "assets": [
+    {
+      "concept_id": "DEV-03",
+      "identification": "Visual identification of recovered provider previews; original PNG and original POST request unavailable in this environment",
+      "reference_expected": "Abandoned_Meshy_Concepts/images/DEV-03.png",
+      "reference_sha256": null,
+      "image_to_3d_task_id": "01a1c952-6200-7441-bb77-73eb68bf4437",
+      "status": "SUCCEEDED",
+      "created_at_utc": "2026-11-11T06:36:22.624000+00:00",
+      "finished_at_utc": "2026-11-11T06:38:03.160000+00:00",
+      "consumed_credits": 35,
+      "provider_observed_settings": {
+        "geometry_resolution": "2k",
+        "ultra_mode": true,
+        "texture_prompt": "",
+        "formats": [
+          "glb"
+        ]
+      },
+      "original_request_available": false,
+      "raw_glb_sha256": "6624dcff6a9caaf7a985501bf9d3a517312c5ea0936c79ff2f08f409f0597f64",
+      "normalizer_mode": "wall_button_concept",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 22361,
+          "bounds_min": [
+            -0.18000000715255737,
+            -0.25,
+            -0.07999999821186066
+          ],
+          "bounds_max": [
+            0.18000000715255737,
+            0.25,
+            0.1599999964237213
+          ]
+        },
+        {
+          "name": "Key",
+          "triangles": 558,
+          "bounds_min": [
+            -0.05190142244100571,
+            -0.05870802327990532,
+            0.07177320867776871
+          ],
+          "bounds_max": [
+            0.05224398151040077,
+            0.064729705452919,
+            0.09866639971733093
+          ]
+        }
+      ],
+      "validation": {
+        "reproduces_exact_file_bytes": true,
+        "degenerate_triangles": 0,
+        "surface_area_relative_error": 1.0746583174903924e-08,
+        "finite_positions_uv_and_unit_normals": true
+      },
+      "files": [
+        {
+          "path": "content/models/devices/wall_button/wall_button_body.bin",
+          "bytes": 1110580,
+          "sha256": "d192c47f7a89ad8b4bd80938eb3ebfe38a44478771cbfa04e2594c28f571038d"
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body.gltf",
+          "bytes": 3333,
+          "sha256": "328feb1f24ac549a4df927545cd4356423e18111ea9cd13841f6f0e60ca65ccc"
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_base_color.jpg",
+          "bytes": 3046168,
+          "sha256": "6bac6a883c4592936ccf621b317cd22ac000963fad2294250a0b13ac103532fe",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_metallic_roughness.jpg",
+          "bytes": 1954748,
+          "sha256": "54b0681a08d99b63ea7828fd6124538615b4ab7adf4b0485609b18a20395003f",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_button/wall_button_body_normal.png",
+          "bytes": 4226222,
+          "sha256": "db86114b6c3ab701f74d0d451c97cc78145a4a7885586807e45628dc7b33c530",
+          "format": "PNG",
+          "size": [
+            2048,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "DEV-04",
+      "identification": "Visual identification of recovered provider previews; original PNG and original POST request unavailable in this environment",
+      "reference_expected": "Abandoned_Meshy_Concepts/images/DEV-04.png",
+      "reference_sha256": null,
+      "image_to_3d_task_id": "01a1c952-7de5-754a-bf76-a109bd3fceb1",
+      "status": "SUCCEEDED",
+      "created_at_utc": "2026-11-11T06:36:29.761000+00:00",
+      "finished_at_utc": "2026-11-11T06:38:02.829000+00:00",
+      "consumed_credits": 35,
+      "provider_observed_settings": {
+        "geometry_resolution": "2k",
+        "ultra_mode": true,
+        "texture_prompt": "",
+        "formats": [
+          "glb"
+        ]
+      },
+      "original_request_available": false,
+      "raw_glb_sha256": "1b3c26640a99c249e5ad01866c354d019cabb2673683cf653af9b5c63cc9c97b",
+      "normalizer_mode": "wall_switch_concept",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 19818,
+          "bounds_min": [
+            -0.1599999964237213,
+            -0.25,
+            -0.07999999821186066
+          ],
+          "bounds_max": [
+            0.1599999964237213,
+            0.25,
+            0.11796556413173676
+          ]
+        },
+        {
+          "name": "Lever",
+          "triangles": 3546,
+          "bounds_min": [
+            -0.04716478417171141,
+            -0.09792184485192514,
+            0.0600021836159105
+          ],
+          "bounds_max": [
+            0.04681817313181261,
+            0.16499297665362145,
+            0.15999999789496014
+          ]
+        }
+      ],
+      "validation": {
+        "reproduces_exact_file_bytes": true,
+        "degenerate_triangles": 0,
+        "surface_area_relative_error": 4.934741109539396e-09,
+        "finite_positions_uv_and_unit_normals": true
+      },
+      "files": [
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.bin",
+          "bytes": 1023280,
+          "sha256": "0fe36af64953b1d7d916c9d61e1597a74584afc6c295daf866198efc85c5c9e9"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.gltf",
+          "bytes": 3447,
+          "sha256": "0dbedfdf0d5f1141299d0a579d06980ad8881db2d2b006b8435a558ccecb6168"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_base_color.jpg",
+          "bytes": 3177581,
+          "sha256": "e2676ad5f41708f412db694bbafcf007af05cc9bc5222a7ed392ffd1adcb74fb",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_metallic_roughness.jpg",
+          "bytes": 2084125,
+          "sha256": "c2fe35012f02f1ade6cfc83f439e6e3e35f9aa4362cef26d27585e76858011c7",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_normal.png",
+          "bytes": 4233298,
+          "sha256": "6b6b0c1d24361ba679b0cd96b73aba2d337874fce67e5b73ab29347ae484b44e",
+          "format": "PNG",
+          "size": [
+            2048,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "DEV-07",
+      "identification": "Visual identification of recovered provider previews; original PNG and original POST request unavailable in this environment",
+      "reference_expected": "Abandoned_Meshy_Concepts/images/DEV-07.png",
+      "reference_sha256": null,
+      "image_to_3d_task_id": "01a1c952-9a29-7496-84b6-8fcb2dcfcadc",
+      "status": "SUCCEEDED",
+      "created_at_utc": "2026-11-11T06:36:36.904000+00:00",
+      "finished_at_utc": "2026-11-11T06:38:43.960000+00:00",
+      "consumed_credits": 35,
+      "provider_observed_settings": {
+        "geometry_resolution": "2k",
+        "ultra_mode": true,
+        "texture_prompt": "",
+        "formats": [
+          "glb"
+        ]
+      },
+      "original_request_available": false,
+      "raw_glb_sha256": "1ae2f969cfa97bcda525199b6442679d6b6659195655a12abc629b52d9f7fe8a",
+      "normalizer_mode": "logic_box",
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 14307,
+          "bounds_min": [
+            -0.2199999988079071,
+            -0.2199999988079071,
+            -0.07999999821186066
+          ],
+          "bounds_max": [
+            0.2199999988079071,
+            0.2199999988079071,
+            0.07999999821186066
+          ]
+        }
+      ],
+      "validation": {
+        "reproduces_exact_file_bytes": true,
+        "degenerate_triangles": 0,
+        "surface_area_relative_error": 6.867408443705046e-09,
+        "finite_positions_uv_and_unit_normals": true
+      },
+      "files": [
+        {
+          "path": "content/models/devices/logic_box/logic_box.bin",
+          "bytes": 968292,
+          "sha256": "02aef588cae382d03fc150921dee3ef59d967dbebc2c112cf65a328e905cded9"
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box.gltf",
+          "bytes": 2159,
+          "sha256": "ede61a31f0c150cef50bbd972c04688da09efd4b01b21ee7c24edf917ea631b4"
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_base_color.jpg",
+          "bytes": 2822130,
+          "sha256": "3de07edbcdb1123a8a6e01d5439749cbb26235850bd9eead6100e59e72b4822e",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_metallic_roughness.jpg",
+          "bytes": 1840434,
+          "sha256": "a19f98dcbf388f6f649fc1d9701213e157d2a3f0ce9d5904a30762a61f1b4468",
+          "format": "JPEG",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/logic_box/logic_box_normal.png",
+          "bytes": 4433293,
+          "sha256": "46b8e05409fe48432a91eb2153f17ac31be9d6992da7a1a07e46f01eaa2b5f17",
+          "format": "PNG",
+          "size": [
+            2048,
+            2048
+          ]
+        }
+      ]
+    }
+  ]
+}
