@@ -18,6 +18,8 @@
 
 ### Графический backend и бюджеты
 
+В прототипе есть процедурные PBR-поверхности, Meshy-модели устройств, свечение по выходам сети и прямые Godot-источники. [Комната 07](../design/puzzles/lighting-room.md) отдельно показывает движущийся `OmniLight3D`, `SpotLight3D` и их shadow maps. F3/F4 доступны и в обычном release. Запечённого GI, финального фонаря, звуковой системы и финального диегетического UI пока нет; список бюджетов ниже остаётся инженерной целью.
+
 Forward+ выбирается для desktop 3D, а драйвер **Vulkan фиксируется явно** на Windows и Linux. Forward+ сам по себе не гарантирует Vulkan: Godot поддерживает другие драйверы и fallback. На Vulkan-only профиле отключаются автоматические переходы на D3D12/OpenGL; фактический backend проверяется при старте и в GPU-smoke. Если Vulkan не инициализируется, поддерживаемый путь запуска не считается пройденным. См. [обзор рендереров](https://docs.godotengine.org/en/4.7/tutorials/rendering/renderers.html) и [ProjectSettings](https://docs.godotengine.org/en/4.7/classes/class_projectsettings.html).
 
 Настройки реализации для выбранной сборки проверяются в FND-03: `rendering/renderer/rendering_method`, `rendering/rendering_device/driver.windows`, `driver.linuxbsd`, `fallback_to_d3d12` и `fallback_to_opengl3`. Названия и смысл сверяются с документацией версии; значения не меняются автоматически ради зелёного теста. Headless-проверки используют свои условия и не предъявляются как GPU-проверка.

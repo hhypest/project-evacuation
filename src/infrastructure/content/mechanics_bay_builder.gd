@@ -14,6 +14,10 @@ func _ready() -> void:
 	_shell()
 	_build()
 	_board(heading, Vector3(entrance_side * 11.8, 3.4, 0), 90.0 * entrance_side)
+	_lighting()
+
+
+func _lighting() -> void:
 	for x: float in [-6.0, 6.0]:
 		for z: float in [-6.0, 6.0]:
 			_lamp(Vector3(x, 5.1, z), 12.0, 1.3)

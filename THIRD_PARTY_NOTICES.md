@@ -1,6 +1,6 @@
 # Third-party components
 
-Own code, documentation and the procedural primitive scene in this repository are covered by [LICENSE](LICENSE), MIT. No external art, fonts, audio, plugins or Steam SDK are included.
+Own code, documentation and procedural test geometry in this repository are covered by [LICENSE](LICENSE), MIT. Generated device models and PBR maps are also included: their provenance, processing and license scope are recorded in the [model registry](content/models/README.md); procedural surface textures are recorded in the [texture registry](content/textures/README.md). No external game art, audio, plugins or Steam SDK are included.
 
 | Component | Version / source | License / notices | Use |
 | --- | --- | --- | --- |
