@@ -2,7 +2,7 @@ class_name PortalViewWorld
 extends Node3D
 ## Native screen-space portal views. Only geometry intersecting the exit plane needs clipped meshes;
 ## front geometry uses its original materials, back geometry is excluded from that camera's layer.
-## Proxies contain no physics and never cast a second shadow.
+## Clipped meshes draw color. Shadow-only copies keep casters on camera layers that omit their originals.
 
 const VIEW_LAYERS: Array[int] = [1 << 17, 1 << 18]
 const VIEW_MASK: int = (1 << 17) | (1 << 18)
@@ -19,6 +19,7 @@ class Part:
 	var id: int
 	var original_layers: int
 	var proxies: Array[Proxy] = [null, null]
+	var shadow: MeshInstance3D
 
 class Lamp:
 	extends RefCounted
@@ -39,7 +40,6 @@ func configure(level: Node3D, pair: PortalPairDevice) -> void:
 	_collect(level)
 	get_tree().node_added.connect(_on_node_added)
 	process_priority = 100
-	refresh()
 
 
 func _collect(node: Node) -> void:
@@ -68,7 +68,15 @@ func _collect(node: Node) -> void:
 
 
 func _process(_delta: float) -> void:
-	refresh()
+	# PortalSurface decides visibility earlier in the frame. A disabled target never samples
+	# its layers, so leave those layers and proxies alone until the next visible frame.
+	var sides: int = 0
+	if _pair.surface_a.viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+		sides |= 1
+	if _pair.surface_b.viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+		sides |= 2
+	if sides != 0:
+		refresh(sides)
 
 
 func _on_node_added(node: Node) -> void:
@@ -76,40 +84,47 @@ func _on_node_added(node: Node) -> void:
 		_collect(node)
 
 
-func refresh() -> void:
-	var exits: Array[PortalSurface] = [_pair.surface_b, _pair.surface_a]
+func refresh(sides: int = 3) -> void:
+	var exits: Array[Transform3D] = [_pair.surface_b.global_transform, _pair.surface_a.global_transform]
+	var normals: Array[Vector3] = [exits[0].basis.z.normalized(), exits[1].basis.z.normalized()]
+	var active_layers: int = (VIEW_LAYERS[0] if sides & 1 else 0) | (VIEW_LAYERS[1] if sides & 2 else 0)
 	for part: Part in _parts.duplicate():
 		if not is_instance_valid(part.source):
 			for old: Proxy in part.proxies:
 				if old != null:
 					old.mesh.queue_free()
+			if part.shadow != null:
+				part.shadow.queue_free()
 			_parts.erase(part)
 			_registered.erase(part.id)
 			continue
-		var layers: int = part.original_layers & ~VIEW_MASK
+		var layers: int = part.source.layers
+		var visible: bool = part.source.is_visible_in_tree()
+		var mesh: MeshInstance3D = part.source as MeshInstance3D
+		var has_mesh: bool = mesh != null and mesh.mesh != null
+		var bounds: AABB
+		if visible and has_mesh:
+			bounds = mesh.global_transform * mesh.get_aabb()
 		for side: int in range(2):
+			if sides & (1 << side) == 0:
+				continue
+			layers &= ~VIEW_LAYERS[side]
 			var proxy: Proxy = part.proxies[side]
-			if proxy != null:
-				proxy.mesh.visible = false
-			if not part.source.is_visible_in_tree():
-				continue
-			var exit: PortalSurface = exits[side]
-			var normal: Vector3 = exit.global_basis.z.normalized()
-			var distance: float = normal.dot(part.source.global_position - exit.global_position)
-			var mesh: MeshInstance3D = part.source as MeshInstance3D
-			if mesh == null or mesh.mesh == null:
-				# The current non-mesh geometry is temporary Label3D signage. Cull its anchor at the
-				# plane; the opaque level meshes and intersecting props use exact fragment clipping.
-				if distance >= 0.0:
-					layers |= VIEW_LAYERS[side]
-				continue
-			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
-			distance = normal.dot(bounds.get_center() - exit.global_position)
-			var radius: float = normal.abs().dot(bounds.size * 0.5)
-			if distance + radius < -0.0001:
-				continue
-			if distance - radius >= -0.0001:
+			var normal: Vector3 = normals[side]
+			var anchor: Vector3 = bounds.get_center() if has_mesh else part.source.global_position
+			var distance: float = normal.dot(anchor - exits[side].origin)
+			var radius: float = normal.abs().dot(bounds.size * 0.5) if has_mesh else 0.0
+			if part.source.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+				if proxy != null:
+					proxy.mesh.hide()
 				layers |= VIEW_LAYERS[side]
+				continue
+			if not visible or distance + radius < -0.0001 or not has_mesh or distance - radius >= -0.0001:
+				if proxy != null and proxy.mesh.visible:
+					proxy.mesh.visible = false
+				# Non-mesh signage is clipped by its anchor.
+				if visible and (distance - radius >= -0.0001 if has_mesh else distance >= 0.0):
+					layers |= VIEW_LAYERS[side]
 				continue
 			if proxy == null:
 				proxy = Proxy.new()
@@ -141,11 +156,47 @@ func refresh() -> void:
 				if parameter is Vector4:
 					source_clip = parameter
 			proxy.mesh.global_transform = mesh.global_transform
-			proxy.mesh.set_instance_shader_parameter(&"portal_clip_plane", Vector4(normal.x, normal.y, normal.z, -normal.dot(exit.global_position)))
+			var plane: Vector4 = Vector4(normal.x, normal.y, normal.z, -normal.dot(exits[side].origin))
+			proxy.mesh.set_instance_shader_parameter(&"portal_clip_plane", plane)
 			proxy.mesh.set_instance_shader_parameter(&"portal_second_clip", source_clip)
 			proxy.mesh.visible = true
 		if part.source.layers != layers:
 			part.source.layers = layers
+		var shadow_layers: int = active_layers & ~layers if visible and has_mesh else 0
+		_sync_shadow(part, mesh, shadow_layers)
+
+
+func _sync_shadow(part: Part, source: MeshInstance3D, layers: int) -> void:
+	var shadow: MeshInstance3D = part.shadow
+	if layers == 0 or source.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+		if shadow != null and shadow.visible:
+			shadow.hide()
+		return
+	if shadow == null:
+		shadow = MeshInstance3D.new()
+		shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		shadow.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		shadow.layers = layers
+		add_child(shadow)
+		part.shadow = shadow
+	if shadow.layers != layers:
+		shadow.layers = layers
+	if shadow.mesh != source.mesh:
+		shadow.mesh = source.mesh
+	if shadow.material_override != source.material_override:
+		shadow.material_override = source.material_override
+	for index: int in range(source.mesh.get_surface_count()):
+		var override: Material = source.get_surface_override_material(index)
+		if shadow.get_surface_override_material(index) != override:
+			shadow.set_surface_override_material(index, override)
+	# Use the source's clipping in the shadow pass when a cube is split across the pair.
+	var material: ShaderMaterial = source.get_active_material(0) as ShaderMaterial
+	if material != null and material.shader == PortalPropVisual.CLIP_SHADER:
+		shadow.set_instance_shader_parameter(&"portal_clip_plane", source.get_instance_shader_parameter(&"portal_clip_plane"))
+	if shadow.global_transform != source.global_transform:
+		shadow.global_transform = source.global_transform
+	if not shadow.visible:
+		shadow.show()
 
 
 func _exit_tree() -> void:

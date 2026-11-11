@@ -1,5 +1,5 @@
 extends SceneTree
-## Real Vulkan regression for native detail while turning close to either portal.
+## Real Vulkan regressions for native detail and lighting continuity through both portals.
 
 var _failed: bool = false
 
@@ -67,8 +67,65 @@ func _run() -> void:
 			print("QUALITY side=%s yaw=%.2f edges=%d target=%s" % [entry.name, angle, edges, entry.viewport.size])
 	scope.close()
 	await process_frame
+	var lighting_passed: bool = await _lighting_parity(capture)
+	_failed = _failed or not lighting_passed
 	print("PORTAL_NATIVE_%s" % ("FAILED" if _failed else "PASSED"))
 	quit(1 if _failed else 0)
+
+## Compare the actual membrane against the same rays in the main camera. The ceiling and walls
+## can be outside the exit's color pass yet still block the directional light over the room.
+func _lighting_parity(capture: String) -> bool:
+	const GENERATION: int = 91
+	var scope: LevelScope = LevelScope.new()
+	root.add_child(scope)
+	if not scope.open(preload("res://content/levels/mechanics_lab.tscn"), GENERATION):
+		scope.close()
+		return false
+	var level: Node3D = scope.get_child(0) as Node3D
+	var camera: LookCamera = level.get_node("Camera") as LookCamera
+	var pair: PortalPairDevice = level.get_node("Portals/Fixture/portal_pair") as PortalPairDevice
+	var input_frame: GameplayInputFrame = GameplayInputFrame.new()
+	input_frame.generation = GENERATION
+	for tick: int in range(20):
+		await physics_frame
+		scope.apply_input(input_frame)
+	var passed: bool = true
+	for entry: PortalSurface in [pair.surface_a, pair.surface_b]:
+		var viewer: Transform3D = entry.global_transform * Transform3D(Basis(Vector3.RIGHT, -0.17), Vector3(0, 0.43, 0.065))
+		camera.global_transform = viewer
+		camera.cull_mask |= PortalSurface.MEMBRANE_LAYER
+		var through: Image = await _capture_frame()
+		camera.global_transform = PortalMath.map_transform(entry.global_transform, entry.partner.global_transform, viewer)
+		camera.cull_mask &= ~PortalSurface.MEMBRANE_LAYER
+		var direct: Image = await _capture_frame()
+		var error: float = _mean_rgb_error(through, direct, Rect2i(240, 100, 800, 550))
+		var prefix: String = capture.get_basename() + "-lighting-" + str(entry.name)
+		var saved: bool = through.save_png(prefix + "-through.png") == OK and direct.save_png(prefix + "-direct.png") == OK
+		passed = passed and saved and error < 0.012
+		print("PORTAL_LIGHTING_PARITY side=%s mean_rgb_error=%.5f limit=0.012" % [entry.name, error])
+	scope.close()
+	await process_frame
+	return passed
+
+
+func _capture_frame() -> Image:
+	for frame: int in range(8):
+		await process_frame
+	await RenderingServer.frame_post_draw
+	return root.get_texture().get_image()
+
+
+func _mean_rgb_error(a: Image, b: Image, area: Rect2i) -> float:
+	var difference: float = 0.0
+	var samples: int = 0
+	for y: int in range(area.position.y, area.end.y, 5):
+		for x: int in range(area.position.x, area.end.x, 5):
+			var left: Color = a.get_pixel(x, y)
+			var right: Color = b.get_pixel(x, y)
+			difference += absf(left.r - right.r) + absf(left.g - right.g) + absf(left.b - right.b)
+			samples += 3
+	return difference / float(samples)
+
 
 func _timeout() -> void:
 	printerr("PORTAL_NATIVE_TIMEOUT")

@@ -39,5 +39,6 @@ func teleport(_body_id: StringName, _destination: Transform3D, _linear: Vector3,
 
 ## Applies recovery only if the complete pose and path from the current body are free. A failed
 ## placement must leave the physical body unchanged, so the coordinator can reset the chamber.
-func hold(_body_id: StringName, _destination: Transform3D, _linear: Vector3, _former_carrier: StringName = &"") -> bool:
+func hold(_body_id: StringName, _destination: Transform3D, _linear: Vector3, _former_carrier: StringName = &"",
+			_waypoint: Vector3 = Vector3.INF) -> bool:
 	return false
