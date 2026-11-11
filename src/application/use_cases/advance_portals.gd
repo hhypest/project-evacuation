@@ -98,15 +98,17 @@ func _prepare_entry(entry: PortalPlane, exit: PortalPlane, powered: bool,
 				continue
 			var at_plane: Transform3D = body.transform
 			at_plane.origin = entry.transform * Vector3(local.origin.x, local.origin.y, 0)
+			var fits: bool = PortalRules.fits(entry, at_plane, body.half_extents)
 			var destination: Transform3D = PortalMath.map_transform(entry.transform, exit.transform, at_plane)
 			var excluded: Array[StringName] = _group_ids(body, bodies)
-			if not PortalRules.fits(entry, at_plane, body.half_extents) \
-					or not _world.exit_free(body.id, destination, excluded):
+			if not fits or not _world.exit_free(body.id, destination, excluded):
 				blocked = true
-				# Never enable a slab inside an existing shape. First put a newly obstructed traveller
-				# safely in front of it, then let Jolt enforce the closed passage.
+				# Never enable a slab inside an existing shape. When the body is grazing the
+				# solid frame, leave it to Jolt if making room for the slab would be unsafe.
 				if local.origin.z < extent.z + PortalRules.BARRIER_HALF_DEPTH - PortalRules.CONTACT_TOLERANCE:
-					if not _hold(entry, body):
+					if not _hold(entry, body, fits):
+						if not fits:
+							_world.set_barrier(entry.id, false)
 						return
 	_world.set_barrier(entry.id, blocked)
 
@@ -249,31 +251,46 @@ func _move(entry: PortalPlane, exit: PortalPlane, body: PortalBodyState, destina
 	body.transform = destination
 
 
-func _hold(entry: PortalPlane, body: PortalBodyState) -> bool:
+func _hold(entry: PortalPlane, body: PortalBodyState, require_recovery: bool = true) -> bool:
+	if _try_hold(entry, body):
+		return true
+	if require_recovery:
+		recovery_required = true
+		recovery_body_id = body.id
+	return false
+
+
+func _try_hold(entry: PortalPlane, body: PortalBodyState) -> bool:
 	var local: Transform3D = entry.transform.affine_inverse() * body.transform
-	# The authored frame is 0.4 m deep. Keep even a prop beside the aperture clear of its front,
-	# rather than dropping a too-wide companion halfway into the frame or behind the entry wall.
-	local.origin.z = PortalRules.projected_extent(local.basis, body.half_extents).z \
-		+ PortalRules.FRAME_HALF_DEPTH + PortalRules.ENTRY_CLEARANCE
+	var extent: Vector3 = PortalRules.projected_extent(local.basis, body.half_extents)
+	# Keep the complete shape clear of the 0.4 m frame before returning it to ordinary physics.
+	var front: float = extent.z + PortalRules.FRAME_HALF_DEPTH + PortalRules.ENTRY_CLEARANCE
 	var velocity: Vector3 = entry.transform.basis.inverse() * body.linear_velocity
 	velocity.z = maxf(0.0, velocity.z)
-	var held_at: Transform3D = entry.transform * local
+	velocity = entry.transform.basis * velocity
+	var held_at: Transform3D = Transform3D(body.transform.basis,
+		entry.transform * Vector3(local.origin.x, local.origin.y, front))
 	var carrier: StringName = body.carrier_id if not body.carrier_id.is_empty() else _held_carriers.get(body.id, &"")
-	if not _world.hold(body.id, held_at, entry.transform.basis * velocity, carrier):
+	if not _world.hold(body.id, held_at, velocity, carrier):
 		var saved: PortalRecoveryPose = _safe_poses.get(body.id)
-		var restored: Transform3D = body.transform
-		if saved != null:
-			restored.origin = saved.transform.origin
-		if saved == null or saved.entry_id != entry.id \
-				or not _world.hold(body.id, restored, entry.transform.basis * velocity, carrier):
-			recovery_required = true
-			recovery_body_id = body.id
-			return false
-		held_at = restored
+		if saved != null and saved.entry_id == entry.id:
+			held_at.origin = saved.transform.origin
+		if saved == null or saved.entry_id != entry.id or not _world.hold(body.id, held_at, velocity, carrier):
+			# A cube turned behind the frame may be clear at both ends but unable to return in a
+			# straight line. Align it with the opening at its current depth before pulling it back.
+			var opening: Vector2 = entry.half_size - Vector2(extent.x, extent.y)
+			if carrier.is_empty() or local.origin.z >= 0.0 or opening.x < 0.0 or opening.y < 0.0:
+				return false
+			var x: float = clampf(local.origin.x, -opening.x, opening.x)
+			var y: float = clampf(local.origin.y, -opening.y, opening.y)
+			var waypoint: Vector3 = entry.transform * Vector3(x, y, local.origin.z)
+			held_at.origin = entry.transform * Vector3(x, y, front)
+			if not _world.hold(body.id, held_at, velocity, carrier, waypoint):
+				return false
 	_previous[body.id] = held_at.origin
 	_clear_held(body.id)
 	body.transform = held_at
-	body.linear_velocity = entry.transform.basis * velocity
+	body.linear_velocity = velocity
 	return true
 
 

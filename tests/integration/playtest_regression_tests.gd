@@ -18,6 +18,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append_array(await _obstructed_companion(true))
 	results.append_array(await _obstructed_companion(false, "CubeHeavy"))
 	results.append_array(await _repeated_portals())
+	results.append_array(await _off_axis_portal_return())
 	results.append_array(await _view_clipping())
 	return results
 
@@ -150,6 +151,63 @@ func _repeated_portals() -> Array[TestOutcome]:
 	return results
 
 
+func _off_axis_portal_return() -> Array[TestOutcome]:
+	var scope: LevelScope = LevelScope.new()
+	_tree.root.add_child(scope)
+	const GENERATION: int = 86
+	if not scope.open(preload("res://content/levels/mechanics_lab.tscn"), GENERATION):
+		scope.close()
+		return [TestOutcome.new("off-axis portal regression opens the unified lab", false)]
+	var lab: Node3D = scope.get_child(0) as Node3D
+	var player: PlayerMotor = lab.get_node("Player") as PlayerMotor
+	var camera: LookCamera = lab.get_node("Camera") as LookCamera
+	var pair: PortalPairDevice = lab.get_node("Portals/Fixture/portal_pair") as PortalPairDevice
+	var cube: CarryRigidBody = lab.get_node("Portals/Fixture/CubeA") as CarryRigidBody
+	var a: Transform3D = pair.surface_a.global_transform
+	player.global_position = a * Vector3(0, -1.15, 1.5)
+	camera.global_basis = Basis.IDENTITY
+	cube.global_position = a * Vector3(0, -0.65, 0.75)
+	for tick: int in range(15):
+		await _tick(scope, GENERATION)
+	camera.look_at(cube.global_position)
+	await _tick(scope, GENERATION, Vector2.ZERO, true)
+	camera.global_basis = Basis.IDENTITY
+	var crossings: int = 0
+	var dropped: bool = false
+	var turns: Array[int] = [13, 11]
+	var aim_offsets: Array[float] = [-0.00492647, -0.23171490]
+	for lap: int in range(3):
+		var before: int = scope.portals().crossing_count
+		for tick: int in range(60):
+			await _tick(scope, GENERATION, Vector2.UP, false, true)
+			if scope.needs_recovery() or scope.portals().crossing_count > before:
+				break
+		if scope.needs_recovery() or scope.portals().crossing_count == before:
+			break
+		var crossing: PortalTransfer = scope.portals().transfers.back()
+		if crossing.blocked or crossing.body_id != PortalWorldAdapter.PLAYER_ID:
+			break
+		crossings += 1
+		dropped = crossing.detached_id == cube.stable_id
+		await _tick(scope, GENERATION, Vector2.UP, false, true)
+		if lap == 2 or scope.needs_recovery():
+			break
+		for tick: int in range(turns[lap]):
+			camera.global_basis = Basis(Vector3.UP, -PI / turns[lap]) * camera.global_basis
+			await _tick(scope, GENERATION)
+		var entry: PortalSurface = pair.surface_b if lap == 0 else pair.surface_a
+		camera.look_at(entry.global_position + Vector3.UP * 0.4 + entry.global_basis.x * aim_offsets[lap])
+	for tick: int in range(8):
+		await _tick(scope, GENERATION)
+	var cube_z: float = pair.surface_a.to_local(cube.global_position).z
+	var result: TestOutcome = TestOutcome.new("two quick turns and an off-axis return leave the refused cube on the entry side without a reset",
+		crossings == 3 and dropped and not cube.is_carried() and cube_z > 0.5 and not scope.needs_recovery(),
+		"crossings=%d detached=%s cube_z=%.3f recovery=%s" % [crossings, dropped, cube_z, scope.portals().recovery_body_id])
+	scope.close()
+	await _tree.process_frame
+	return [result]
+
+
 func _view_clipping() -> Array[TestOutcome]:
 	var scope: LevelScope = LevelScope.new()
 	_tree.root.add_child(scope)
@@ -196,10 +254,12 @@ func _view_clipping() -> Array[TestOutcome]:
 	return results
 
 
-func _tick(scope: LevelScope, generation: int, move: Vector2 = Vector2.ZERO, interact: bool = false) -> void:
+func _tick(scope: LevelScope, generation: int, move: Vector2 = Vector2.ZERO, interact: bool = false,
+		sprint: bool = false) -> void:
 	await _tree.physics_frame
 	var frame: GameplayInputFrame = GameplayInputFrame.new()
 	frame.generation = generation
 	frame.move_axis = move
 	frame.interact_requested = interact
+	frame.sprinting = sprint
 	scope.apply_input(frame)

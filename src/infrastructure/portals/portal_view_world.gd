@@ -39,7 +39,6 @@ func configure(level: Node3D, pair: PortalPairDevice) -> void:
 	_collect(level)
 	get_tree().node_added.connect(_on_node_added)
 	process_priority = 100
-	refresh()
 
 
 func _collect(node: Node) -> void:
@@ -68,7 +67,15 @@ func _collect(node: Node) -> void:
 
 
 func _process(_delta: float) -> void:
-	refresh()
+	# PortalSurface decides visibility earlier in the frame. A disabled target never samples
+	# its layers, so leave those layers and proxies alone until the next visible frame.
+	var sides: int = 0
+	if _pair.surface_a.viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+		sides |= 1
+	if _pair.surface_b.viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+		sides |= 2
+	if sides != 0:
+		refresh(sides)
 
 
 func _on_node_added(node: Node) -> void:
@@ -76,8 +83,9 @@ func _on_node_added(node: Node) -> void:
 		_collect(node)
 
 
-func refresh() -> void:
-	var exits: Array[PortalSurface] = [_pair.surface_b, _pair.surface_a]
+func refresh(sides: int = 3) -> void:
+	var exits: Array[Transform3D] = [_pair.surface_b.global_transform, _pair.surface_a.global_transform]
+	var normals: Array[Vector3] = [exits[0].basis.z.normalized(), exits[1].basis.z.normalized()]
 	for part: Part in _parts.duplicate():
 		if not is_instance_valid(part.source):
 			for old: Proxy in part.proxies:
@@ -86,30 +94,28 @@ func refresh() -> void:
 			_parts.erase(part)
 			_registered.erase(part.id)
 			continue
-		var layers: int = part.original_layers & ~VIEW_MASK
+		var layers: int = part.source.layers
+		var visible: bool = part.source.is_visible_in_tree()
+		var mesh: MeshInstance3D = part.source as MeshInstance3D
+		var has_mesh: bool = mesh != null and mesh.mesh != null
+		var bounds: AABB
+		if visible and has_mesh:
+			bounds = mesh.global_transform * mesh.get_aabb()
 		for side: int in range(2):
+			if sides & (1 << side) == 0:
+				continue
+			layers &= ~VIEW_LAYERS[side]
 			var proxy: Proxy = part.proxies[side]
-			if proxy != null:
-				proxy.mesh.visible = false
-			if not part.source.is_visible_in_tree():
-				continue
-			var exit: PortalSurface = exits[side]
-			var normal: Vector3 = exit.global_basis.z.normalized()
-			var distance: float = normal.dot(part.source.global_position - exit.global_position)
-			var mesh: MeshInstance3D = part.source as MeshInstance3D
-			if mesh == null or mesh.mesh == null:
-				# The current non-mesh geometry is temporary Label3D signage. Cull its anchor at the
-				# plane; the opaque level meshes and intersecting props use exact fragment clipping.
-				if distance >= 0.0:
+			var normal: Vector3 = normals[side]
+			var anchor: Vector3 = bounds.get_center() if has_mesh else part.source.global_position
+			var distance: float = normal.dot(anchor - exits[side].origin)
+			var radius: float = normal.abs().dot(bounds.size * 0.5) if has_mesh else 0.0
+			if not visible or distance + radius < -0.0001 or not has_mesh or distance - radius >= -0.0001:
+				if proxy != null and proxy.mesh.visible:
+					proxy.mesh.visible = false
+				# Non-mesh signage is clipped by its anchor.
+				if visible and (distance - radius >= -0.0001 if has_mesh else distance >= 0.0):
 					layers |= VIEW_LAYERS[side]
-				continue
-			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
-			distance = normal.dot(bounds.get_center() - exit.global_position)
-			var radius: float = normal.abs().dot(bounds.size * 0.5)
-			if distance + radius < -0.0001:
-				continue
-			if distance - radius >= -0.0001:
-				layers |= VIEW_LAYERS[side]
 				continue
 			if proxy == null:
 				proxy = Proxy.new()
@@ -141,7 +147,8 @@ func refresh() -> void:
 				if parameter is Vector4:
 					source_clip = parameter
 			proxy.mesh.global_transform = mesh.global_transform
-			proxy.mesh.set_instance_shader_parameter(&"portal_clip_plane", Vector4(normal.x, normal.y, normal.z, -normal.dot(exit.global_position)))
+			var plane: Vector4 = Vector4(normal.x, normal.y, normal.z, -normal.dot(exits[side].origin))
+			proxy.mesh.set_instance_shader_parameter(&"portal_clip_plane", plane)
 			proxy.mesh.set_instance_shader_parameter(&"portal_second_clip", source_clip)
 			proxy.mesh.visible = true
 		if part.source.layers != layers:

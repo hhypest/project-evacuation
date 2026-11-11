@@ -164,7 +164,8 @@ func teleport(body_id: StringName, destination: Transform3D, linear: Vector3, an
 				visual.reset_transit()
 
 
-func hold(body_id: StringName, destination: Transform3D, linear: Vector3, former_carrier: StringName = &"") -> bool:
+func hold(body_id: StringName, destination: Transform3D, linear: Vector3, former_carrier: StringName = &"",
+		waypoint: Vector3 = Vector3.INF) -> bool:
 	var current: Transform3D
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		current = Transform3D(_player.global_basis, _player.center())
@@ -176,10 +177,15 @@ func hold(body_id: StringName, destination: Transform3D, linear: Vector3, former
 	# cast_motion sweeps translation, not rotation. Recovery keeps the body's current frame so
 	# neither a stored approach nor a caller can hide a rotation through intervening geometry.
 	var excluded: Array[StringName] = []
+	if body_id == PLAYER_ID and _carry != null and not _carry.state.held_id.is_empty():
+		# Match the physical collision exception for the player and their currently held prop.
+		excluded.append(_carry.state.held_id)
 	if former_carrier == PLAYER_ID and body_id != PLAYER_ID and _carry != null:
 		excluded.append(PLAYER_ID)
 	if not destination.basis.is_equal_approx(current.basis) \
-			or not exit_free(body_id, destination, excluded, current.origin):
+			or not exit_free(body_id, destination, excluded, waypoint if waypoint.is_finite() else current.origin):
+		return false
+	if waypoint.is_finite() and not exit_free(body_id, Transform3D(current.basis, waypoint), excluded, current.origin):
 		return false
 	if body_id == PLAYER_ID and is_instance_valid(_player):
 		_player.portal_place(destination, linear)
