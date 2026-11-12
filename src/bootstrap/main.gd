@@ -20,7 +20,8 @@ var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
 var _continue_level: LevelEntry
-var _checkpoint_notice: String = ""
+var _checkpoint_load_notice: String = ""
+var _checkpoint_write_notice: String = ""
 var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
@@ -143,8 +144,8 @@ func _on_level_requested(index: int) -> void:
 	var item: LevelEntry = catalog.entry(index) if catalog != null else null
 	if item == null or item.scene == null:
 		return
-	var id: StringName = item.level_id if catalog.find_level(item.level_id) == item else &""
-	_start_chamber(item.scene, id)
+	var checkpoint_entry: LevelEntry = item if catalog.find_level(item.level_id) == item else null
+	_start_chamber(item.scene, checkpoint_entry)
 
 
 func _on_load_checkpoint_requested() -> void:
@@ -160,40 +161,44 @@ func _on_load_checkpoint_requested() -> void:
 		print("CHECKPOINT_LOADED level=%s checkpoint=%s" % [item.level_id, SaveSnapshot.ENTRY_ID])
 
 
-func _start_chamber(scene: PackedScene, level_id: StringName = &"") -> void:
+func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null) -> void:
 	if not _session.start():
 		return
 	chamber_scene = scene
 	_replace_scope()
-	if _scope != null and save_repository != null and not level_id.is_empty():
+	if _scope != null and save_repository != null and checkpoint_entry != null:
+		var level_id: StringName = checkpoint_entry.level_id
 		var version: String = str(ProjectSettings.get_setting("application/config/version"))
 		var result: SaveResult.Code = save_repository.write_checkpoint(SaveSnapshot.new(level_id, version))
 		_refresh_checkpoint()
 		if result == SaveResult.Code.OK:
+			_checkpoint_write_notice = ""
 			print("CHECKPOINT_READY level=%s checkpoint=%s" % [level_id, SaveSnapshot.ENTRY_ID])
 		else:
-			_checkpoint_notice = "Не удалось сохранить вход в камеру. " + _checkpoint_error(result)
+			_checkpoint_write_notice = "Не удалось сохранить вход в камеру «%s». %s" % [
+				checkpoint_entry.title, _checkpoint_error(result)
+			]
 			printerr("CHECKPOINT_WRITE_FAILED level=%s code=%s" % [level_id, SaveResult.Code.keys()[result]])
 	_sync_session()
 
 
 func _refresh_checkpoint() -> void:
 	_continue_level = null
-	_checkpoint_notice = ""
+	_checkpoint_load_notice = ""
 	if save_repository == null:
 		return
 	var result: SaveResult = save_repository.read_checkpoint()
 	if result.code == SaveResult.Code.MISSING:
 		return
 	if result.code != SaveResult.Code.OK:
-		_checkpoint_notice = _checkpoint_error(result.code)
+		_checkpoint_load_notice = _checkpoint_error(result.code)
 		return
 	_continue_level = catalog.find_level(result.snapshot.level_id) if catalog != null else null
 	if _continue_level == null:
-		_checkpoint_notice = "Уровень из сохранения недоступен в этой сборке."
+		_checkpoint_load_notice = "Уровень из сохранения недоступен в этой сборке."
 		return
 	var notice: String = "Доступна предыдущая контрольная точка. " if result.recovered else ""
-	_checkpoint_notice = notice + "Продолжение открывает камеру с точки входа."
+	_checkpoint_load_notice = notice + "Продолжение открывает камеру с точки входа."
 
 
 func _checkpoint_error(code: SaveResult.Code) -> String:
@@ -279,8 +284,9 @@ func _sync_session() -> void:
 	_input.set_gameplay_enabled(status.accepts_gameplay, status.generation)
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"
 	var notice: String = "\n" + _log.notice if not _log.notice.is_empty() else ""
+	var load_notice: String = _checkpoint_load_notice if status.phase == SessionLifecycle.Phase.READY else ""
 	var messages: PackedStringArray = []
-	for message: String in [_problem, _checkpoint_notice if status.phase == SessionLifecycle.Phase.READY else ""]:
+	for message: String in [_problem, _checkpoint_write_notice, load_notice]:
 		if not message.is_empty():
 			messages.append(message)
 	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [

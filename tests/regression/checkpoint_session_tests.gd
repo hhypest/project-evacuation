@@ -5,6 +5,20 @@ const MAIN: PackedScene = preload("res://src/bootstrap/main.tscn")
 const PORTAL_LAB: PackedScene = preload("res://content/levels/portal_lab.tscn")
 
 
+class CheckpointWriteFixture extends SaveRepository:
+	var checkpoint: SaveSnapshot = SaveSnapshot.new(&"mechanics_lab", "0.0.10-dev")
+	var fail_writes: bool = true
+
+	func read_checkpoint() -> SaveResult:
+		return SaveResult.new(SaveResult.Code.OK, checkpoint)
+
+	func write_checkpoint(snapshot: SaveSnapshot) -> SaveResult.Code:
+		if fail_writes:
+			return SaveResult.Code.IO_ERROR
+		checkpoint = snapshot
+		return SaveResult.Code.OK
+
+
 func suite_name() -> StringName:
 	return &"regression"
 
@@ -83,4 +97,49 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	for name: String in DirAccess.get_files_at(path):
 		DirAccess.remove_absolute(path.path_join(name))
 	DirAccess.remove_absolute(path)
+	results.append_array(await _write_failure_with_previous_checkpoint(tree))
+	return results
+
+
+func _write_failure_with_previous_checkpoint(tree: SceneTree) -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	var store: CheckpointWriteFixture = CheckpointWriteFixture.new()
+	var main: SessionBootstrap = MAIN.instantiate() as SessionBootstrap
+	main.save_repository = store
+	tree.root.add_child(main)
+	await tree.process_frame
+	var status: Label = main.find_child("Status") as Label
+	var reserve: Button = main.find_child("LevelButton1", true, false) as Button
+	var menu: Button = main.find_child("MenuButton") as Button
+	var continue_button: Button = main.find_child("LoadCheckpointButton") as Button
+	var failure: String = "Не удалось сохранить вход в камеру «Резервный контур»."
+	var load_hint: String = "Продолжение открывает камеру с точки входа."
+
+	reserve.pressed.emit()
+	TestInputEvents.key(KEY_ESCAPE)
+	TestInputEvents.key(KEY_ESCAPE, false)
+	results.append(TestOutcome.new("a failed checkpoint write is visible in pause while the new chamber stays playable",
+		main.get_node_or_null("LevelScope/ReserveCircuit") != null and tree.paused
+		and status.is_visible_in_tree() and failure in status.text and load_hint not in status.text))
+	menu.pressed.emit()
+	results.append(TestOutcome.new("returning to the menu keeps the write warning and the previous checkpoint available",
+		status.is_visible_in_tree() and failure in status.text and load_hint in status.text
+		and continue_button.is_visible_in_tree() and not continue_button.disabled))
+	continue_button.pressed.emit()
+	results.append(TestOutcome.new("continuation still opens the previous chamber after a failed write",
+		main.get_node_or_null("LevelScope/MechanicsLab") != null))
+
+	TestInputEvents.key(KEY_ESCAPE)
+	TestInputEvents.key(KEY_ESCAPE, false)
+	menu.pressed.emit()
+	store.fail_writes = false
+	reserve.pressed.emit()
+	TestInputEvents.key(KEY_ESCAPE)
+	TestInputEvents.key(KEY_ESCAPE, false)
+	results.append(TestOutcome.new("a successful retry replaces the checkpoint and clears the write warning",
+		store.checkpoint.level_id == &"reserve_circuit" and status.is_visible_in_tree()
+		and failure not in status.text and load_hint not in status.text))
+	tree.root.remove_child(main)
+	main.queue_free()
+	await tree.process_frame
 	return results
