@@ -23,6 +23,12 @@ uniform vec4 ao_channel = vec4(1.0, 0.0, 0.0, 0.0);
 uniform vec3 emission_color : source_color = vec3(0.0);
 uniform vec3 uv_scale = vec3(1.0);
 uniform vec3 uv_offset = vec3(0.0);
+uniform bool repeat_enabled = true;
+
+vec2 map_uv(sampler2D image, vec2 uv) {
+	vec2 half_texel = 0.5 / vec2(textureSize(image, 0));
+	return repeat_enabled ? uv : clamp(uv, half_texel, vec2(1.0) - half_texel);
+}
 
 void vertex() {
 	portal_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -33,15 +39,15 @@ void fragment() {
 		discard;
 	}
 	vec2 uv = UV * uv_scale.xy + uv_offset.xy;
-	ALBEDO = albedo_color.rgb * texture(albedo_map, uv).rgb;
-	METALLIC = metallic_factor * dot(texture(metallic_map, uv), metallic_channel);
-	ROUGHNESS = roughness_factor * dot(texture(roughness_map, uv), roughness_channel);
+	ALBEDO = albedo_color.rgb * texture(albedo_map, map_uv(albedo_map, uv)).rgb;
+	METALLIC = metallic_factor * dot(texture(metallic_map, map_uv(metallic_map, uv)), metallic_channel);
+	ROUGHNESS = roughness_factor * dot(texture(roughness_map, map_uv(roughness_map, uv)), roughness_channel);
 	if (normals_enabled) {
-		NORMAL_MAP = texture(normal_map, uv).rgb;
+		NORMAL_MAP = texture(normal_map, map_uv(normal_map, uv)).rgb;
 		NORMAL_MAP_DEPTH = normal_depth;
 	}
 	if (ao_enabled) {
-		AO = dot(texture(ao_map, uv), ao_channel);
+		AO = dot(texture(ao_map, map_uv(ao_map, uv)), ao_channel);
 	}
-	EMISSION = emission_color * texture(emission_map, uv).rgb;
+	EMISSION = emission_color * texture(emission_map, map_uv(emission_map, uv)).rgb;
 }

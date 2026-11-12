@@ -7,7 +7,8 @@ func _initialize() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
-	create_timer(60.0, true, false, true).timeout.connect(_timeout)
+	# Cold Forward+ pipelines on software Vulkan can exceed a minute on the complete proving ground.
+	create_timer(180.0, true, false, true).timeout.connect(_timeout)
 	var capture: String = "res://work/portal-native.png"
 	var arguments: PackedStringArray = OS.get_cmdline_user_args()
 	if arguments.size() == 2 and arguments[0] == "--capture":

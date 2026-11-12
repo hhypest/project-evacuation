@@ -16,7 +16,7 @@
 | Архитектурный контракт / обоснование выбора | [Архитектура](../../Architecture.md) / [ADR](../adr/README.md) |
 | Правила GDScript и физического изменения | [Код](../development/coding.md) / [физика](../development/physics.md) |
 | Команды и критерии проверок | [Проверки](../development/checks.md), сверять со скриптами и CI |
-| Канон / художественное изложение | [Библия ART-01](../design/lore/world-bible.md) / редакция 4 |
+| Канон / художественное изложение | [Библия ART-01](../design/lore/world-bible.md) / редакция 4.1 |
 | Ритм / размеры / процесс сборки | [Структура](../design/level-structure.md) / [метрики](../design/level-metrics.md) / [сборка](../design/authoring.md) |
 | Арт и постановка | [Арт](../design/art-production-guide.md) / [катсцены](../design/cutscenes.md), с явным статусом предложений |
 | Права и происхождение ресурсов | Реестры [моделей](../../content/models/README.md)/[текстур](../../content/textures/README.md), [notices](../../THIRD_PARTY_NOTICES.md) |

@@ -14,6 +14,9 @@ var half_size: Vector2 = Vector2(0.8, 1.2)
 ## The opening starts at the floor: no bottom bar and posts that stop at the floor.
 var floor_level: bool = true
 var accent: Color = Color(0.88, 0.42, 0.18)
+## Visual-only controls. Zero intensity restores the original native portal image for comparisons.
+var rim_width: float = 0.04
+var rim_intensity: float = 0.65
 var partner: PortalSurface
 var powered: bool = false
 var viewport: SubViewport
@@ -171,6 +174,9 @@ func place_camera(viewer: Transform3D, visible: Rect2 = Rect2()) -> void:
 	_live.set_shader_parameter(&"portal_up", global_basis.y.normalized())
 	_live.set_shader_parameter(&"portal_normal", global_basis.z.normalized())
 	_live.set_shader_parameter(&"portal_half", half_size)
+	_live.set_shader_parameter(&"rim_color", accent)
+	_live.set_shader_parameter(&"rim_width", maxf(rim_width, 0.0))
+	_live.set_shader_parameter(&"rim_intensity", maxf(rim_intensity, 0.0))
 
 
 func _screen_size() -> Vector2i:

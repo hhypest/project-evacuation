@@ -6,6 +6,7 @@
 
 [resource]
 resource_name = "basalt_wall"
+texture_filter = 5
 albedo_texture = ExtResource("1_b4e7a")
 orm_texture = ExtResource("3_qfhlh")
 normal_enabled = true

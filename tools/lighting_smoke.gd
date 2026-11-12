@@ -85,12 +85,37 @@ func _run() -> void:
 		and _bay.point.visible and _bay.spot.visible and _bay.point.shadow_enabled and _bay.spot.shadow_enabled,
 		"switches restore moving direct lights and both shadow maps"):
 		return
+	if not await _reference():
+		return
 	_scope.close()
 	await process_frame
 	_finished = true
 	print("LIGHTING_SMOKE_PASSED driver=%s gpu=%s shadow_delta=%.4f" % [runtime.rendering_driver,
 		RenderingServer.get_video_adapter_name(), largest_drop])
 	quit(0)
+
+
+func _reference() -> bool:
+	await _press("stop")
+	var control: WallButtonDevice = _bay.get_node("ReferenceSwitch") as WallButtonDevice
+	_player.global_position = control.global_position + Vector3(0, -1.3, 1.3)
+	await _ticks(3)
+	_camera.look_at(control.global_position, Vector3.UP)
+	if await _capture("reference-off") == null:
+		return false
+	await _ticks(1, true)
+	var lamp: MeshInstance3D = control.get_node("Indicator/Lamp") as MeshInstance3D
+	var material: StandardMaterial3D = lamp.material_override as StandardMaterial3D
+	if not _check(material.emission_enabled, "real E interaction lights DEV-04 reference lens"):
+		return false
+	if await _capture("reference-on") == null:
+		return false
+	_camera.global_position = _bay.to_global(Vector3(8.3, 1.65, -1.8))
+	_camera.look_at(_bay.to_global(Vector3(8.3, 1.3, -5.5)))
+	if await _capture("reference-overview") == null:
+		return false
+	_scope.puzzle().reset()
+	return _check(not material.emission_enabled, "network reset extinguishes DEV-04 reference lens")
 
 
 func _set_view() -> void:

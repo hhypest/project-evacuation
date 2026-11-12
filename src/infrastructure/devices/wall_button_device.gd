@@ -19,6 +19,7 @@ const BUTTON_LAMP_AT: Vector3 = Vector3(0, 0.162, 0.084)
 const LEVER_OFF: float = 0.0
 const LEVER_ON: float = -0.4
 const SWITCH_LAMP_AT: Vector3 = Vector3(0.105, 0.0, 0.063)
+const LENS_OFF: Color = Color(0.18, 0.105, 0.035)
 
 var body: StaticBody3D
 var _key: Node3D
@@ -44,14 +45,14 @@ func _ready() -> void:
 	if toggle:
 		_lever = housing.get_node("Lever") as Node3D
 		_lever.rotation.x = LEVER_OFF
-		_lamp = box_mesh(Vector3(0.012, 0.025, 0.004), DARK)
-		_lamp.position = SWITCH_LAMP_AT
+		_lamp = _switch_indicator()
 	else:
 		_key = housing.get_node("Key") as Node3D
 		_lamp = box_mesh(Vector3(0.028, 0.008, 0.004), DARK)
 		_lamp.position = BUTTON_LAMP_AT
 	_lamp.name = "Lamp"
-	add_child(_lamp)
+	if not toggle:
+		add_child(_lamp)
 	var label: Label3D = Label3D.new()
 	label.text = caption if not caption.is_empty() else ("⟳" if toggle else "%.0f с" % hold_seconds)
 	label.modulate = Color(0.1, 0.1, 0.1)
@@ -74,8 +75,48 @@ func owns(collider: Object) -> bool:
 
 
 func show_output(on: bool, _delta: float) -> void:
-	set_lamp(_lamp, on)
+	if mode == DeviceDefinition.WallMode.TOGGLE:
+		var material: StandardMaterial3D = _lamp.material_override as StandardMaterial3D
+		material.albedo_color = Color(0.55, 0.3, 0.075) if on else LENS_OFF
+		material.emission_enabled = on
+		material.emission = AMBER
+		material.emission_energy_multiplier = 1.1
+	else:
+		set_lamp(_lamp, on)
 	if _key != null:
 		_key.position.z = -KEY_TRAVEL if on else 0.0
 	if _lever != null:
 		_lever.rotation.x = LEVER_ON if on else LEVER_OFF
+
+
+## Godot prototype: a gasket, rounded metal bezel and an opaque frosted lens below its front lip.
+## Body samples in this footprint reach z=0.0594 m. Seat the gasket there, without moving the hinge.
+func _switch_indicator() -> MeshInstance3D:
+	var mount: Node3D = Node3D.new()
+	mount.name = "Indicator"
+	mount.position = SWITCH_LAMP_AT
+	add_child(mount)
+	var gasket: MeshInstance3D = disc_mesh(0.018, Color(0.035, 0.038, 0.04))
+	(gasket.mesh as CylinderMesh).height = 0.003
+	gasket.rotation.x = PI * 0.5
+	gasket.position.z = -0.002
+	mount.add_child(gasket)
+	var bezel: MeshInstance3D = box_mesh(Vector3.ONE, Color(0.18, 0.2, 0.21))
+	var ring: TorusMesh = TorusMesh.new()
+	ring.inner_radius = 0.011
+	ring.outer_radius = 0.016
+	ring.rings = 24
+	ring.ring_segments = 12
+	bezel.mesh = ring
+	bezel.rotation.x = PI * 0.5
+	var metal: StandardMaterial3D = bezel.material_override as StandardMaterial3D
+	metal.metallic = 0.75
+	metal.roughness = 0.42
+	mount.add_child(bezel)
+	var lens: MeshInstance3D = disc_mesh(0.0108, LENS_OFF)
+	(lens.mesh as CylinderMesh).height = 0.002
+	lens.rotation.x = PI * 0.5
+	var glass: StandardMaterial3D = lens.material_override as StandardMaterial3D
+	glass.roughness = 0.55
+	mount.add_child(lens)
+	return lens
