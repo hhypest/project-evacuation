@@ -1,0 +1,31 @@
+[check-after.log]
+TEST_RESULT total=383 failed=0 elapsed_ms=273989
+TEST_RESULT total=383 failed=0 elapsed_ms=35319
+TEST_RESULT total=383 failed=0 elapsed_ms=95543
+CHECKS_PASSED (CPU/headless only; Vulkan smoke is separate).
+[art-scene.log]
+ART_SCENE_RESULT total=26 failed=0
+[native.log]
+PORTAL_LIGHTING_PARITY side=A mean_rgb_error=0.00348 limit=0.012
+PORTAL_LIGHTING_PARITY side=B mean_rgb_error=0.00147 limit=0.012
+PORTAL_NATIVE_PASSED
+[portal-gameplay.log]
+PORTAL_SMOKE_PASSED driver=vulkan gpu=llvmpipe (LLVM 19.1.7, 256 bits) view=a/b/close/half transfer=cube/player-held input=E/W/Shift/mouse image=res://work/portal_smoke-*.png
+[lighting.log]
+LIGHTING_SMOKE_PASSED driver=vulkan gpu=llvmpipe (LLVM 19.1.7, 256 bits) shadow_delta=0.4624
+[rim.log]
+PORTAL_RIM side=A centre_error=0.000000 changed=3040 occlusion_error=0.000000
+PORTAL_RIM side=B centre_error=0.000000 changed=3040 occlusion_error=0.000000
+PORTAL_RIM_PASSED driver=vulkan GPU=llvmpipe (LLVM 19.1.7, 256 bits)
+[quality-2k.log]
+TEXTURE_QUALITY_PASSED profile=2K maps=27
+[quality-source.log]
+TEXTURE_QUALITY_PASSED profile=source (4K/2K) maps=27
+[material-after.log]
+MATERIAL_REFERENCE_PASSED driver=vulkan GPU=llvmpipe (LLVM 19.1.7, 256 bits)
+[material-2k.log]
+MATERIAL_REFERENCE_PASSED driver=vulkan GPU=llvmpipe (LLVM 19.1.7, 256 bits)
+[export-runtime.log]
+EXPORTED_GAMEPLAY_SMOKE_PASSED checks=19 Godot=4.7.2-stable (official) CPU_ONLY
+[export-vulkan.log]
+EXPORTED_GAMEPLAY_SMOKE_PASSED checks=19 Godot=4.7.2-stable (official) CPU_ONLY
