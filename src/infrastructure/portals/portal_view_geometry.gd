@@ -53,6 +53,34 @@ static func uv_region(region: Rect2, half: Vector2) -> Vector4:
 		(half.y - region.end.y) / (2.0 * half.y), region.size.x / (2.0 * half.x), region.size.y / (2.0 * half.y))
 
 
+## One convex, opaque box must cover the entire aperture patch. Partial or combined coverage is
+## intentionally left to depth testing. Start after the viewer's near plane and inset the boxes
+## when authoring them so their silhouettes cannot hide a visible sliver.
+static func hidden_by_box(region: Rect2, aperture: Transform3D, viewer: Transform3D,
+		near_plane: float, blockers: Array[AABB]) -> bool:
+	var from: Array[Vector3] = []
+	var to: Array[Vector3] = []
+	for corner: Vector2 in [region.position, Vector2(region.end.x, region.position.y),
+			region.end, Vector2(region.position.x, region.end.y)]:
+		var target: Vector3 = aperture * Vector3(corner.x, corner.y, 0.0)
+		var ray: Vector3 = target - viewer.origin
+		var depth: float = ray.dot(-viewer.basis.z)
+		if depth <= near_plane:
+			return false
+		from.append(viewer.origin + ray * (near_plane / depth))
+		to.append(target)
+	for blocker: AABB in blockers:
+		var covered: bool = true
+		for index: int in range(from.size()):
+			if blocker.has_point(from[index]) or blocker.has_point(to[index]) \
+					or blocker.intersects_segment(from[index], to[index]) == null:
+				covered = false
+				break
+		if covered:
+			return true
+	return false
+
+
 static func _clip(polygon: Array[Vector2], transform: Transform3D, plane: Vector4) -> Array[Vector2]:
 	var result: Array[Vector2] = []
 	if polygon.is_empty():

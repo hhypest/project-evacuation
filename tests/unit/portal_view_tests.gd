@@ -44,6 +44,17 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 		normal == Vector2i(1920, 1080) and huge.x <= 4096 and huge.y <= 4096
 		and float(huge.x) * huge.y <= PortalViewGeometry.MAX_PIXELS, str(huge)))
 	var plane: PortalPlane = PortalPlane.make(&"a", Transform3D.IDENTITY, half)
+	var aperture: Rect2 = Rect2(-half, half * 2.0)
+	var ahead: Transform3D = Transform3D(Basis.IDENTITY, Vector3(0, 0, 3))
+	var wall: AABB = AABB(Vector3(-2, -2, 1), Vector3(4, 4, 0.3))
+	var edge: AABB = AABB(Vector3(0, -2, 1), Vector3(2, 4, 0.3))
+	var behind: AABB = AABB(Vector3(-2, -2, -1), Vector3(4, 4, 0.3))
+	results.append(TestOutcome.new("portal culling requires one opaque box in front of the entire aperture",
+		PortalViewGeometry.hidden_by_box(aperture, Transform3D.IDENTITY, ahead, 0.05, [wall])
+		and not PortalViewGeometry.hidden_by_box(aperture, Transform3D.IDENTITY, ahead, 0.05, [edge, behind])))
+	var inside: Transform3D = Transform3D(Basis.IDENTITY, Vector3(0, 0, 1.15))
+	results.append(TestOutcome.new("portal culling preserves near-plane views when the viewer is inside a blocker",
+		not PortalViewGeometry.hidden_by_box(aperture, Transform3D.IDENTITY, inside, 0.05, [wall])))
 	results.append(TestOutcome.new("centre-only opening hit does not admit an oversized or rotated shape",
 		PortalRules.fits(plane, Transform3D.IDENTITY, Vector3(0.3, 0.9, 0.3))
 		and not PortalRules.fits(plane, Transform3D(Basis.IDENTITY, Vector3(0.5, 0, 0)), Vector3.ONE * 0.5)

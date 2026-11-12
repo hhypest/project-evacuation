@@ -79,6 +79,7 @@ func _build() -> void:
 	_board("Матовый / гладкий / металл · кубы можно переносить\nУзкие стойки отбрасывают тени от прожектора", Vector3(-2, 2.4, -7.85))
 	_material_reference()
 	# Low emissive strips preserve the exit route when both test sources are switched off.
+	_board("ВЫХОД К ПОЛИГОНУ", Vector3(-11.76, 2.95, 0), 90)
 	for x: float in [-10.5, -6.5, -2.5]:
 		var guide: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.9, 0.01, 0.08), AMBER_GUIDE, 1)
 		guide.position = Vector3(x, 0.05, 0)

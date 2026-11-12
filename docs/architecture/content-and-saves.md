@@ -9,7 +9,7 @@
 
 ## 11. Уровни, контент и валидация
 
-**Сейчас в коде:** [`LevelCatalog`](../../src/infrastructure/content/level_catalog.gd) содержит массив `LevelEntry` со стабильным ID, названием, описанием и `PackedScene`. В [каталоге меню](../../content/definitions/level_catalog.tres) одна сцена — `MechanicsLab`, семь отсеков. Геометрию и устройства создают `ChamberBuilder` и его наследники. [`LevelScope.open`](../../src/bootstrap/level_scope.gd) проверяет корневые Player/Camera, собирает адаптеры, определения устройств и портальные пары; `PuzzleNetwork.build` валидирует сеть. R закрывает scope и заново создаёт сцену. Стабильные ID используются устройствами и переносимыми телами; Domain не читает `.tres` и не ищет узлы.
+**Сейчас в коде.** [`LevelCatalog`](../../src/infrastructure/content/level_catalog.gd) содержит массив `LevelEntry` со стабильным ID, названием, описанием и `PackedScene`. В [каталоге меню](../../content/definitions/level_catalog.tres) две сцены, `MechanicsLab` и `ReserveCircuit`. Геометрию и устройства создают `ChamberBuilder` и его наследники. [`LevelScope.open`](../../src/bootstrap/level_scope.gd) проверяет корневые Player/Camera, собирает адаптеры, определения устройств и портальные пары; `PuzzleNetwork.build` валидирует сеть. R закрывает scope и заново создаёт сцену. Стабильные ID используются устройствами и переносимыми телами; Domain не читает `.tres` и не ищет узлы.
 
 **Целевой контракт авторинга:** `LevelDefinition` как `Resource` в Infrastructure/Content с ID уровня/камер, версией данных, устройствами, соединениями, spawn, checkpoint, reset и условиями выхода. Такого класса, общего валидатора уровня и версии данных уровня пока нет; это объём SKL-10/SYS-02, а не описание существующего файла.
 

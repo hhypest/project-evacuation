@@ -2,9 +2,11 @@ class_name SessionBootstrap
 extends Node
 ## Composition root. Session policy stays in Application; scene lifetime stays here.
 
+const LAB_SCENE: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
+
 @export var catalog: LevelCatalog = preload("res://content/definitions/level_catalog.tres")
 ## Chamber loaded by start/restart; selecting a level in the menu replaces it.
-@export var chamber_scene: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
+@export var chamber_scene: PackedScene = LAB_SCENE
 
 ## Injected for session tests. A game launched from the main scene opens the real portable store.
 var save_repository: SaveRepository
@@ -18,10 +20,12 @@ var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
 var _continue_level: LevelEntry
-var _checkpoint_notice: String = ""
+var _checkpoint_load_notice: String = ""
+var _checkpoint_write_notice: String = ""
 var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
+var camera_preferences: CameraPreferences = CameraPreferences.new()
 
 
 func _ready() -> void:
@@ -37,6 +41,10 @@ func _ready() -> void:
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.menu_requested.connect(_on_menu_requested)
 	_hud.quit_requested.connect(_on_quit_requested)
+	_hud.camera_preferences_changed.connect(_on_camera_preferences_changed)
+	if get_tree().current_scene == self:
+		CameraPreferenceFile.load_into(camera_preferences)
+	_hud.set_camera_preferences(camera_preferences)
 	_window = get_window()
 	_runtime = RuntimeProbe.new().read()
 	if not _runtime.headless and "--windowed" in OS.get_cmdline_user_args():
@@ -107,9 +115,18 @@ func _on_profile_record_toggled() -> void:
 		_profiler.start_recording()
 
 
+func _on_camera_preferences_changed() -> void:
+	if _scope != null:
+		_scope.configure_camera(camera_preferences)
+	if get_tree().current_scene == self and CameraPreferenceFile.save(camera_preferences) != OK:
+		_hud.show_preferences_notice("Не удалось записать настройки камеры.")
+		printerr("CAMERA_PREFERENCES_WRITE_FAILED")
+
+
 func _physics_process(delta: float) -> void:
 	if _scope != null and _session.get_status().accepts_gameplay:
 		_scope.apply_input(_input.take_frame(), delta)
+		_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
 		if _scope.needs_recovery():
 			var portals: AdvancePortals = _scope.portals()
 			print("CHAMBER_RECOVERY body=%s level=%s generation=%d crossings=%d blocked=%d" % [
@@ -127,8 +144,8 @@ func _on_level_requested(index: int) -> void:
 	var item: LevelEntry = catalog.entry(index) if catalog != null else null
 	if item == null or item.scene == null:
 		return
-	var id: StringName = item.level_id if catalog.find_level(item.level_id) == item else &""
-	_start_chamber(item.scene, id)
+	var checkpoint_entry: LevelEntry = item if catalog.find_level(item.level_id) == item else null
+	_start_chamber(item.scene, checkpoint_entry)
 
 
 func _on_load_checkpoint_requested() -> void:
@@ -144,40 +161,44 @@ func _on_load_checkpoint_requested() -> void:
 		print("CHECKPOINT_LOADED level=%s checkpoint=%s" % [item.level_id, SaveSnapshot.ENTRY_ID])
 
 
-func _start_chamber(scene: PackedScene, level_id: StringName = &"") -> void:
+func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null) -> void:
 	if not _session.start():
 		return
 	chamber_scene = scene
 	_replace_scope()
-	if _scope != null and save_repository != null and not level_id.is_empty():
+	if _scope != null and save_repository != null and checkpoint_entry != null:
+		var level_id: StringName = checkpoint_entry.level_id
 		var version: String = str(ProjectSettings.get_setting("application/config/version"))
 		var result: SaveResult.Code = save_repository.write_checkpoint(SaveSnapshot.new(level_id, version))
 		_refresh_checkpoint()
 		if result == SaveResult.Code.OK:
+			_checkpoint_write_notice = ""
 			print("CHECKPOINT_READY level=%s checkpoint=%s" % [level_id, SaveSnapshot.ENTRY_ID])
 		else:
-			_checkpoint_notice = "Не удалось сохранить вход в камеру. " + _checkpoint_error(result)
+			_checkpoint_write_notice = "Не удалось сохранить вход в камеру «%s». %s" % [
+				checkpoint_entry.title, _checkpoint_error(result)
+			]
 			printerr("CHECKPOINT_WRITE_FAILED level=%s code=%s" % [level_id, SaveResult.Code.keys()[result]])
 	_sync_session()
 
 
 func _refresh_checkpoint() -> void:
 	_continue_level = null
-	_checkpoint_notice = ""
+	_checkpoint_load_notice = ""
 	if save_repository == null:
 		return
 	var result: SaveResult = save_repository.read_checkpoint()
 	if result.code == SaveResult.Code.MISSING:
 		return
 	if result.code != SaveResult.Code.OK:
-		_checkpoint_notice = _checkpoint_error(result.code)
+		_checkpoint_load_notice = _checkpoint_error(result.code)
 		return
 	_continue_level = catalog.find_level(result.snapshot.level_id) if catalog != null else null
 	if _continue_level == null:
-		_checkpoint_notice = "Уровень из сохранения недоступен в этой сборке."
+		_checkpoint_load_notice = "Уровень из сохранения недоступен в этой сборке."
 		return
 	var notice: String = "Доступна предыдущая контрольная точка. " if result.recovered else ""
-	_checkpoint_notice = notice + "Продолжение открывает камеру с точки входа."
+	_checkpoint_load_notice = notice + "Продолжение открывает камеру с точки входа."
 
 
 func _checkpoint_error(code: SaveResult.Code) -> String:
@@ -238,6 +259,7 @@ func _replace_scope() -> void:
 		_session.return_to_menu()
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
 	else:
+		_scope.configure_camera(camera_preferences)
 		_problem = ""
 
 
@@ -262,13 +284,15 @@ func _sync_session() -> void:
 	_input.set_gameplay_enabled(status.accepts_gameplay, status.generation)
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"
 	var notice: String = "\n" + _log.notice if not _log.notice.is_empty() else ""
+	var load_notice: String = _checkpoint_load_notice if status.phase == SessionLifecycle.Phase.READY else ""
 	var messages: PackedStringArray = []
-	for message: String in [_problem, _checkpoint_notice]:
+	for message: String in [_problem, _checkpoint_write_notice, load_notice]:
 		if not message.is_empty():
 			messages.append(message)
 	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [
 		_runtime.engine_version, mode, _runtime.physics_backend, notice
-	], "\n".join(messages), _continue_level != null)
+	], "\n".join(messages), _continue_level != null,
+		"Перезапустить полигон [R]" if chamber_scene == LAB_SCENE else "Перезапустить камеру [R]")
 
 
 func _exit_tree() -> void:

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://src/infrastructure/content/level_entry.gd" id="1"]
 [ext_resource type="PackedScene" path="res://content/levels/mechanics_lab.tscn" id="2"]
 [ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="3"]
+[ext_resource type="PackedScene" path="res://content/levels/reserve_circuit.tscn" id="4"]
 
 [sub_resource type="Resource" id="UnifiedLab"]
 script = ExtResource("1")
@@ -11,6 +12,13 @@ title = "Единый полигон: все механики"
 summary = "Хаб и семь отсеков: движение, перенос, устройства, оптика, гравитация, порталы, динамический свет и тени. R сбрасывает весь полигон."
 scene = ExtResource("2")
 
+[sub_resource type="Resource" id="ReserveCircuit"]
+script = ExtResource("1")
+level_id = &"reserve_circuit"
+title = "Резервный контур"
+summary = "Камера с двумя источниками питания портала, оптической блокировкой и выходным шлюзом."
+scene = ExtResource("4")
+
 [resource]
 script = ExtResource("3")
-entries = Array[ExtResource("1")]([SubResource("UnifiedLab")])
+entries = Array[ExtResource("1")]([SubResource("UnifiedLab"), SubResource("ReserveCircuit")])

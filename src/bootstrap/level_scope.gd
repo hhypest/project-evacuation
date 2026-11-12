@@ -160,6 +160,17 @@ func held_prop_id() -> StringName:
 	return _carry.state.held_id if _carry != null else &""
 
 
+func has_placement() -> bool:
+	return _carry != null and _carry.preview != null and _carry.preview.available
+
+
+func configure_camera(preferences: CameraPreferences) -> void:
+	if _camera != null:
+		_camera.fov = preferences.fov
+		_camera.radians_per_pixel = CameraPreferences.BASE_RADIANS_PER_PIXEL * preferences.sensitivity / 100.0
+		_camera.align_degrees_per_second = preferences.gravity_rate
+
+
 func suspend_carry() -> void:
 	if _carry != null:
 		_carry.suspend()
