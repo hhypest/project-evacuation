@@ -50,6 +50,6 @@ func _navigation_board() -> void:
 	label.text = "ЕДИНЫЙ ПОЛИГОН\n01 Движение ← → 02 Перенос\n03 Устройства ← → 04 Оптика\n05 Гравитация ← → 06 Порталы\n07 Свет и тени — в конце коридора\nR — полный сброс · Esc — пауза"
 	label.position = Vector3(0, 3.6, -0.105)
 	label.font_size = 36
-	label.pixel_size = 0.0028
-	label.outline_size = 0
+	label.pixel_size = 0.0038
+	label.outline_size = 4
 	add_child(label)

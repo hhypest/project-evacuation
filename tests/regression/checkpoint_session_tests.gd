@@ -47,7 +47,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	earlier.title = "Порталы"
 	earlier.scene = PORTAL_LAB
 	var reordered: LevelCatalog = LevelCatalog.new()
-	reordered.entries = [earlier, reopened.catalog.entry(0)]
+	reordered.entries = [earlier, reopened.catalog.entry(1), reopened.catalog.entry(0)]
 	reopened.catalog = reordered
 	reopened.chamber_scene = PORTAL_LAB
 	tree.root.add_child(reopened)
@@ -64,6 +64,19 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("continuing from disk resolves the level by ID after reordering and restores authored poses",
 		available and restored and reopened.get_session_status().accepts_gameplay
 		and reopened.get_session_status().generation == 1))
+	var status_label: Label = reopened.find_child("Status") as Label
+	TestInputEvents.key(KEY_ESCAPE)
+	TestInputEvents.key(KEY_ESCAPE, false)
+	results.append(TestOutcome.new("pause does not show checkpoint loading instructions",
+		tree.paused and "точки входа" not in status_label.text))
+	var menu: Button = reopened.find_child("MenuButton") as Button
+	menu.pressed.emit()
+	var reserve: Button = reopened.find_child("LevelButton1", true, false) as Button
+	reserve.pressed.emit()
+	saved = reopened.save_repository.read_checkpoint()
+	results.append(TestOutcome.new("starting the second chamber persists its own stable checkpoint ID",
+		saved.code == SaveResult.Code.OK and saved.snapshot.level_id == &"reserve_circuit"
+		and reopened.get_node_or_null("LevelScope/ReserveCircuit") != null))
 	tree.root.remove_child(reopened)
 	reopened.queue_free()
 	await tree.process_frame

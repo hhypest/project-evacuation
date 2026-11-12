@@ -30,6 +30,8 @@ var blocked: bool = false
 var barrier_rid: RID
 ## The aperture-local patch rendered into the viewport this frame (expanded to its aspect).
 var view_region: Rect2
+## Inset world-space boxes of permanent opaque walls authored with the level.
+var view_blockers: Array[AABB] = []
 
 
 func _ready() -> void:
@@ -140,7 +142,8 @@ func _process(_delta: float) -> void:
 		tangents = Vector2(vertical, vertical / aspect)
 	var visible: Rect2 = PortalViewGeometry.visible_region(half_size,
 		viewer.global_transform.affine_inverse() * global_transform, tangents)
-	if not visible.has_area():
+	if not visible.has_area() or (not view_blockers.is_empty() and PortalViewGeometry.hidden_by_box(
+			visible, global_transform, viewer.global_transform, viewer.near, view_blockers)):
 		_membrane.visible = false
 		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return

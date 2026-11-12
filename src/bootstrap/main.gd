@@ -2,9 +2,11 @@ class_name SessionBootstrap
 extends Node
 ## Composition root. Session policy stays in Application; scene lifetime stays here.
 
+const LAB_SCENE: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
+
 @export var catalog: LevelCatalog = preload("res://content/definitions/level_catalog.tres")
 ## Chamber loaded by start/restart; selecting a level in the menu replaces it.
-@export var chamber_scene: PackedScene = preload("res://content/levels/mechanics_lab.tscn")
+@export var chamber_scene: PackedScene = LAB_SCENE
 
 ## Injected for session tests. A game launched from the main scene opens the real portable store.
 var save_repository: SaveRepository
@@ -22,6 +24,7 @@ var _checkpoint_notice: String = ""
 var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
+var camera_preferences: CameraPreferences = CameraPreferences.new()
 
 
 func _ready() -> void:
@@ -37,6 +40,10 @@ func _ready() -> void:
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.menu_requested.connect(_on_menu_requested)
 	_hud.quit_requested.connect(_on_quit_requested)
+	_hud.camera_preferences_changed.connect(_on_camera_preferences_changed)
+	if get_tree().current_scene == self:
+		CameraPreferenceFile.load_into(camera_preferences)
+	_hud.set_camera_preferences(camera_preferences)
 	_window = get_window()
 	_runtime = RuntimeProbe.new().read()
 	if not _runtime.headless and "--windowed" in OS.get_cmdline_user_args():
@@ -107,9 +114,18 @@ func _on_profile_record_toggled() -> void:
 		_profiler.start_recording()
 
 
+func _on_camera_preferences_changed() -> void:
+	if _scope != null:
+		_scope.configure_camera(camera_preferences)
+	if get_tree().current_scene == self and CameraPreferenceFile.save(camera_preferences) != OK:
+		_hud.show_preferences_notice("Не удалось записать настройки камеры.")
+		printerr("CAMERA_PREFERENCES_WRITE_FAILED")
+
+
 func _physics_process(delta: float) -> void:
 	if _scope != null and _session.get_status().accepts_gameplay:
 		_scope.apply_input(_input.take_frame(), delta)
+		_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
 		if _scope.needs_recovery():
 			var portals: AdvancePortals = _scope.portals()
 			print("CHAMBER_RECOVERY body=%s level=%s generation=%d crossings=%d blocked=%d" % [
@@ -238,6 +254,7 @@ func _replace_scope() -> void:
 		_session.return_to_menu()
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
 	else:
+		_scope.configure_camera(camera_preferences)
 		_problem = ""
 
 
@@ -263,12 +280,13 @@ func _sync_session() -> void:
 	var mode: String = "HEADLESS: графика не проверена" if _runtime.headless else "Vulkan"
 	var notice: String = "\n" + _log.notice if not _log.notice.is_empty() else ""
 	var messages: PackedStringArray = []
-	for message: String in [_problem, _checkpoint_notice]:
+	for message: String in [_problem, _checkpoint_notice if status.phase == SessionLifecycle.Phase.READY else ""]:
 		if not message.is_empty():
 			messages.append(message)
 	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [
 		_runtime.engine_version, mode, _runtime.physics_backend, notice
-	], "\n".join(messages), _continue_level != null)
+	], "\n".join(messages), _continue_level != null,
+		"Перезапустить полигон [R]" if chamber_scene == LAB_SCENE else "Перезапустить камеру [R]")
 
 
 func _exit_tree() -> void:
