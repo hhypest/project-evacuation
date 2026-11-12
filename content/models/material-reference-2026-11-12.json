@@ -1,0 +1,238 @@
+{
+  "source_audit_version": 1,
+  "models": {
+    "DEV-01": {
+      "parts": [
+        {
+          "name": "Cube",
+          "triangles": 23752,
+          "geometry_degenerate": 0,
+          "uv_degenerate": 0,
+          "normal_length_range": [
+            0.9999999403953552,
+            1.0
+          ],
+          "texels_per_metre_4k_p10_p50_p90": [
+            818.0443176269531,
+            1224.4718627929688,
+            2071.9693359375
+          ],
+          "uv_min": [
+            0.0,
+            0.0010089874267578125
+          ],
+          "uv_max": [
+            0.9999790191650391,
+            0.9999849796295166
+          ],
+          "authored_tangents": false
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube.gltf",
+          "sha256": "7acb8553dbcf0c34182746786b6dbfd85ad79837d900884503872a1cd749cf50"
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube.bin",
+          "sha256": "5a9a4bbe2bb89bee1006955e5ec6be95fa6de414ddecb9b38d361c274c6307c2"
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_base_color.jpg",
+          "sha256": "4f855bad2a138c953dedbe3a8ab237bc292d0e100c89a48a9247634a611a7c2f",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_metallic_roughness.jpg",
+          "sha256": "d3c4b8bae0b72d51aa84ba25e12e751ee4f3b3cd35dce8cd4514b62846bc1ad7",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/ballast_cube/ballast_cube_normal.jpg",
+          "sha256": "3188e43994c31debe42c93cb5b0fc7296e4824c434cb312206edd9506f175167",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    },
+    "DEV-04": {
+      "parts": [
+        {
+          "name": "Body",
+          "triangles": 19818,
+          "geometry_degenerate": 0,
+          "uv_degenerate": 2,
+          "normal_length_range": [
+            0.9999999403953552,
+            1.0
+          ],
+          "texels_per_metre_4k_p10_p50_p90": [
+            1999.882568359375,
+            5100.586181640625,
+            10974.837890625
+          ],
+          "uv_min": [
+            3.999999989900971e-06,
+            0.0015419721603393555
+          ],
+          "uv_max": [
+            0.9999849796295166,
+            0.9999179840087891
+          ],
+          "authored_tangents": false
+        },
+        {
+          "name": "Lever",
+          "triangles": 3546,
+          "geometry_degenerate": 0,
+          "uv_degenerate": 0,
+          "normal_length_range": [
+            0.9999999403953552,
+            1.0
+          ],
+          "texels_per_metre_4k_p10_p50_p90": [
+            3725.760009765625,
+            4957.414794921875,
+            6599.458251953125
+          ],
+          "uv_min": [
+            3.9999998989515007e-05,
+            0.0016660094261169434
+          ],
+          "uv_max": [
+            0.9999529719352722,
+            0.999970018863678
+          ],
+          "authored_tangents": false
+        }
+      ],
+      "files": [
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.gltf",
+          "sha256": "0865a141ba37050131089dac0c7dd11ea3dea10cc4bd362d3d2ff35303ad72a3"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body.bin",
+          "sha256": "0fe36af64953b1d7d916c9d61e1597a74584afc6c295daf866198efc85c5c9e9"
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_base_color.jpg",
+          "sha256": "d38c34b1ae0223753dff03b7c6531ab182bbf583705fdff72f933004d877e9b6",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_metallic_roughness.jpg",
+          "sha256": "7de1a49c0375b113cd731b3d8a19025bbdc3cedcc9b93e9ccb3b450ca8964b02",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "path": "content/models/devices/wall_switch/wall_switch_body_normal.jpg",
+          "sha256": "16304613ce04ca2245e5e780b81a60783bfb2e89dc9019b456b6d4cc21b511dd",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  },
+  "tiles": [
+    {
+      "name": "panel_light",
+      "metres_per_tile": 1,
+      "files": [
+        {
+          "path": "content/textures/surfaces/panel_light/panel_light_albedo.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "ba9e5f86d936362a8368bf1877fb7764af6c7c1b95d237fa588c24ef79c7b949"
+        },
+        {
+          "path": "content/textures/surfaces/panel_light/panel_light_normal.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "fbdeb3a4d89432e6fd6af98f7a10346e99215579941686fb59b19616ec9299bf"
+        },
+        {
+          "path": "content/textures/surfaces/panel_light/panel_light_orm.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "75d37b059ddb1ca7bc888a0557b6d9a730e768e42dd96635d5b05817841f824b"
+        }
+      ]
+    },
+    {
+      "name": "basalt_wall",
+      "metres_per_tile": 2,
+      "files": [
+        {
+          "path": "content/textures/alien/basalt_wall/basalt_wall_albedo.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "59ce91a7bbeb62f143829c0f0baaf8d88a6359c4d68066ad425f7a7fb4a0bcf8"
+        },
+        {
+          "path": "content/textures/alien/basalt_wall/basalt_wall_normal.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "6623a79150bf49fcebf7f05ff5c748a39af07c7bc55f80b0312f98448abf2351"
+        },
+        {
+          "path": "content/textures/alien/basalt_wall/basalt_wall_orm.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "sha256": "19023b099ee3bbacc72bb007ffc80a311a9e2b5190514f683c5e66b68add228c"
+        }
+      ]
+    }
+  ],
+  "date": "2026-11-12",
+  "base_commit": "12e71367fa0f8792f9a9dd9d7bf4c9fee35ff06c",
+  "license": "MIT",
+  "provenance": {
+    "shader_reference": {
+      "name": "sample.md",
+      "sha256": "1ad7e93b73f6f2d36bb9dd107c12a4e07b772f284279b333df35f9383f2431fa",
+      "origin": "Owner supplied; owner confirmed own or generated code on 2026-11-12. Slow value-noise technique adapted; four complete sample shaders are not redistributed."
+    },
+    "indicator_and_metric_uv": "Own project code; editable sources in src/infrastructure. No paid generation, no new image maps.",
+    "existing_device_assets": "Existing Meshy assets retain the ownership and MIT scope recorded in content/models/README.md."
+  },
+  "changes": {
+    "portal": "Opaque aperture-local 4 cm rim; existing accent, slow noise, intensity 0.65; zero disables effect.",
+    "DEV-04": "Godot gasket/bezel/frosted-lens prototype at existing lamp zone; actual network output; no imported geometry/pivot/UV/collision changes.",
+    "DEV-01": "Per-instance anisotropic PBR sampling and non-repeating atlas coordinates match the portal clipping shader. Original atlas and PBR pixels unchanged.",
+    "tiles": "Two-metre UVs aligned per face in the bay builder, including adjacent modules. Panel reference uses one metre. Anisotropic filtering for panel_light/basalt_wall."
+  },
+  "findings": {
+    "wall_uv": "Stock BoxMesh maps a fixed atlas to a complete box regardless of metre dimensions. The previous long walls stretched one atlas face across up to 24.6 metres.",
+    "cube": "4K atlas median area density is about 1224 texels/m, with no zero-area geometry or UV triangles. Sampling correction does not recreate details missing from the generated atlas.",
+    "switch": "Two tiny source triangles have zero UV area. They are retained for now; source UV/geometry repair and rebaking follow review of the prototype."
+  }
+}

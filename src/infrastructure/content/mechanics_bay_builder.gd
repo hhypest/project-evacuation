@@ -63,6 +63,7 @@ func _surface_box(size: Vector3, at: Vector3, material: Material, label: String 
 	for child: Node in body.get_children():
 		var visual: MeshInstance3D = child as MeshInstance3D
 		if visual != null:
+			visual.mesh = MetricBoxMesh.make(size, at)
 			visual.material_override = material
 	return body
 

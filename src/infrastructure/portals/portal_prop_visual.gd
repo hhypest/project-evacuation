@@ -149,6 +149,7 @@ static func _material(source: Material) -> ShaderMaterial:
 	result.set_shader_parameter(&"roughness_factor", pbr.roughness)
 	result.set_shader_parameter(&"uv_scale", pbr.uv1_scale)
 	result.set_shader_parameter(&"uv_offset", pbr.uv1_offset)
+	result.set_shader_parameter(&"repeat_enabled", pbr.texture_repeat)
 	result.set_shader_parameter(&"ao_enabled", pbr.ao_enabled)
 	result.set_shader_parameter(&"emission_color", pbr.emission * pbr.emission_energy_multiplier if pbr.emission_enabled else Color.BLACK)
 	result.set_shader_parameter(&"emission_map", pbr.get_texture(BaseMaterial3D.TEXTURE_EMISSION))

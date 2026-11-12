@@ -26,6 +26,10 @@ func _run() -> void:
 	var button: Button = main.find_child("StartButton", true, false) as Button
 	if not _check(main.get_session_status().can_start and button != null, "menu offers the unified proving ground"):
 		return
+	# Main applies the product's desktop-sized fullscreen policy during startup. Set the test window
+	# afterwards so software Vulkan actually uses the documented 640 x 360 capture size.
+	root.mode = Window.MODE_WINDOWED
+	root.size = Vector2i(640, 360)
 	button.pressed.emit()
 	for _tick: int in range(60):
 		await physics_frame

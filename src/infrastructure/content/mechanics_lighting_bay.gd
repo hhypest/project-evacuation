@@ -3,6 +3,7 @@ extends MechanicsBayBuilder
 ## Local direct-light bench: moving omni, spot, physical blockers and independent comparison switches.
 
 const AMBER_GUIDE: Color = Color(0.7, 0.4, 0.13)
+const REFERENCE_PANEL: Material = preload("res://content/materials/surfaces/panel_light.tres")
 
 var point: OmniLight3D
 var spot: SpotLight3D
@@ -76,12 +77,34 @@ func _build() -> void:
 		_test_block(Vector3(1, 1, 1), Vector3(-5 + float(index) * 2, 0.5, -5),
 			0.15 if index == 1 else 0.8, 1.0 if index == 2 else 0.0, "MaterialSample%d" % index)
 	_board("Матовый / гладкий / металл · кубы можно переносить\nУзкие стойки отбрасывают тени от прожектора", Vector3(-2, 2.4, -7.85))
+	_material_reference()
 	# Low emissive strips preserve the exit route when both test sources are switched off.
 	for x: float in [-10.5, -6.5, -2.5]:
 		var guide: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.9, 0.01, 0.08), AMBER_GUIDE, 1)
 		guide.position = Vector3(x, 0.05, 0)
 		guide.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(guide)
+
+
+## Reachable first-person reference under the room's existing moving light and spotlight.
+func _material_reference() -> void:
+	for index: int in range(2):
+		var at: Vector3 = Vector3(7.2 + index * 2.2, 1.2, -6)
+		var material: Material = REFERENCE_PANEL if index == 0 else WALL_MATERIAL
+		var body: StaticBody3D = _box(Vector3(2, 2.4, 0.2), at, WALL_COLOR, "ReferencePanel%d" % index)
+		for child: Node in body.get_children():
+			var visual: MeshInstance3D = child as MeshInstance3D
+			if visual != null:
+				visual.mesh = MetricBoxMesh.make(Vector3(2, 2.4, 0.2), at, 1.0 if index == 0 else 2.0)
+				visual.material_override = material
+	var control: WallButtonDevice = WallButtonDevice.new()
+	control.name = "ReferenceSwitch"
+	control.stable_id = &"qa.lighting.reference.switch"
+	control.mode = DeviceDefinition.WallMode.TOGGLE
+	control.position = Vector3(7.2, 1.35, -5.82)
+	add_child(control)
+	_cube("ReferenceCube", &"qa.lighting.reference.cube", Vector3(8.3, 0.55, -4.3), 5)
+	_board("ЭТАЛОН МАТЕРИАЛОВ · DEV-04: E — индикатор\nКуб / окрашенный металл / базальт · СТОП фиксирует свет", Vector3(8.3, 3, -5.8))
 
 
 func _process(delta: float) -> void:
