@@ -10,9 +10,6 @@ const WARNING: Color = Color(0.48, 0.76, 0.12)
 const WALL: Material = preload("res://content/materials/alien/concrete030_basalt.tres")
 const FLOOR: Material = preload("res://content/materials/alien/basalt_floor.tres")
 
-var reserve: OxygenReserve = OxygenReserve.new()
-var exposed: bool = false
-var supplied: bool = false
 var _beacon: MeshInstance3D
 
 
@@ -40,16 +37,21 @@ func _ready() -> void:
 	_finish_zone(Vector3(0, 1.0, -30.0), Vector3(5.3, 2.1, 1.0), Vector3(0, 2.3, -31.72))
 
 
-func advance_air(player_center: Vector3, delta: float) -> void:
-	var in_breach: bool = player_center.z <= BREACH_START_Z and player_center.z > BREACH_END_Z
-	if exposed != in_breach:
-		var material: StandardMaterial3D = _beacon.material_override as StandardMaterial3D
+func atmosphere_at(player_center: Vector3) -> OxygenStatus.Atmosphere:
+	if player_center.z > BREACH_START_Z or player_center.z <= SUPPLY_START_Z:
+		return OxygenStatus.Atmosphere.SUPPLY
+	if player_center.z > BREACH_END_Z:
+		return OxygenStatus.Atmosphere.BREACH
+	return OxygenStatus.Atmosphere.PASSAGE
+
+
+func present_atmosphere(status: OxygenStatus) -> void:
+	var material: StandardMaterial3D = _beacon.material_override as StandardMaterial3D
+	var in_breach: bool = status.atmosphere == OxygenStatus.Atmosphere.BREACH
+	if material.emission_enabled != in_breach:
 		material.emission_enabled = in_breach
 		material.emission = WARNING
 		material.emission_energy_multiplier = 1.1
-	exposed = in_breach
-	supplied = player_center.z > BREACH_START_Z or player_center.z <= SUPPLY_START_Z
-	reserve.step(delta, exposed, supplied)
 
 
 func _checkpoint() -> void:

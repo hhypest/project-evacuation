@@ -156,10 +156,11 @@ func _physics_process(delta: float) -> void:
 		return
 	_scope.apply_input(_input.take_frame(), delta)
 	_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
-	var training: OxygenTrainingBuilder = _scope.oxygen_training()
-	if training != null:
-		_hud.show_oxygen(training.reserve.percentage(), training.exposed, training.supplied)
-		if training.reserve.remaining_seconds <= 0.0:
+	var oxygen: OxygenStatus = _scope.oxygen_status
+	if oxygen != null:
+		_hud.show_oxygen(oxygen.percent, oxygen.atmosphere == OxygenStatus.Atmosphere.BREACH,
+			oxygen.atmosphere == OxygenStatus.Atmosphere.SUPPLY)
+		if oxygen.recovery_required:
 			_recover_chamber(&"oxygen", PortalWorldAdapter.PLAYER_ID)
 			return
 	if _scope.needs_recovery():

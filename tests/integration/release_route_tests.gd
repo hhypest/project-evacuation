@@ -58,21 +58,21 @@ func _oxygen() -> void:
 	await _ticks(15)
 	if not _record("oxygen level starts from the menu", _bind() and _scope.oxygen_training() != null):
 		return
-	var training: OxygenTrainingBuilder = _scope.oxygen_training()
 	await _go(Vector3(0, 0, -7.5))
 	var generation: int = _main.get_session_status().generation
-	if not _record("crossing the marked breach consumes oxygen", training.exposed and training.reserve.percentage() < 100):
+	if not _record("crossing the marked breach consumes oxygen", _scope.oxygen_status.atmosphere == OxygenStatus.Atmosphere.BREACH
+			and _scope.oxygen_status.percent < 100):
 		_hud.menu_requested.emit()
 		return
 	_hud.pause_requested.emit()
-	var remaining: float = training.reserve.remaining_seconds
+	var before_pause: OxygenStatus = _scope.oxygen_status
 	await _ticks(20)
-	_record("pausing in the breach freezes oxygen", training.reserve.remaining_seconds == remaining)
+	_record("pausing in the breach freezes oxygen", _scope.oxygen_status == before_pause)
 	_hud.pause_requested.emit()
 	await _ticks(730)
 	if not _record("first oxygen failure returns to entry with a full reserve", _bind()
 			and _main.get_session_status().generation == generation + 1 and _player.position.z > 2.5
-			and _scope.oxygen_training().reserve.percentage() == 100):
+			and _scope.oxygen_status != null and _scope.oxygen_status.percent == 100):
 		_hud.menu_requested.emit()
 		return
 	await _go(Vector3(1.7, 0, -3.0))
@@ -94,8 +94,8 @@ func _oxygen() -> void:
 	# Walk around the terminal before heading through the breach.
 	await _go(Vector3(0, 0, -3.3))
 	await _go(Vector3(0, 0, -25.5), true)
-	training = _scope.oxygen_training()
-	_record("crossing without delay reaches supply and replenishes oxygen", training.supplied and training.reserve.percentage() == 100)
+	_record("crossing without delay reaches supply and replenishes oxygen",
+		_scope.oxygen_status.atmosphere == OxygenStatus.Atmosphere.SUPPLY and _scope.oxygen_status.percent == 100)
 	await _go(Vector3(0, 0, -30.8))
 	saved = _main.save_repository.read_checkpoint()
 	_record("oxygen course records completion at its exit", saved.code == SaveResult.Code.OK
