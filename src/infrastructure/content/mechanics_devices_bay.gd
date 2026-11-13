@@ -5,8 +5,8 @@ extends MechanicsBayBuilder
 func _build() -> void:
 	_plate(&"qa.devices.plate", Vector3(-7, 0, -3), 8, 6)
 	_test_door(&"qa.devices.door.plate", Vector3(-7, 0, -8), [&"qa.devices.plate"])
-	_cube("PlateCubeA", &"qa.devices.cube.a", Vector3(-9, 0.55, 0), 5)
-	_cube("PlateCubeB", &"qa.devices.cube.b", Vector3(-7.5, 0.55, 0), 5)
+	_cube("PlateCubeA", &"qa.devices.cube.a", Vector3(-9, 0.30, 0), BallastCube.Kind.LIGHT)
+	_cube("PlateCubeB", &"qa.devices.cube.b", Vector3(-7.5, 0.30, 0), BallastCube.Kind.LIGHT)
 	_button(&"qa.devices.timed", Vector3(-2, 1.3, -7.72), DeviceDefinition.WallMode.TIMED, 4)
 	_test_door(&"qa.devices.door.timed", Vector3(0, 0, -8), [&"qa.devices.timed"])
 	_button(&"qa.devices.toggle", Vector3(5, 1.3, -7.72), DeviceDefinition.WallMode.TOGGLE, 1)

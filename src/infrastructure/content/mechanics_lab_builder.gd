@@ -31,7 +31,7 @@ func _ready() -> void:
 	for z: float in [4.0, -10.0, -24.0, -38.0, -52.0, -66.0, -78.0]:
 		_lamp(Vector3(0, 5.5, z), 13, 1.3)
 	# A first interaction in the safe hub also exercises start/restart/carry without walking a whole bay.
-	_cube("TestCube", &"lab.cube.medium", Vector3(0, 0.55, 0.8), 20)
+	_cube("TestCube", &"lab.cube.medium", Vector3(0, 0.425, 0.8), BallastCube.Kind.HEAVY)
 
 
 func _add_bay(bay: MechanicsBayBuilder, label: String, title: String, at: Vector3, side: float) -> void:

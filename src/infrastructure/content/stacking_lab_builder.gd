@@ -8,8 +8,7 @@ const HALF_WIDTH: float = 5.0
 const HEIGHT: float = 5.0
 const Z_FRONT: float = 4.0
 const Z_BACK: float = -10.0
-const CUBE_EDGE: float = 0.75
-const CUBE_MASS: float = 10.0
+const CUBE_EDGE: float = BallastCube.HEAVY_EDGE
 ## Ledge on the right: front face at LEDGE_FRONT, top at LEDGE_HEIGHT.
 const LEDGE_HEIGHT: float = 2.2
 const LEDGE_FRONT: float = -3.5
@@ -33,7 +32,7 @@ func _ready() -> void:
 	_partition(HALF_WIDTH, Z_BACK + 2.0, HEIGHT, PLATE_AT.x, &"stack.door", [&"stack.plate"])
 	for index: int in range(3):
 		_cube("Cube%d" % index, StringName("stack.cube.%d" % index),
-			Vector3(-1.0 + index * 1.5, CUBE_EDGE * 0.5 + 0.05, 1.0), CUBE_MASS, CUBE_EDGE)
+			Vector3(-1.0 + index * 1.5, CUBE_EDGE * 0.5 + 0.05, 1.0), BallastCube.Kind.HEAVY)
 	_lamp(Vector3(0, HEIGHT - 0.4, -1.0), 14.0, 1.6)
 	_lamp(Vector3(LEDGE_X, HEIGHT - 0.4, -6.0), 8.0, 1.0)
 	_sign("Постановка: держа куб, наведи на кнопку или на другой куб.\nСилуэт покажет место, E ставит куб точно в него.",

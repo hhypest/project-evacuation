@@ -5,3 +5,4 @@
 [resource]
 script = ExtResource("1")
 hold_height = 0.68
+throw_impulse = 90.0

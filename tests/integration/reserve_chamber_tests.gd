@@ -127,8 +127,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_record("R restores the same chamber, both cubes, power and completion state",
 		reset and _main.get_session_status().generation == 2 and not _level.completed
 		and not _out(&"reserve.portal") and not _out(&"reserve.backup")
-		and (_level.get_node("Ballast") as CarryRigidBody).position.distance_to(Vector3(3.5, 0.38, 0)) < 0.1
-		and (_level.get_node("ScreenCube") as CarryRigidBody).position.distance_to(Vector3(-3.5, 0.38, -16.2)) < 0.1
+		and (_level.get_node("Ballast") as CarryRigidBody).position.distance_to(Vector3(3.5, BallastCube.HEAVY_EDGE * 0.5, 0)) < 0.1
+		and (_level.get_node("ScreenCube") as CarryRigidBody).position.distance_to(Vector3(-3.5, BallastCube.LIGHT_EDGE * 0.5, -16.2)) < 0.1
 		and _player.position.distance_to(Vector3(0, 0, 3)) < 0.1)
 	await _close()
 	return _results

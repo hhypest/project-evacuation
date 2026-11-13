@@ -210,7 +210,7 @@ func _run() -> void:
 		TestInputEvents.key(KEY_E, false)
 		for _tick: int in range(10):
 			await physics_frame
-		var target: Vector3 = plate_top if pair[1] == plate else cube_a.global_position + Vector3.UP * 0.5
+		var target: Vector3 = plate_top if pair[1] == plate else cube_a.global_position + Vector3.UP * (BallastCube.LIGHT_EDGE * 0.5)
 		lab_player.global_position = Vector3(plate_top.x, 0.05, plate_top.z) + Vector3(0.8, 0, 1.8)
 		for _tick: int in range(10):
 			await physics_frame
@@ -230,7 +230,7 @@ func _run() -> void:
 		for _tick: int in range(60):
 			await physics_frame
 	var on_top: Vector3 = cube_b.global_position - cube_a.global_position
-	if not _check(on_top.slide(Vector3.UP).length() < 0.03 and absf(on_top.y - 1.0) < 0.03
+	if not _check(on_top.slide(Vector3.UP).length() < 0.03 and absf(on_top.y - BallastCube.LIGHT_EDGE) < 0.03
 			and (cube_a.global_position - plate_top).slide(Vector3.UP).length() < 0.03 and plate_door.is_open()
 			and not ghost.visible, "E sets the cubes square on the plate and on each other; the plate opens its door"):
 		return

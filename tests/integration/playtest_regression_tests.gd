@@ -162,7 +162,7 @@ func _off_axis_portal_return() -> Array[TestOutcome]:
 	var player: PlayerMotor = lab.get_node("Player") as PlayerMotor
 	var camera: LookCamera = lab.get_node("Camera") as LookCamera
 	var pair: PortalPairDevice = lab.get_node("Portals/Fixture/portal_pair") as PortalPairDevice
-	var cube: CarryRigidBody = lab.get_node("Portals/Fixture/CubeA") as CarryRigidBody
+	var cube: CarryRigidBody = lab.get_node("Portals/Fixture/CubeHeavy") as CarryRigidBody
 	var a: Transform3D = pair.surface_a.global_transform
 	player.global_position = a * Vector3(0, -1.15, 1.5)
 	camera.global_basis = Basis.IDENTITY
@@ -175,7 +175,7 @@ func _off_axis_portal_return() -> Array[TestOutcome]:
 	var crossings: int = 0
 	var dropped: bool = false
 	var turns: Array[int] = [13, 11]
-	var aim_offsets: Array[float] = [-0.00492647, -0.23171490]
+	var aim_offsets: Array[float] = [-0.00492647, -0.305]
 	for lap: int in range(3):
 		var before: int = scope.portals().crossing_count
 		for tick: int in range(60):

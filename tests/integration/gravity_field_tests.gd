@@ -89,6 +89,7 @@ func _lab_bay() -> Array[TestOutcome]:
 	var button: WallButtonDevice = _lab.get_node("lab_button_gravity") as WallButtonDevice
 	var field: GravityFieldDevice = _lab.get_node("lab_field") as GravityFieldDevice
 	var cube: CarryRigidBody = _lab.get_node("CubeD") as CarryRigidBody
+	var plate: FloorButtonDevice = _lab.get_node("lab_plate_wall") as FloorButtonDevice
 	var down: Vector3 = field.zone().direction
 	await _ticks(120)
 	var resting: bool = cube.sleeping
@@ -133,7 +134,7 @@ func _lab_bay() -> Array[TestOutcome]:
 	await _ticks(120)
 	results.append(TestOutcome.new("switching the field off returns the cube to base gravity and releases the plate",
 		cube.get_gravity().is_equal_approx(Vector3(0, -9.8, 0)) and not _output(&"lab.plate.wall"),
-		"gravity %s" % cube.get_gravity()))
+		"gravity %s cube=%s load=%.2f" % [cube.get_gravity(), cube.global_position, plate.last_load]))
 	await _close()
 	return results
 

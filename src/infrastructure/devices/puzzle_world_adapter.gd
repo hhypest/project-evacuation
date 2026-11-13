@@ -95,6 +95,7 @@ func _trace(emitter: EmitterDevice) -> BeamHit:
 	var collider: Variant = hit.get("collider")
 	if point is not Vector3 or collider is not Object:
 		emitter.show_beam(emitter.range_m)
+		emitter.show_contact()
 		return null
 	# Raw engine query result; both types were checked before crossing the typed boundary.
 	@warning_ignore("unsafe_cast")
@@ -105,7 +106,14 @@ func _trace(emitter: EmitterDevice) -> BeamHit:
 	for id: StringName in _devices.keys():
 		var receiver: ReceiverDevice = _devices[id] as ReceiverDevice
 		if receiver != null and receiver.owns(target):
+			emitter.show_contact()
 			return BeamHit.make(emitter.stable_id, id, receiver.front().dot(-forward))
+	var normal: Variant = hit.get("normal")
+	if normal is Vector3 and target != _player:
+		@warning_ignore("unsafe_cast")
+		emitter.show_contact(end, normal as Vector3)
+	else:
+		emitter.show_contact()
 	return null
 
 

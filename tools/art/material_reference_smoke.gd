@@ -1,10 +1,11 @@
 extends SceneTree
 ## Repeatable first-person material bench. --capture <PNG path>; fixed camera/light pairs for QA.
 
-const PANEL: Material = preload("res://content/materials/surfaces/panel_light.tres")
-const BASALT: Material = preload("res://content/materials/alien/basalt_wall.tres")
+const PANEL: Material = preload("res://content/materials/expedition/panel_reference.tres")
+const BASALT: Material = preload("res://content/materials/expedition/basalt_reference.tres")
 var _capture: String = "res://work/material-reference.png"
 var _failed: bool = false
+var _target: SubViewport
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -24,9 +25,15 @@ func _run() -> void:
 		printerr("MATERIAL_REFERENCE_FAILED: Vulkan Forward+ required")
 		quit(1)
 		return
-	root.size = Vector2i(960, 640)
+	# A native off-screen target gives identical pixels when the Windows desktop constrains the window.
+	var target: SubViewport = SubViewport.new()
+	target.size = Vector2i(2560, 1440)
+	target.own_world_3d = true
+	target.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	root.add_child(target)
+	_target = target
 	var stage: Node3D = Node3D.new()
-	root.add_child(stage)
+	target.add_child(stage)
 	var world: WorldEnvironment = WorldEnvironment.new()
 	var environment: Environment = Environment.new()
 	environment.background_mode = Environment.BG_COLOR
@@ -55,9 +62,17 @@ func _run() -> void:
 	panel.material_override = PANEL
 	panel.position = Vector3(1, 1.2, 0)
 	stage.add_child(panel)
-	var cube: Node3D = PropVisuals.ballast_cube()
-	cube.position = Vector3(-0.2, 0.5, 1)
+	var floor_visual: MeshInstance3D = MeshInstance3D.new()
+	floor_visual.mesh = MetricBoxMesh.make(Vector3(10, 0.1, 4), Vector3(0, -0.05, 1.8))
+	floor_visual.position = Vector3(0, -0.05, 1.8)
+	floor_visual.material_override = BASALT
+	stage.add_child(floor_visual)
+	var cube: Node3D = PropVisuals.ballast_cube(BallastCube.LIGHT_EDGE)
+	cube.position = Vector3(-0.52, 0.25, 1)
 	stage.add_child(cube)
+	var heavy: Node3D = PropVisuals.ballast_cube(BallastCube.HEAVY_EDGE, true)
+	heavy.position = Vector3(0.36, 0.375, 1)
+	stage.add_child(heavy)
 	var lever: WallButtonDevice = WallButtonDevice.new()
 	lever.mode = DeviceDefinition.WallMode.TOGGLE
 	lever.position = Vector3(1, 1.35, 0.16)
@@ -79,8 +94,8 @@ func _run() -> void:
 	light.light_energy = 3
 	for side: float in [-1.0, 1.0]:
 		light.position.x = side * 2.5
-		camera.position = Vector3(0.2, 1.25, 2.7)
-		camera.look_at(cube.position)
+		camera.position = Vector3(0.1, 0.95, 2.48)
+		camera.look_at(Vector3(-0.04, 0.35, 1))
 		await _save("cube-light-%s" % side)
 	print("MATERIAL_REFERENCE_%s driver=%s GPU=%s" % ["FAILED" if _failed else "PASSED", runtime.rendering_driver, RenderingServer.get_video_adapter_name()])
 	quit(1 if _failed else 0)
@@ -89,7 +104,7 @@ func _save(suffix: String) -> void:
 	for frame: int in range(4):
 		await process_frame
 	await RenderingServer.frame_post_draw
-	var screenshot: Image = root.get_texture().get_image()
+	var screenshot: Image = _target.get_texture().get_image()
 	if screenshot == null or screenshot.is_empty() or screenshot.save_png(_capture.get_basename() + "-" + suffix + ".png") != OK:
 		_failed = true
 		printerr("MATERIAL_REFERENCE_FAILED: " + suffix)

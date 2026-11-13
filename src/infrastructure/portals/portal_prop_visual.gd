@@ -155,11 +155,8 @@ static func _material(source: Material) -> ShaderMaterial:
 	result.set_shader_parameter(&"emission_map", pbr.get_texture(BaseMaterial3D.TEXTURE_EMISSION))
 	if pbr is ORMMaterial3D:
 		var orm: Texture2D = pbr.get_texture(BaseMaterial3D.TEXTURE_ORM)
-		result.set_shader_parameter(&"metallic_map", orm)
-		result.set_shader_parameter(&"roughness_map", orm)
-		result.set_shader_parameter(&"ao_map", orm)
-		result.set_shader_parameter(&"metallic_channel", Vector4(0, 0, 1, 0))
-		result.set_shader_parameter(&"roughness_channel", Vector4(0, 1, 0, 0))
+		result.set_shader_parameter(&"packed_orm", true)
+		result.set_shader_parameter(&"orm_map", orm)
 	else:
 		result.set_shader_parameter(&"metallic_map", pbr.get_texture(BaseMaterial3D.TEXTURE_METALLIC))
 		result.set_shader_parameter(&"roughness_map", pbr.get_texture(BaseMaterial3D.TEXTURE_ROUGHNESS))

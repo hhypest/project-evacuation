@@ -44,16 +44,16 @@ func _run() -> void:
 	var ground: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(10, 0.05, 10), Color(0.24, 0.26, 0.29))
 	ground.position.y = -0.025
 	stage.add_child(ground)
-	var cube: Node3D = PropVisuals.ballast_cube()
-	cube.position = Vector3(-1.05, 0.5, 0)
+	var cube: Node3D = PropVisuals.ballast_cube(BallastCube.HEAVY_EDGE, true)
+	cube.position = Vector3(-1.05, 0.375, 0)
 	stage.add_child(cube)
-	_check(_bounds(cube).size.is_equal_approx(Vector3.ONE), "cube art stays exactly 1 m")
+	_check((_bounds(cube).size * cube.scale).is_equal_approx(Vector3.ONE * 0.75), "heavy art matches its 0.75 m hull")
 	_check(_bounds(cube).get_center().length() < 0.0001, "cube pivot stays at body centre")
 	_check(cube.find_children("*", "CollisionObject3D", true, false).is_empty(), "cube art adds no physics bodies")
-	var small_cube: Node3D = PropVisuals.ballast_cube(0.75)
+	var small_cube: Node3D = PropVisuals.ballast_cube(BallastCube.LIGHT_EDGE)
 	stage.add_child(small_cube)
-	_check(small_cube.scale.is_equal_approx(Vector3.ONE * 0.75), "Loop chamber cube scales to 0.75 m")
-	small_cube.queue_free()
+	_check((_bounds(small_cube).size * small_cube.scale).is_equal_approx(Vector3.ONE * 0.50), "light art matches its 0.50 m hull")
+	small_cube.hide()
 	var button: FloorButtonDevice = FloorButtonDevice.new()
 	button.position = Vector3(1.1, 0, 0)
 	stage.add_child(button)
@@ -63,7 +63,7 @@ func _run() -> void:
 	scaled.rotation.z = PI * 0.5
 	stage.add_child(scaled)
 	_check_button(scaled)
-	scaled.queue_free()
+	scaled.hide()
 	var camera: Camera3D = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.size = 3.9
@@ -91,6 +91,8 @@ func _run() -> void:
 	await _capture("button-top")
 	print("DEVICE_MODELS_SMOKE_%s driver=%s gpu=%s" % ["FAILED" if _failed else "PASSED",
 		runtime.rendering_driver, RenderingServer.get_video_adapter_name()])
+	stage.queue_free()
+	await process_frame
 	quit(1 if _failed else 0)
 
 

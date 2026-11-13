@@ -5,6 +5,8 @@ extends Node3D
 ## Clipped meshes draw color. Shadow-only copies keep casters on camera layers that omit their originals.
 
 const VIEW_LAYERS: Array[int] = [1 << 17, 1 << 18]
+const BEAM_CORE_SHADER: Shader = preload("res://src/infrastructure/devices/optics_beam.gdshader")
+const BEAM_HALO_SHADER: Shader = preload("res://src/infrastructure/devices/optics_halo.gdshader")
 const VIEW_MASK: int = (1 << 17) | (1 << 18)
 
 class Proxy:
@@ -56,7 +58,8 @@ func _collect(node: Node) -> void:
 		_registered[node.get_instance_id()] = true
 	if node is GeometryInstance3D:
 		var geometry: GeometryInstance3D = node as GeometryInstance3D
-		if geometry.layers & PortalSurface.MEMBRANE_LAYER == 0 and not _registered.has(geometry.get_instance_id()):
+		if geometry.layers & (PortalSurface.MEMBRANE_LAYER | PuzzleDeviceNode.SCREEN_EFFECT_LAYER) == 0 \
+				and not _registered.has(geometry.get_instance_id()):
 			var part: Part = Part.new()
 			part.source = geometry
 			part.id = geometry.get_instance_id()
@@ -104,7 +107,7 @@ func refresh(sides: int = 3) -> void:
 		var has_mesh: bool = mesh != null and mesh.mesh != null
 		var bounds: AABB
 		if visible and has_mesh:
-			bounds = mesh.global_transform * mesh.get_aabb()
+			bounds = mesh.global_transform * (mesh.custom_aabb if mesh.custom_aabb.has_volume() else mesh.get_aabb())
 		for side: int in range(2):
 			if sides & (1 << side) == 0:
 				continue
@@ -130,6 +133,7 @@ func refresh(sides: int = 3) -> void:
 				proxy = Proxy.new()
 				proxy.mesh = MeshInstance3D.new()
 				proxy.mesh.mesh = mesh.mesh
+				proxy.mesh.custom_aabb = mesh.custom_aabb
 				proxy.mesh.layers = VIEW_LAYERS[side]
 				proxy.mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				add_child(proxy.mesh)
@@ -143,7 +147,7 @@ func refresh(sides: int = 3) -> void:
 					proxy.sources[index] = source
 					var clipped: ShaderMaterial = source as ShaderMaterial
 					proxy.materials[index] = clipped.duplicate() as ShaderMaterial \
-						if clipped != null and clipped.shader == PortalPropVisual.CLIP_SHADER else PortalPropVisual._material(source)
+						if _supports_clipping(clipped) else PortalPropVisual._material(source)
 					proxy.mesh.set_surface_override_material(index, proxy.materials[index])
 				var pbr: BaseMaterial3D = source as BaseMaterial3D
 				if pbr != null:
@@ -151,7 +155,7 @@ func refresh(sides: int = 3) -> void:
 					proxy.materials[index].set_shader_parameter(&"emission_color", pbr.emission * pbr.emission_energy_multiplier if pbr.emission_enabled else Color.BLACK)
 			var source_clip: Vector4 = Vector4(0, 0, 0, 1)
 			var original: ShaderMaterial = mesh.get_active_material(0) as ShaderMaterial
-			if original != null and original.shader == PortalPropVisual.CLIP_SHADER:
+			if _supports_clipping(original):
 				var parameter: Variant = mesh.get_instance_shader_parameter(&"portal_clip_plane")
 				if parameter is Vector4:
 					source_clip = parameter
@@ -209,3 +213,7 @@ func _exit_tree() -> void:
 		if is_instance_valid(lamp.source):
 			lamp.source.light_cull_mask = lamp.original_mask
 			lamp.source.layers = lamp.original_layers
+
+static func _supports_clipping(material: ShaderMaterial) -> bool:
+	return material != null and (material.shader == PortalPropVisual.CLIP_SHADER
+		or material.shader == BEAM_CORE_SHADER or material.shader == BEAM_HALO_SHADER)

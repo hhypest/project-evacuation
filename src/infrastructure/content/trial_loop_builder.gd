@@ -16,7 +16,7 @@ const BEAM_Z: float = -7.0
 const SHAFT: float = 0.6
 const OPENING: float = 0.3
 ## Ballast cube edge; the plinth depth, plate size and beam distance are tuned for it.
-const CUBE_EDGE: float = 0.75
+const CUBE_EDGE: float = BallastCube.HEAVY_EDGE
 ## Plinth on the wall carrying the plate; deep enough that a cube resting on it covers the beam.
 const PLINTH_DEPTH: float = 0.75
 const PLINTH_FACE: float = 0.9
@@ -41,7 +41,7 @@ func _ready() -> void:
 		_box(Vector3(0.5, 1.5, 0.1), Vector3(-HALF_WIDTH + 0.25, 2.25, BEAM_Z + side * 0.5), WALL_COLOR, "Rail")
 	_box(Vector3(PLINTH_DEPTH, PLINTH_FACE, PLINTH_FACE), Vector3(-HALF_WIDTH + PLINTH_DEPTH * 0.5, PLINTH_Y, BEAM_Z), WALL_COLOR, "Plinth")
 	_wall_plate()
-	_cube("CubeA", &"loop.cube", Vector3(2.0, CUBE_EDGE * 0.5 + 0.05, -4.5), 10.0, CUBE_EDGE)
+	_cube("CubeA", &"loop.cube", Vector3(2.0, CUBE_EDGE * 0.5 + 0.05, -4.5), BallastCube.Kind.HEAVY)
 	_partition(HALF_WIDTH, DOOR_Z, chamber_height, DOOR_X, &"loop.door", [&"loop.plate"])
 	_sign("Камера «Петля»", Vector3(DOOR_X, 4.6, DOOR_Z + 0.2))
 	_sign("Схема: источник → эмиттер\nприёмник → НЕ → поле к стене\nкнопка на стене → дверь", Vector3(-1.2, 4.6, DOOR_Z + 0.2))

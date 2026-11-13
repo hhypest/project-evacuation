@@ -56,7 +56,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("DEV-04 indicator adds visual geometry without physics bodies",
 		lever.get_node("Indicator").find_children("*", "CollisionObject3D", true, false).is_empty()))
 	lever.free()
-	var cube: Node3D = PropVisuals.ballast_cube()
+	var cube: Node3D = PropVisuals.ballast_cube(BallastCube.HEAVY_EDGE, true)
 	var sample: MeshInstance3D = cube.get_node("Cube") as MeshInstance3D
 	var pbr: BaseMaterial3D = sample.get_active_material(0) as BaseMaterial3D
 	var clipped: ShaderMaterial = PortalPropVisual._material(pbr)
@@ -74,6 +74,6 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		clamp_matches = not repeats and not pbr.texture_repeat
 	results.append(TestOutcome.new("cube's portal halves preserve PBR textures and ordinary sampling quality",
 		pbr.texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-		and textures_match and clamp_matches))
+		and textures_match and clamp_matches and pbr.albedo_texture == PropVisuals.HEAVY_ALBEDO))
 	cube.free()
 	return results
