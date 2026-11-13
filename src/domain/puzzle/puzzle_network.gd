@@ -97,10 +97,6 @@ func restore_checkpoint_switches(states: Dictionary[StringName, bool]) -> bool:
 	return true
 
 
-func has_device(id: StringName) -> bool:
-	return _devices.has(id)
-
-
 func device(id: StringName) -> DeviceDefinition:
 	var definition: DeviceDefinition = _devices.get(id)
 	return definition.duplicate_definition() if definition != null else null

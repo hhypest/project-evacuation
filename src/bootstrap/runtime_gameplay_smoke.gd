@@ -25,6 +25,15 @@ func _run() -> void:
 		return
 	if not _check(not FileAccess.file_exists("res://tests/run_tests.gd"), "test suite excluded from game pack"):
 		return
+	if not _check(not ResourceLoader.exists("res://content/levels/foundation_lab.tscn")
+			and not ResourceLoader.exists("res://content/levels/material_showcase.tscn")
+			and not ResourceLoader.exists("res://content/materials/devices/cube_face.tres"),
+			"editor fixtures and showcase materials excluded from game pack"):
+		return
+	if not _check(ResourceLoader.exists("res://content/levels/mechanics_lab.tscn")
+			and ResourceLoader.exists("res://content/levels/reserve_circuit.tscn"),
+			"both playable levels included in game pack"):
+		return
 	var main: SessionBootstrap = _main
 	await _tree.process_frame
 	if not _check(main.get_session_status().can_start and _tree.paused, "usable main menu"):
@@ -158,6 +167,13 @@ func _run() -> void:
 	log_text = FileAccess.get_file_as_string(journal)
 	if not _check("CHAMBER_RECOVERY body=@portal.player level=res://content/levels/mechanics_lab.tscn generation=" in log_text,
 			"portal recovery records body, level and generation in the session log"):
+		return
+	hud.menu_requested.emit()
+	hud.level_requested.emit(1)
+	scope = main.get_node_or_null("LevelScope") as LevelScope
+	var reserve: ReserveChamberBuilder = scope.get_child(0) as ReserveChamberBuilder if scope != null else null
+	if not _check(main.get_session_status().accepts_gameplay and reserve != null
+			and reserve.has_node("CheckpointTerminal"), "Reserve Circuit opens from the exported menu"):
 		return
 	_finished = true
 	print("EXPORTED_GAMEPLAY_SMOKE_PASSED checks=%d Godot=%s CPU_ONLY" % [_checks, Engine.get_version_info()["string"]])
