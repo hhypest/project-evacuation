@@ -18,14 +18,14 @@ func _ready() -> void:
 	_logic(&"t2.power", DeviceDefinition.Kind.SOURCE, [], Vector3(-4.75, 1.6, -3.4), 1.0, 90.0, true)
 	_emitter(&"t2.emitter", Vector3(-4.5, 0.6, -5.0), [&"t2.power"], -90.0)
 	_receiver(&"t2.receiver", Vector3(4.6, 0.6, -5.0), -90.0)
-	_cube("CubeA", &"t2.cube.a", Vector3(0, 0.55, -5.0), 10.0)
+	_cube("CubeA", &"t2.cube.a", Vector3(0, 0.425, -5.0), BallastCube.Kind.HEAVY)
 	_partition(HALF_WIDTH, DOOR_A, HEIGHT, 0.0, &"t2.door.a", [&"t2.receiver"])
 	_sign("1 · Освободите путь лучу", Vector3(0, 3.5, DOOR_A + 0.2))
 	# Room 2: a field toward the right wall drops the cube onto the wall plate; the door is outside the field.
 	_button(&"t2.button.drop", Vector3(-4.75, 1.3, -14.0), DeviceDefinition.WallMode.TOGGLE, 1.0, "", 90.0)
 	_field(&"t2.field.drop", Vector3(HALF_WIDTH - 1.25, 2.0, -17.0), Vector3(4.0, 2.5, 10.0), 90.0, [&"t2.button.drop"])
 	_plate(&"t2.plate.wall", Vector3(HALF_WIDTH, 0.75, -17.0), 4.0, 3.0, Vector3(0, 0, 90))
-	_cube("CubeB", &"t2.cube.b", Vector3(HALF_WIDTH - 1.4, 0.55, -17.0), 5.0)
+	_cube("CubeB", &"t2.cube.b", Vector3(HALF_WIDTH - 1.4, 0.30, -17.0), BallastCube.Kind.LIGHT)
 	_partition(HALF_WIDTH, DOOR_B, HEIGHT, -2.0, &"t2.door.b", [&"t2.plate.wall"])
 	_sign("2 · Включите поле — куб упадёт на кнопку на стене", Vector3(0, 3.6, DOOR_B + 0.2))
 	# Room 3: a field toward the left wall; walk up past 3 m and forward out of the field onto the ledge.

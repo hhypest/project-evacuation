@@ -2,6 +2,7 @@ class_name ReserveChamberBuilder
 extends ChamberBuilder
 ## Two isolated rooms and a gated service hall. All puzzle state belongs to the existing device network.
 
+const SERVICE_CHECKPOINT: StationCheckpoint = preload("res://content/definitions/reserve_station.tres")
 const HALF_WIDTH: float = 7.0
 const HEIGHT: float = 4.5
 const RESERVE_Z: float = -29.0
@@ -22,6 +23,7 @@ func _ready() -> void:
 	_entry_room()
 	_optics_room()
 	_service_hall()
+	_checkpoint_station()
 	_exit()
 
 
@@ -41,8 +43,8 @@ func _envelope() -> void:
 
 
 func _entry_room() -> void:
-	_cube("Ballast", &"reserve.cube.ballast", Vector3(3.5, 0.45, 0), 20.0, 0.75)
-	_plate(&"reserve.primary", Vector3(3.5, 0.05, -5.0), 12.0, 9.0)
+	_cube("Ballast", &"reserve.cube.ballast", Vector3(3.5, 0.425, 0), BallastCube.Kind.HEAVY)
+	_plate(&"reserve.primary", Vector3(3.5, 0.05, -5.0), 8.0, 6.0)
 	_logic(&"reserve.portal_feed", DeviceDefinition.Kind.OR, [&"reserve.primary", &"reserve.backup"],
 		Vector3(-1.65, 1.55, PORTAL_A_Z + 0.25))
 	var pair: PortalPairDevice = PortalPairDevice.new()
@@ -54,12 +56,12 @@ func _entry_room() -> void:
 	add_child(pair)
 	_sign("РЕЗЕРВНЫЙ КОНТУР\nЦель: открыть выходной шлюз", Vector3(0, 3.55, -7.77))
 	_sign("ПОРТАЛ\nОсновное ИЛИ резерв", Vector3(-3, 2.85, -7.76))
-	_sign("ОСНОВНОЕ ПИТАНИЕ\nПлита · от 12 кг", Vector3(3.5, 2.0, -7.76))
+	_sign("ОСНОВНОЕ ПИТАНИЕ\nПлита · от 8 кг", Vector3(3.5, 2.0, -7.76))
 	_guide(Vector3(3.5, 0.012, -5.9), Vector3(1.4, 0.014, 0.06))
 
 
 func _optics_room() -> void:
-	_cube("ScreenCube", &"reserve.cube.screen", Vector3(-3.5, 0.45, -16.2), 5.0, 0.75)
+	_cube("ScreenCube", &"reserve.cube.screen", Vector3(-3.5, 0.30, -16.2), BallastCube.Kind.LIGHT)
 	_logic(&"reserve.source", DeviceDefinition.Kind.SOURCE, [], Vector3(-5.65, 1.25, -19.0), 1.0, 90.0, true)
 	_emitter(&"reserve.emitter", Vector3(-5.75, 0.56, -19.0), [&"reserve.source"], -90.0)
 	_receiver(&"reserve.receiver", Vector3(5.75, 0.56, -19.0), -90.0)
@@ -79,11 +81,11 @@ func _screen_socket() -> void:
 	var socket: CarrySocketBody = CarrySocketBody.new()
 	socket.name = "ScreenSocket"
 	socket.stable_id = &"reserve.screen_socket"
-	socket.position = Vector3(-3.5, 0.04, -19.0)
+	socket.position = Vector3(-3.5, 0.09, -19.0)
 	socket.collision_layer = 1
 	socket.collision_mask = 6
 	var shape: BoxShape3D = BoxShape3D.new()
-	shape.size = Vector3(1.2, 0.08, 1.2)
+	shape.size = Vector3(1.2, 0.18, 1.2)
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = shape
 	socket.add_child(collision)
@@ -96,13 +98,31 @@ func _service_hall() -> void:
 	_button(&"reserve.backup", Vector3(-4.5, 1.35, -34.0),
 		DeviceDefinition.WallMode.TOGGLE, 1.0, "РЕЗЕРВ")
 	_sign("РЕЗЕРВ\nУдерживает питание портала\nи открывает обратный проход", Vector3(-4.5, 2.52, -34.04))
-	_plate(&"reserve.exit_load", Vector3(4.1, 0.05, -35.0), 12.0, 9.0)
-	_sign("ВЫХОДНАЯ ПЛИТА\nот 12 кг", Vector3(6.82, 1.55, -35.0), -90.0)
+	_plate(&"reserve.exit_load", Vector3(4.1, 0.05, -35.0), 8.0, 6.0)
+	_sign("ВЫХОДНАЯ ПЛИТА\nот 8 кг", Vector3(6.82, 1.55, -35.0), -90.0)
 	_guide(Vector3(4.1, 0.012, -35.9), Vector3(1.4, 0.014, 0.06))
 	_logic(&"reserve.exit_feed", DeviceDefinition.Kind.AND, [&"reserve.exit_load", &"reserve.backup"],
 		Vector3(1.85, 1.55, EXIT_Z + 0.22))
 	_partition(HALF_WIDTH, EXIT_Z, HEIGHT, 0, &"reserve.exit_door", [&"reserve.exit_feed"])
 	_sign("ВЫХОД\nРезерв И нагрузка", Vector3(0, 2.76, EXIT_Z + 0.19))
+
+
+func _checkpoint_station() -> void:
+	var station: CheckpointStation = CheckpointStation.new()
+	station.name = "CheckpointStation"
+	station.checkpoint = SERVICE_CHECKPOINT
+	station.position = Vector3(-2.45, 1.35, -33.85)
+	var spawn: Marker3D = Marker3D.new()
+	spawn.name = "Spawn"
+	spawn.position = Vector3(0, -1.30, 1.45)
+	station.spawn = spawn
+	station.add_child(spawn)
+	var primary: FloorButtonDevice = get_node("reserve_primary") as FloorButtonDevice
+	station.prop_supports[&"reserve.cube.ballast"] = primary.plate
+	station.prop_supports[&"reserve.cube.screen"] = get_node("ScreenSocket") as CarrySocketBody
+	_box(Vector3(0.44, 0.95, 0.35), Vector3(-2.45, 0.475, -33.93),
+		Color(0.21, 0.23, 0.24), "StationStand")
+	add_child(station)
 
 
 func _exit() -> void:
@@ -133,6 +153,7 @@ func _on_exit_entered(body: Node3D) -> void:
 	completed = true
 	_completion_sign.text = "ИСПЫТАНИЕ ПРОЙДЕНО\nR — заново · Esc — пауза"
 	print("CHAMBER_COMPLETED level=reserve_circuit")
+	chamber_completed.emit()
 
 
 func _portal_wall(x: float, z: float) -> void:

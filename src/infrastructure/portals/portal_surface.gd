@@ -5,8 +5,9 @@ extends Node3D
 
 ## Render layer of live membranes (seen by the player camera only).
 const MEMBRANE_LAYER: int = 1 << 1
-## Render layer of membrane stubs (seen by portal cameras only).
-const STUB_LAYER: int = 1 << 19
+const ASSEMBLY_ENAMEL: Material = preload("res://content/materials/expedition/portal_enamel.tres")
+const GASKET_COLOR: Color = Color(0.085, 0.092, 0.096)
+const AMBER: Color = Color(1.0, 0.55, 0.23)
 const ALL_LAYERS: int = 0xFFFFF
 const MEMBRANE_SHADER: Shader = preload("res://src/infrastructure/portals/portal_membrane.gdshader")
 
@@ -22,7 +23,6 @@ var powered: bool = false
 var viewport: SubViewport
 var camera: Camera3D
 var _membrane: MeshInstance3D
-var _stub: MeshInstance3D
 var _frame_lamps: Array[MeshInstance3D] = []
 var _live: ShaderMaterial
 var _gate: CollisionShape3D
@@ -35,22 +35,27 @@ var view_blockers: Array[AABB] = []
 
 
 func _ready() -> void:
-	var frame_color: Color = Color(0.88, 0.86, 0.82)
 	var depth: float = PortalRules.FRAME_HALF_DEPTH * 2.0
 	for side: float in [-1.0, 1.0]:
 		var post_height: float = half_size.y * 2.0 + (0.16 if floor_level else 0.32)
-		var post: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.16, post_height, depth), frame_color)
-		post.position = Vector3(side * (half_size.x + 0.08), 0.08 if floor_level else 0.0, 0)
-		add_child(post)
-		# Floor-level openings have no sill: a bar flush with the floor plane z-fights with it.
+		_frame_rail(Vector3(0.16, post_height, depth),
+			Vector3(side * (half_size.x + 0.08), 0.08 if floor_level else 0.0, 0), Vector3.RIGHT * side)
+		# Floor-level openings have no sill.
 		if side > 0.0 or not floor_level:
-			var bar: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(half_size.x * 2.0, 0.16, depth), frame_color)
-			bar.position = Vector3(0, side * (half_size.y + 0.08), 0)
-			add_child(bar)
-		var lamp: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.05, half_size.y * 1.6, 0.02), accent)
-		lamp.position = Vector3(side * (half_size.x + 0.08), 0, depth * 0.5 + 0.01)
-		add_child(lamp)
-		_frame_lamps.append(lamp)
+			_frame_rail(Vector3(half_size.x * 2.0, 0.16, depth),
+				Vector3(0, side * (half_size.y + 0.08), 0), Vector3.UP * side)
+		# Pair identity stays visible when unpowered, independently of the amber contact lamps.
+		var tag: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.075, 0.21, 0.01), accent)
+		tag.position = Vector3(side * (half_size.x + 0.103), half_size.y * 0.67, depth * 0.5 + 0.025)
+		add_child(tag)
+		var letter: Label3D = Label3D.new()
+		letter.text = str(name)
+		letter.modulate = Color(0.05, 0.06, 0.06)
+		letter.outline_size = 0
+		letter.font_size = 48
+		letter.pixel_size = 0.00112
+		letter.position = tag.position + Vector3(0, 0, 0.009)
+		add_child(letter)
 	viewport = SubViewport.new()
 	viewport.name = "View"
 	viewport.size = PortalViewGeometry.target_size(_screen_size())
@@ -76,16 +81,6 @@ func _ready() -> void:
 	# lies inside Camera3D.near. Off-screen/back-facing apertures are hidden in _process instead.
 	_membrane.extra_cull_margin = 1.0
 	add_child(_membrane)
-	var stub_material: StandardMaterial3D = StandardMaterial3D.new()
-	stub_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	stub_material.albedo_color = accent.darkened(0.55)
-	_stub = MeshInstance3D.new()
-	_stub.name = "Stub"
-	_stub.mesh = quad
-	_stub.material_override = stub_material
-	_stub.layers = STUB_LAYER
-	_stub.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(_stub)
 	# A real local barrier is enabled only for a refused passage, never by disabling a wall.
 	var barrier: StaticBody3D = StaticBody3D.new()
 	barrier.name = "ExitBlocker"
@@ -102,15 +97,36 @@ func _ready() -> void:
 	set_powered(false)
 
 
+## Nest the enamel and contact strip inside the collar, entirely outside the physical aperture.
+func _frame_rail(size: Vector3, at: Vector3, away: Vector3) -> void:
+	var collar: MeshInstance3D = PuzzleDeviceNode.box_mesh(size, GASKET_COLOR)
+	collar.position = at
+	add_child(collar)
+	var enamel_size: Vector3 = size - away.abs() * 0.048
+	enamel_size.z = 0.022
+	for face: float in [-1.0, 1.0]:
+		var enamel_at: Vector3 = at + away * 0.019 + Vector3.BACK * face * (size.z * 0.5 + 0.01)
+		var enamel: MeshInstance3D = MeshInstance3D.new()
+		enamel.mesh = MetricBoxMesh.make(enamel_size, enamel_at, 1.0)
+		enamel.material_override = ASSEMBLY_ENAMEL
+		enamel.position = enamel_at
+		add_child(enamel)
+		var contact_size: Vector3 = size - away.abs() * 0.149
+		contact_size.z = 0.008
+		var lamp: MeshInstance3D = PuzzleDeviceNode.box_mesh(contact_size, AMBER.darkened(0.65))
+		lamp.position = at - away * 0.055 + Vector3.BACK * face * (size.z * 0.5 + 0.005)
+		add_child(lamp)
+		_frame_lamps.append(lamp)
+
+
 func set_powered(on: bool) -> void:
 	powered = on
 	_membrane.visible = on
-	_stub.visible = on
 	for lamp: MeshInstance3D in _frame_lamps:
 		var material: StandardMaterial3D = lamp.material_override as StandardMaterial3D
 		material.emission_enabled = on
-		material.emission = accent
-		material.emission_energy_multiplier = 2.0
+		material.emission = AMBER
+		material.emission_energy_multiplier = 0.65
 	if not on:
 		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		set_blocked(false)
@@ -177,7 +193,7 @@ func place_camera(viewer: Transform3D, visible: Rect2 = Rect2()) -> void:
 	_live.set_shader_parameter(&"portal_up", global_basis.y.normalized())
 	_live.set_shader_parameter(&"portal_normal", global_basis.z.normalized())
 	_live.set_shader_parameter(&"portal_half", half_size)
-	_live.set_shader_parameter(&"rim_color", accent)
+	_live.set_shader_parameter(&"contact_color", AMBER)
 	_live.set_shader_parameter(&"rim_width", maxf(rim_width, 0.0))
 	_live.set_shader_parameter(&"rim_intensity", maxf(rim_intensity, 0.0))
 

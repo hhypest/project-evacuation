@@ -3,7 +3,9 @@ extends MechanicsBayBuilder
 ## Local direct-light bench: moving omni, spot, physical blockers and independent comparison switches.
 
 const AMBER_GUIDE: Color = Color(0.7, 0.4, 0.13)
-const REFERENCE_PANEL: Material = preload("res://content/materials/surfaces/panel_light.tres")
+const REFERENCE_PANEL: Material = preload("res://content/materials/expedition/panel_reference.tres")
+
+const REFERENCE_BASALT: Material = preload("res://content/materials/expedition/basalt_reference.tres")
 
 var point: OmniLight3D
 var spot: SpotLight3D
@@ -70,8 +72,8 @@ func _build() -> void:
 	# A slatted blocker makes the spot's moving/occluded footprint easy to distinguish on the floor.
 	for index: int in range(7):
 		_test_block(Vector3(0.18, 2.8, 0.18), Vector3(1.5 + float(index) * 0.65, 1.4, 0), 0.6, 0, "Slat%d" % index)
-	_cube("ShadowCubeA", &"qa.lighting.cube.a", Vector3(-3, 0.55, -1), 5)
-	_cube("ShadowCubeB", &"qa.lighting.cube.b", Vector3(3, 0.55, -4), 20)
+	_cube("ShadowCubeA", &"qa.lighting.cube.a", Vector3(-3, 0.30, -1), BallastCube.Kind.LIGHT)
+	_cube("ShadowCubeB", &"qa.lighting.cube.b", Vector3(3, 0.425, -4), BallastCube.Kind.HEAVY)
 	# Three equal shapes isolate roughness/metalness while the light moves over them.
 	for index: int in range(3):
 		_test_block(Vector3(1, 1, 1), Vector3(-5 + float(index) * 2, 0.5, -5),
@@ -91,7 +93,7 @@ func _build() -> void:
 func _material_reference() -> void:
 	for index: int in range(2):
 		var at: Vector3 = Vector3(7.2 + index * 2.2, 1.2, -6)
-		var material: Material = REFERENCE_PANEL if index == 0 else WALL_MATERIAL
+		var material: Material = REFERENCE_PANEL if index == 0 else REFERENCE_BASALT
 		var body: StaticBody3D = _box(Vector3(2, 2.4, 0.2), at, WALL_COLOR, "ReferencePanel%d" % index)
 		for child: Node in body.get_children():
 			var visual: MeshInstance3D = child as MeshInstance3D
@@ -104,7 +106,8 @@ func _material_reference() -> void:
 	control.mode = DeviceDefinition.WallMode.TOGGLE
 	control.position = Vector3(7.2, 1.35, -5.82)
 	add_child(control)
-	_cube("ReferenceCube", &"qa.lighting.reference.cube", Vector3(8.3, 0.55, -4.3), 5)
+	_cube("ReferenceCube", &"qa.lighting.reference.cube", Vector3(8.3, 0.30, -4.3), BallastCube.Kind.LIGHT)
+	_cube("ReferenceHeavyCube", &"qa.lighting.reference.heavy", Vector3(9.2, 0.425, -4.3), BallastCube.Kind.HEAVY)
 	_board("ЭТАЛОН МАТЕРИАЛОВ · DEV-04: E — индикатор\nКуб / окрашенный металл / базальт · СТОП фиксирует свет", Vector3(8.3, 3, -5.8))
 
 

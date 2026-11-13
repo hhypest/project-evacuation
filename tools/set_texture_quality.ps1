@@ -20,18 +20,23 @@ $originals = [ordered]@{}
 $changes = [ordered]@{}
 $utf8 = [Text.UTF8Encoding]::new($false)
 
+function Register-Texture([string]$mapPath) {
+  $path = $mapPath + '.import'
+  $source = [IO.File]::ReadAllText($path)
+  if ([regex]::Matches($source, '(?m)^process/size_limit=\d+\r?$').Count -ne 1) { throw "Invalid import limit in $path" }
+  $originals[$path] = $source
+  $changes[$path] = [regex]::Replace($source, '(?m)^process/size_limit=\d+', "process/size_limit=$limit")
+}
+
 # Validate the entire set before modifying any file; source images are never rewritten.
 foreach ($model in @('ballast_cube', 'floor_button', 'emitter', 'receiver', 'wall_button', 'wall_switch', 'logic_box', 'door', 'door_frame')) {
   $folder = Join-Path $root "content/models/devices/$model"
   $textures = @(Get-ChildItem -LiteralPath $folder -File | Where-Object Extension -In '.jpg', '.png')
   if ($textures.Count -ne 3) { throw "Expected exactly three source maps in $model." }
-  foreach ($texture in $textures) {
-    $path = $texture.FullName + '.import'
-    $source = [IO.File]::ReadAllText($path)
-    if ([regex]::Matches($source, '(?m)^process/size_limit=\d+\r?$').Count -ne 1) { throw "Invalid import limit in $path" }
-    $originals[$path] = $source
-    $changes[$path] = [regex]::Replace($source, '(?m)^process/size_limit=\d+', "process/size_limit=$limit")
-  }
+  foreach ($texture in $textures) { Register-Texture $texture.FullName }
+}
+foreach ($variant in @('5kg', '10kg')) {
+  Register-Texture (Join-Path $root "content/textures/expedition/ballast_${variant}_albedo.jpg")
 }
 $manifest = Join-Path $root 'content/definitions/device_texture_quality.tres'
 $source = [IO.File]::ReadAllText($manifest)
@@ -54,7 +59,7 @@ try {
   $report = Invoke-QualityGodot -Arguments @('--headless', '--path', $root, '--script', 'tools/texture_quality_smoke.gd')
   if ($report -notmatch 'TEXTURE_QUALITY_PASSED') { throw 'Missing texture-size verification result.' }
   Write-Output $report
-  Write-Output "TEXTURE_PROFILE_APPLIED quality=$Quality max_size=$limit maps=27 (original images preserved; restart the game)"
+  Write-Output "TEXTURE_PROFILE_APPLIED quality=$Quality max_size=$limit maps=29 (original images preserved; restart the game)"
 } catch {
   $reason = $_
   foreach ($path in $originals.Keys) { [IO.File]::WriteAllText($path, $originals[$path], $utf8) }

@@ -7,6 +7,8 @@ extends Node3D
 ## IDs of devices that drive this one (consumers and logic only; ignored by sensors).
 @export var inputs: Array[StringName] = []
 
+## Screen-reading device effects use the main camera's opaque pass.
+const SCREEN_EFFECT_LAYER: int = 1 << 16
 const AMBER: Color = Color(0.91, 0.59, 0.24)
 const DARK: Color = Color(0.08, 0.09, 0.1)
 

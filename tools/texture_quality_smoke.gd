@@ -22,5 +22,12 @@ func _initialize() -> void:
 				printerr("TEXTURE_QUALITY_FAILED %s expected=%d" % [path, expected])
 			else:
 				print("TEXTURE_SIZE %s %dx%d" % [path, texture.get_width(), texture.get_height()])
-	print("TEXTURE_QUALITY_%s profile=%s maps=27" % ["FAILED" if failed else "PASSED", SETTINGS.profile_label()])
+	var side: int = 2048 if SETTINGS.max_size == 2048 else 4096
+	for albedo: Texture2D in [PropVisuals.LIGHT_ALBEDO, PropVisuals.HEAVY_ALBEDO]:
+		if albedo.get_width() != side or albedo.get_height() != side:
+			failed = true
+			printerr("TEXTURE_QUALITY_FAILED %s expected=%d" % [albedo.resource_path, side])
+		else:
+			print("TEXTURE_SIZE %s %dx%d" % [albedo.resource_path, side, side])
+	print("TEXTURE_QUALITY_%s profile=%s maps=29" % ["FAILED" if failed else "PASSED", SETTINGS.profile_label()])
 	quit(1 if failed else 0)

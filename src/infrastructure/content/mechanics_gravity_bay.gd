@@ -11,8 +11,10 @@ func _build() -> void:
 	_box(Vector3(0.3, 4.2, 10), Vector3(-10.75, 2.1, 4), WALL_COLOR, "GravityWall")
 	_button(&"qa.gravity.toggle", Vector3(-10.48, 1.3, -1), DeviceDefinition.WallMode.TOGGLE, 1, "", 90)
 	_field(&"qa.gravity.field", Vector3(-8.1, 2, 4), Vector3(4, 5, 8), -90, [&"qa.gravity.toggle"])
-	_plate(&"qa.gravity.plate", Vector3(-10.6, 0.75, 4), 4, 3, Vector3(0, 0, -90))
-	_cube("WallCube", &"qa.gravity.cube", Vector3(-7.4, 0.55, 4), 5)
+	_plate(&"qa.gravity.plate", Vector3(-10.6, 0.98, 4), 4, 3, Vector3(0, 0, -90),
+		Vector3(0.84, 0.1, 1.4))
+	_box(Vector3(3.0, 0.34, 0.84), Vector3(-8.26, 0.17, 4), FLOOR_COLOR, "GravityCubeStand")
+	_cube("WallCube", &"qa.gravity.cube", Vector3(-7.4, 0.64, 4), BallastCube.Kind.LIGHT)
 	_board("Поле к стене: поверни игрока и куб\nКуб на настенной плите; выйди за край поля", Vector3(-5.5, 4.6, 11.8), 180)
 	var loop: TrialLoopBuilder = TrialLoopBuilder.new()
 	loop.name = "CombinedLoop"

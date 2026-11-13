@@ -1,11 +1,10 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/presentation/player/look_camera.gd" id="1"]
 [ext_resource type="PackedScene" path="res://src/infrastructure/godot_physics/player_body.tscn" id="2"]
 [ext_resource type="Script" path="res://src/infrastructure/content/movement_lab_builder.gd" id="3"]
-[ext_resource type="Script" path="res://src/infrastructure/godot_physics/carry_rigid_body.gd" id="4"]
+[ext_resource type="Script" path="res://src/infrastructure/content/ballast_cube.gd" id="4"]
 [ext_resource type="Script" path="res://src/infrastructure/content/puzzle_lab_builder.gd" id="5"]
-[ext_resource type="PackedScene" path="res://content/models/devices/ballast_cube/ballast_cube.gltf" id="6"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMaterial"]
 albedo_color = Color(0.13, 0.17, 0.21, 1)
@@ -17,8 +16,6 @@ size = Vector3(48, 1, 48)
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(48, 1, 48)
-
-[sub_resource type="BoxShape3D" id="CubeShape"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -64,14 +61,7 @@ shape = SubResource("FloorShape")
 script = ExtResource("4")
 stable_id = &"lab.cube.medium"
 position = Vector3(0, 3, 0)
-mass = 20.0
-collision_layer = 2
-collision_mask = 7
-
-[node name="Visual" parent="TestCube" instance=ExtResource("6")]
-
-[node name="Collision" type="CollisionShape3D" parent="TestCube"]
-shape = SubResource("CubeShape")
+kind = 1
 
 [node name="Marker" type="MeshInstance3D" parent="."]
 position = Vector3(0, 0.015, 2)

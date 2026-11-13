@@ -95,6 +95,7 @@ func _trace(emitter: EmitterDevice) -> BeamHit:
 	var collider: Variant = hit.get("collider")
 	if point is not Vector3 or collider is not Object:
 		emitter.show_beam(emitter.range_m)
+		emitter.show_contact()
 		return null
 	# Raw engine query result; both types were checked before crossing the typed boundary.
 	@warning_ignore("unsafe_cast")
@@ -105,27 +106,37 @@ func _trace(emitter: EmitterDevice) -> BeamHit:
 	for id: StringName in _devices.keys():
 		var receiver: ReceiverDevice = _devices[id] as ReceiverDevice
 		if receiver != null and receiver.owns(target):
+			emitter.show_contact()
 			return BeamHit.make(emitter.stable_id, id, receiver.front().dot(-forward))
+	var normal: Variant = hit.get("normal")
+	if normal is Vector3 and target != _player:
+		@warning_ignore("unsafe_cast")
+		emitter.show_contact(end, normal as Vector3)
+	else:
+		emitter.show_contact()
 	return null
 
 
 func usable(view: Transform3D, reach: float) -> StringName:
-	if not _open or _player == null:
-		return &""
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-		view.origin, view.origin - view.basis.z * reach, 3, [_player.get_rid()])
-	var hit: Dictionary = _player.get_world_3d().direct_space_state.intersect_ray(query)
-	var collider: Variant = hit.get("collider")
-	if collider is not Object:
-		return &""
-	# Raw engine query result; the Object type was checked before crossing the typed boundary.
-	@warning_ignore("unsafe_cast")
-	var target: Object = collider as Object
+	var target: Object = interaction_target(view, reach)
 	for id: StringName in _devices.keys():
 		var button: WallButtonDevice = _devices[id] as WallButtonDevice
 		if button != null and button.owns(target):
 			return id
 	return &""
+
+
+func interaction_target(view: Transform3D, reach: float) -> Object:
+	if not _open or _player == null:
+		return null
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		view.origin, view.origin - view.basis.z * reach, 3, [_player.get_rid()])
+	var hit: Dictionary = _player.get_world_3d().direct_space_state.intersect_ray(query)
+	var collider: Variant = hit.get("collider")
+	if collider is not Object:
+		return null
+	@warning_ignore("unsafe_cast")
+	return collider as Object
 
 
 func press(id: StringName) -> bool:

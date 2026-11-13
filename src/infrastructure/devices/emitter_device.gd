@@ -3,6 +3,8 @@ extends PuzzleDeviceNode
 ## Powered beam emitter. Fires along its local -Z. The adapter traces the game beam; the visible beam
 ## only shows the traced length and never decides a hit (Architecture §7).
 
+const CORE_SHADER: Shader = preload("res://src/infrastructure/devices/optics_beam.gdshader")
+const HALO_SHADER: Shader = preload("res://src/infrastructure/devices/optics_halo.gdshader")
 const CYAN: Color = Color(0.22, 0.78, 0.86)
 const HOUSING: Vector3 = Vector3(0.5, 0.5, 0.7)
 ## DEV-05 art: its recessed lens opening sits on the firing axis. The collision stays the HOUSING box;
@@ -21,6 +23,9 @@ var powered: bool = false
 ## Length of the last traced beam, metres.
 var beam_length: float = 0.0
 var _beam: MeshInstance3D
+var _halo: MeshInstance3D
+var _impact: MeshInstance3D
+var _has_impact: bool = false
 var _lens: MeshInstance3D
 var _lamp: MeshInstance3D
 
@@ -48,21 +53,37 @@ func _ready() -> void:
 	_lamp.name = "PowerLamp"
 	_lamp.position = Vector3(0, 0.12, 0.332)
 	add_child(_lamp)
-	var material: StandardMaterial3D = StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = CYAN
-	material.emission_enabled = true
-	material.emission = CYAN
-	material.emission_energy_multiplier = 3.0
-	var mesh: BoxMesh = BoxMesh.new()
-	mesh.size = Vector3(0.035, 0.035, 1.0)
-	_beam = MeshInstance3D.new()
-	_beam.name = "Beam"
-	_beam.mesh = mesh
-	_beam.material_override = material
-	_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_beam.visible = false
-	add_child(_beam)
+	var core: BoxMesh = BoxMesh.new()
+	core.size = Vector3(0.012, 0.012, 1.0)
+	_beam = _light_mesh("Beam", core, CORE_SHADER)
+	var halo: QuadMesh = QuadMesh.new()
+	halo.size = Vector2(0.085, 1.0)
+	_halo = _light_mesh("BeamHalo", halo, HALO_SHADER)
+	_halo.rotation.x = -PI * 0.5
+	# The billboard can turn out of its local plane. Use the whole cross-section for CPU culling.
+	_halo.custom_aabb = AABB(Vector3(-0.043, -0.5, -0.043), Vector3(0.086, 1.0, 0.086))
+	var contact: SphereMesh = SphereMesh.new()
+	contact.radius = 0.024
+	contact.height = 0.004
+	contact.radial_segments = 16
+	contact.rings = 4
+	_impact = _light_mesh("BeamContact", contact, CORE_SHADER)
+	var contact_material: ShaderMaterial = _impact.material_override as ShaderMaterial
+	contact_material.set_shader_parameter(&"light_color", CYAN)
+	contact_material.set_shader_parameter(&"intensity", 1.15)
+
+
+func _light_mesh(label: String, mesh: Mesh, shader: Shader) -> MeshInstance3D:
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = shader
+	var visual: MeshInstance3D = MeshInstance3D.new()
+	visual.name = label
+	visual.mesh = mesh
+	visual.material_override = material
+	visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	visual.visible = false
+	add_child(visual)
+	return visual
 
 
 func definition() -> DeviceDefinition:
@@ -89,7 +110,11 @@ func show_output(on: bool, _delta: float) -> void:
 		material.emission_enabled = on
 		material.emission = CYAN
 		material.emission_energy_multiplier = 2.0
-	show_beam(beam_length)
+	_beam.visible = on and beam_length > 0.01
+	_halo.visible = _beam.visible
+	_impact.visible = on and _has_impact
+	if not on:
+		_has_impact = false
 
 
 ## Updates the visible beam to the traced length; hidden while unpowered.
@@ -104,3 +129,14 @@ func show_beam(length: float) -> void:
 	var visible_length: float = beam_length + (HOUSING.z * 0.5 + 0.05 - start)
 	_beam.scale = Vector3(1, 1, maxf(visible_length, 0.01))
 	_beam.position = Vector3(0, 0, -start - visible_length * 0.5)
+	_halo.visible = _beam.visible
+	_halo.scale = Vector3(1, maxf(visible_length, 0.01), 1)
+	_halo.position = _beam.position
+
+## Place a steady contact mark on the physical surface hit by the same gameplay ray.
+func show_contact(point: Vector3 = Vector3.ZERO, normal: Vector3 = Vector3.ZERO) -> void:
+	_has_impact = not normal.is_zero_approx()
+	_impact.visible = powered and _has_impact
+	if _has_impact:
+		var orientation: Basis = Basis(Quaternion(Vector3.UP, normal))
+		_impact.global_transform = Transform3D(orientation, point + normal * 0.004)

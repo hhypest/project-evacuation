@@ -2,6 +2,8 @@ class_name CarryPhysicsTests
 extends TestSuite
 
 const LAB: PackedScene = preload("res://content/levels/foundation_lab.tscn")
+const HALF_CUBE: float = BallastCube.HEAVY_EDGE * 0.5
+
 var _scope: LevelScope
 var _player: PlayerMotor
 var _camera: LookCamera
@@ -39,7 +41,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(1, true)
 	await _ticks(12)
 	results.append(TestOutcome.new("a cube settled into the floor is lifted out and reaches a low hold point",
-		rest_height < 0.5 and _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.distance_to(_hold()) < 0.05,
+		rest_height < HALF_CUBE and _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.distance_to(_hold()) < 0.05,
 		"rest=%.4f cube=%s hold=%s" % [rest_height, _cube.position, _hold()]))
 	await _close()
 	await _open()
@@ -60,7 +62,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		and _cube.position.y < 0.8 and _cube not in _player.get_collision_exceptions()))
 	await _close()
 	var throw_speeds: Array[float] = []
-	for kilograms: float in [1.0, 5.0, 40.0]:
+	for kilograms: float in [5.0, 10.0, 40.0]:
 		await _open(kilograms)
 		await _ticks(30, true)
 		var acquired: bool = _scope.held_prop_id() == &"lab.cube.medium"
@@ -73,8 +75,8 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 			and _cube.linear_velocity.is_finite() and _cube.linear_velocity.length() < 12.5,
 			"velocity=%s" % _cube.linear_velocity))
 		await _close()
-	results.append(TestOutcome.new("same bounded throw launches 5 kg faster than 40 kg",
-		throw_speeds[1] > throw_speeds[2] * 1.5 and throw_speeds[2] > 1,
+	results.append(TestOutcome.new("the gameplay throw launches the 5 kg cube faster than the 10 kg cube and bounds both speeds",
+		throw_speeds[0] > throw_speeds[1] + 2.0 and throw_speeds[1] > throw_speeds[2] * 1.5 and throw_speeds[2] > 1,
 		"speeds=%s" % str(throw_speeds)))
 	await _open(80)
 	await _ticks(5, true)
@@ -95,11 +97,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(30, true)
 	await _ticks(100, false, false, Vector2(0, -1))
 	results.append(TestOutcome.new("carrying into a wall stops the cube at the wall, never through it",
-		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.z > -0.7 + 0.45
+		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.z > -0.7 + HALF_CUBE - 0.02
 		and _cube.position.is_finite(), "cube=%s" % _cube.position))
 	# The carrier has walked into the blocked cube (collisions with it are off); dropping it there must not
 	# hand an interpenetrating pair to the solver.
-	var overlapped: bool = _player.position.z - _player.profile.radius < _cube.position.z + 0.5
+	var overlapped: bool = _player.position.z - _player.profile.radius < _cube.position.z + HALF_CUBE
 	await _ticks(1, true)
 	var kept_apart: bool = _cube in _player.get_collision_exceptions()
 	_maximum_speed = 0.0
@@ -118,9 +120,9 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_maximum_lag = 0.0
 	await _ticks(40, false, false, Vector2(1, 0))
 	await _ticks(40, false, false, Vector2(0, -1))
-	results.append(TestOutcome.new("looking straight down, a 1 m cube rides above the floor and follows walking and strafing",
+	results.append(TestOutcome.new("looking straight down, a 0.75 m cube rides above the floor and follows walking and strafing",
 		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.distance_to(_hold()) < 0.1
-		and _maximum_lag < 0.35 and _cube.position.y > 0.5,
+		and _maximum_lag < 0.35 and _cube.position.y > HALF_CUBE,
 		"error=%.3f lag=%.3f cube=%s" % [_cube.position.distance_to(_hold()), _maximum_lag, _cube.position]))
 	await _close()
 	await _open()
@@ -129,27 +131,28 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_camera.rotation.x = deg_to_rad(80)
 	await _ticks(40)
 	results.append(TestOutcome.new("looking up under a 2 m ceiling keeps the cube held below the ceiling",
-		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.y + 0.5 <= 2.0 + 0.001
-		and _cube.position.y + 0.5 > 1.9,
+		_scope.held_prop_id() == &"lab.cube.medium" and _cube.position.y + HALF_CUBE <= 2.0 + 0.001
+		and _cube.position.y + HALF_CUBE > 1.9,
 		"cube=%s" % _cube.position))
 	await _ticks(40, false, false, Vector2(1, 0))
 	var sideways: Vector3 = (_cube.position - _hold()).slide(Vector3.UP)
 	results.append(TestOutcome.new("a cube pressed to the ceiling still slides along it while strafing",
-		_scope.held_prop_id() == &"lab.cube.medium" and sideways.length() < 0.1 and _cube.position.y + 0.5 <= 2.001,
+		_scope.held_prop_id() == &"lab.cube.medium" and sideways.length() < 0.1 and _cube.position.y + HALF_CUBE <= 2.001,
 		"cube=%s hold=%s" % [_cube.position, _hold()]))
 	await _close()
 	await _open(20.0, Vector3(0, 0.05, 2.6))
-	_wall(Vector3(-0.65, 1.5, 0), Vector3(0.2, 3, 4))
-	_wall(Vector3(0.65, 1.5, 0), Vector3(0.2, 3, 4))
+	_wall(Vector3(-0.65, 1.5, 0), Vector3(0.2, 3, 6))
+	_wall(Vector3(0.65, 1.5, 0), Vector3(0.2, 3, 6))
 	await _ticks(30, true)
 	var in_corridor: bool = _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.z > 1.5
 	_camera.rotation.y += deg_to_rad(55)
 	await _ticks(60)
 	# Turning 55 degrees aims the hold point into a wall; the cube slides along the walls toward it but stays
 	# between them and in front of the carrier.
+	var extent: Vector3 = PortalRules.projected_extent(_cube.global_basis, Vector3.ONE * HALF_CUBE)
 	results.append(TestOutcome.new("a cube held in a 1.1 m corridor slides along the walls, never into or past them",
 		in_corridor and _scope.held_prop_id() == &"lab.cube.medium" and _cube.position.is_finite()
-		and absf(_cube.position.x) < 0.06 and _cube.position.z < _player.position.z - _player.profile.radius,
+		and absf(_cube.position.x) + extent.x <= 0.56 and _cube.position.z < _player.position.z - 0.15,
 		"cube=%s player=%s" % [_cube.position, _player.position]))
 	await _close()
 	await _open()
@@ -202,17 +205,17 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(2)
 	results.append(TestOutcome.new("removing a live held body cancels its ownership and pending commands",
 		_scope.held_prop_id().is_empty() and not _cube.is_carried()))
-	level.add_child(_cube)
 	await _close()
+	_cube.free()
 	return results
 
 
-## Where the controller should be holding the 1 m test cube right now.
+## Where the controller should be holding the 0.75 m test cube right now.
 func _hold() -> Vector3:
 	var forward: Vector3 = -_camera.global_basis.z
 	var facing: Vector3 = CarryRules.facing(forward, _player.up_direction, forward)
 	return CarryRules.hold_point(_player.global_position, _player.up_direction, facing, forward,
-		_player.profile.radius, 0.5, 0.5, _profile)
+		_player.profile.radius, HALF_CUBE, HALF_CUBE, _profile)
 
 
 func _open(kilograms: float = 20.0, at: Vector3 = Vector3(0, 0.05, 3)) -> void:

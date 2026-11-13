@@ -4,6 +4,8 @@ extends Node3D
 ## its stable ID and a node name derived from it, so tests and the gpu smoke can find it.
 
 const WALL_COLOR: Color = Color(0.2, 0.23, 0.26)
+signal chamber_completed()
+
 const FLOOR_COLOR: Color = Color(0.13, 0.16, 0.19)
 
 
@@ -28,13 +30,15 @@ func _lamp(at: Vector3, reach: float = 10.0, energy: float = 1.4) -> void:
 	add_child(lamp)
 
 
-func _plate(id: StringName, at: Vector3, press: float, release: float, turn: Vector3 = Vector3.ZERO) -> FloorButtonDevice:
+func _plate(id: StringName, at: Vector3, press: float, release: float, turn: Vector3 = Vector3.ZERO,
+		size: Vector3 = Vector3(1.4, 0.1, 1.4)) -> FloorButtonDevice:
 	var plate: FloorButtonDevice = FloorButtonDevice.new()
 	plate.name = node_name(id)
 	plate.rotation_degrees = turn
 	plate.stable_id = id
 	plate.press_threshold_kg = press
 	plate.release_threshold_kg = release
+	plate.plate_size = size
 	plate.position = at
 	add_child(plate)
 	return plate
@@ -111,28 +115,8 @@ func _logic(id: StringName, kind: DeviceDefinition.Kind, sources: Array[StringNa
 	return logic
 
 
-func _cube(label: String, id: StringName, at: Vector3, kilograms: float, edge: float = 1.0) -> CarryRigidBody:
-	var body: CarryRigidBody = CarryRigidBody.new()
-	body.name = label
-	body.stable_id = id
-	body.position = at
-	body.mass = kilograms
-	body.collision_layer = 2
-	body.collision_mask = 7
-	var shape: BoxShape3D = BoxShape3D.new()
-	shape.size = Vector3.ONE * edge
-	var collision: CollisionShape3D = CollisionShape3D.new()
-	collision.name = "Collision"
-	collision.shape = shape
-	body.add_child(collision)
-	body.add_child(PropVisuals.ballast_cube(edge))
-	var sign: Label3D = Label3D.new()
-	sign.text = "%.0f кг" % kilograms
-	sign.position = Vector3(0, 0, edge * 0.5 + 0.04)
-	sign.pixel_size = 0.005
-	sign.font_size = 48
-	sign.modulate = Color(0.1, 0.1, 0.1)
-	body.add_child(sign)
+func _cube(label: String, id: StringName, at: Vector3, kind: BallastCube.Kind) -> CarryRigidBody:
+	var body: CarryRigidBody = BallastCube.make(label, id, at, kind)
 	add_child(body)
 	return body
 

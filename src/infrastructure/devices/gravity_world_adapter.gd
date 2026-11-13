@@ -13,6 +13,15 @@ func configure(level: Node) -> void:
 	var ranked: Array[StringName] = GravityRules.rank(zones())
 	for index: int in range(ranked.size()):
 		_fields[ranked[index]].set_engine_priority(index + 1)
+	for index: int in range(ranked.size()):
+		var field: GravityFieldDevice = _fields[ranked[index]]
+		var bounds: AABB = field.global_transform * AABB(-field.size * 0.5, field.size)
+		for near_index: int in range(index + 1, ranked.size()):
+			var neighbour: GravityFieldDevice = _fields[ranked[near_index]]
+			var near_bounds: AABB = neighbour.global_transform * AABB(-neighbour.size * 0.5, neighbour.size)
+			if bounds.intersects(near_bounds):
+				field.omit_refraction()
+				neighbour.omit_refraction()
 
 
 func _collect(node: Node) -> void:

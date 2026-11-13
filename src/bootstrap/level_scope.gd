@@ -2,6 +2,9 @@ class_name LevelScope
 extends Node
 ## Owns one chamber generation. Detached scopes reject input before they are freed.
 
+signal station_requested(station: CheckpointStation, states: Dictionary[StringName, bool])
+signal chamber_completed()
+
 var _generation: int = -1
 var _level: Node3D
 var _camera: LookCamera
@@ -9,6 +12,9 @@ var _player: PlayerMotor
 var _carry: CarryController
 var _ghost: CarryGhost
 var _puzzle: AdvancePuzzle
+var _puzzle_world: PuzzleWorldAdapter
+var _use_reach: float = 0.0
+var _stations: Dictionary[StringName, CheckpointStation] = {}
 var _gravity: SampleGravity
 var _gravity_world: GravityWorldAdapter
 var _portals: AdvancePortals
@@ -16,7 +22,7 @@ var _portal_world: PortalWorldAdapter
 var _tick_id: int = 0
 
 
-func open(scene: PackedScene, generation: int) -> bool:
+func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) -> bool:
 	if _level != null or scene == null or not scene.can_instantiate():
 		return false
 	var instance: Node = scene.instantiate()
@@ -50,12 +56,13 @@ func open(scene: PackedScene, generation: int) -> bool:
 	_ghost = CarryGhost.new()
 	level.add_child(_ghost)
 	var settings: PuzzleSettings = preload("res://content/definitions/default_puzzle.tres") as PuzzleSettings
-	var puzzle_world: PuzzleWorldAdapter = PuzzleWorldAdapter.new()
-	if settings == null or not puzzle_world.configure(level, player, settings.player_mass_kg):
-		puzzle_world.close()
+	_puzzle_world = PuzzleWorldAdapter.new()
+	if settings == null or not _puzzle_world.configure(level, player, settings.player_mass_kg):
+		_puzzle_world.close()
 		_abort_open()
 		return false
-	_puzzle = AdvancePuzzle.new(puzzle_world, generation, settings.use_reach, Engine.physics_ticks_per_second)
+	_use_reach = settings.use_reach
+	_puzzle = AdvancePuzzle.new(_puzzle_world, generation, _use_reach, Engine.physics_ticks_per_second)
 	if not _puzzle.ready():
 		push_error("Chamber device network rejected: " + "; ".join(_puzzle.errors))
 		_puzzle.close()
@@ -80,6 +87,62 @@ func open(scene: PackedScene, generation: int) -> bool:
 		_abort_open()
 		return false
 	_puzzle.reset()
+	if not _register_stations():
+		_puzzle.close()
+		_abort_open()
+		return false
+	if checkpoint != null and checkpoint.checkpoint_id != SaveSnapshot.ENTRY_ID and not _restore_station(checkpoint):
+		_puzzle.close()
+		_abort_open()
+		return false
+	var chamber: ChamberBuilder = level as ChamberBuilder
+	if chamber != null:
+		chamber.chamber_completed.connect(chamber_completed.emit)
+	return true
+
+
+func _register_stations() -> bool:
+	for child: Node in _level.get_children():
+		var station: CheckpointStation = child as CheckpointStation
+		if station == null:
+			continue
+		if station.checkpoint == null or station.spawn == null:
+			return false
+		var id: StringName = station.checkpoint.checkpoint_id
+		if id == SaveSnapshot.ENTRY_ID or not SaveSnapshot.valid_id(id) or _stations.has(id):
+			return false
+		_stations[id] = station
+	return true
+
+
+func _restore_station(snapshot: SaveSnapshot) -> bool:
+	var selected: CheckpointStation = _stations.get(snapshot.checkpoint_id)
+	if selected == null or not selected.checkpoint.accepts(snapshot.switches) \
+			or not _puzzle.restore_checkpoint_switches(snapshot.switches) or not selected.restore_props(_level):
+		return false
+	var pose: Transform3D = selected.spawn.global_transform
+	_player.global_transform = pose
+	_player.reset_physics_interpolation()
+	_camera.global_basis = pose.basis
+	_camera.global_position = _player.eye_position()
+	_camera.reset_physics_interpolation()
+	selected.report("ТОЧКА ЗАГРУЖЕНА")
+	return true
+
+
+func _use_station() -> bool:
+	if _stations.is_empty():
+		return false
+	var station: CheckpointStation = _puzzle_world.interaction_target(_camera.global_transform, _use_reach) as CheckpointStation
+	if station == null or station.checkpoint == null:
+		return false
+	var states: Dictionary[StringName, bool] = {}
+	for id: StringName in station.checkpoint.required_switches:
+		states[id] = _puzzle.network.output(id)
+	if not station.checkpoint.accepts(states):
+		station.report("ВКЛЮЧИТЕ РЕЗЕРВ")
+	else:
+		station_requested.emit(station, states)
 	return true
 
 
@@ -89,6 +152,8 @@ func _abort_open() -> void:
 	_carry = null
 	_ghost = null
 	_puzzle = null
+	_puzzle_world = null
+	_stations.clear()
 	_gravity = null
 	if _gravity_world != null:
 		_gravity_world.close()
@@ -135,8 +200,9 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.carrier_up = _player.up_direction
 	carry_input.carrier_radius = _player.profile.radius
 	var interact: bool = frame.interact_requested
-	# A free hand uses a wall button under the view first; otherwise E keeps its carry meaning.
-	if interact and _carry.state.held_id.is_empty() and _puzzle.use(_generation, _camera.global_transform):
+	# A free hand can operate a station or wall button under the view before trying to carry.
+	if interact and _carry.state.held_id.is_empty() \
+			and (_use_station() or _puzzle.use(_generation, _camera.global_transform)):
 		interact = false
 	carry_input.interact = interact
 	carry_input.throw_requested = frame.throw_requested
@@ -210,6 +276,8 @@ func close() -> void:
 	if _puzzle != null:
 		_puzzle.close()
 	_puzzle = null
+	_puzzle_world = null
+	_stations.clear()
 	_gravity = null
 	if _gravity_world != null:
 		_gravity_world.close()

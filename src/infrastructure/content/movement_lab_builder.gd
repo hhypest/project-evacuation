@@ -4,9 +4,8 @@ extends Node3D
 
 
 func _ready() -> void:
-	_carry_cube("LightCube", &"lab.cube.light", Vector3(-7, 1, 10), 5.0)
-	_carry_cube("LimitCube", &"lab.cube.limit", Vector3(-10, 1, 10), 40.0)
-	_carry_cube("HeavyCube", &"lab.cube.heavy", Vector3(-13, 1, 10), 80.0)
+	add_child(BallastCube.make("LightCube", &"lab.cube.light", Vector3(-7, 0.30, 10), BallastCube.Kind.LIGHT))
+	add_child(BallastCube.make("HeavyCube", &"lab.cube.heavy", Vector3(-10, 0.425, 10), BallastCube.Kind.HEAVY))
 	_box("CarryWall", Vector3(20, 1.5, 7), Vector3(0.2, 3, 6), Color(0.35, 0.4, 0.43))
 	_box("CarryCeiling", Vector3(17, 2.2, 7), Vector3(3, 0.2, 4), Color(0.35, 0.4, 0.43))
 	_box("CarryBack", Vector3(17, 1.5, 4), Vector3(6, 3, 0.2), Color(0.35, 0.4, 0.43))
@@ -61,30 +60,6 @@ func _box(label: String, at: Vector3, size: Vector3, color: Color) -> StaticBody
 	add_child(body)
 	_attach_box(body, size, color)
 	return body
-
-
-func _carry_cube(label: String, id: StringName, at: Vector3, kilograms: float) -> void:
-	var body: CarryRigidBody = CarryRigidBody.new()
-	body.name = label
-	body.stable_id = id
-	body.position = at
-	body.mass = kilograms
-	body.collision_layer = 2
-	body.collision_mask = 7
-	var shape: BoxShape3D = BoxShape3D.new()
-	shape.size = Vector3.ONE
-	var collision: CollisionShape3D = CollisionShape3D.new()
-	collision.name = "Collision"
-	collision.shape = shape
-	body.add_child(collision)
-	body.add_child(PropVisuals.ballast_cube())
-	var sign: Label3D = Label3D.new()
-	sign.text = "%.0f кг" % kilograms
-	sign.position = Vector3(0, 0.55, 0)
-	sign.pixel_size = 0.005
-	sign.font_size = 40
-	body.add_child(sign)
-	add_child(body)
 
 
 func _attach_box(body: PhysicsBody3D, size: Vector3, color: Color) -> void:

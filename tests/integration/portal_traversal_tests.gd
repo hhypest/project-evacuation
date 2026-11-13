@@ -106,11 +106,12 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_camera.look_at(cube.global_position, _player.up_direction)
 	await _ticks(1, Vector2.ZERO, true)
 	_camera.global_basis = Basis.IDENTITY
+	var inserted_depth: float = BallastCube.LIGHT_EDGE * 0.5 + 0.07
 	for tick: int in range(30):
 		await _ticks(1, Vector2(0, -1))
-		if a.local(cube.global_position).z < -0.55:
+		if a.local(cube.global_position).z < -inserted_depth:
 			break
-	var inserted: bool = a.local(cube.global_position).z < -0.5 and _player_transfers() == 0
+	var inserted: bool = a.local(cube.global_position).z < -inserted_depth and _player_transfers() == 0
 	var full_twin: bool = false
 	for child: Node in _lab.get_children():
 		if child is PortalPropVisual and (child as PortalPropVisual).body == cube:

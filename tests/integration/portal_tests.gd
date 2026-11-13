@@ -62,7 +62,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		fast and b.local(cube.global_position).z > -0.1 and a.local(cube.global_position).z > -1.0,
 		"at B %s" % b.local(cube.global_position)))
 	await _ticks(90)
-	# Occupied exit: a 20 kg cube parked in front of B; the sent cube must stay on A's side.
+	# Occupied exit: a 10 kg cube parked in front of B; the sent cube must stay on A's side.
 	var blocker: CarryRigidBody = _lab.get_node("CubeHeavy") as CarryRigidBody
 	_place(blocker, b.transform * Vector3(0, -0.65, 0.55), Vector3.ZERO)
 	await _ticks(20)
@@ -72,7 +72,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	var refused: bool = _pair.surface_a.blocked or (_scope.portals().transfers.size() > before and _scope.portals().transfers.back().blocked)
 	await _ticks(10)
 	results.append(TestOutcome.new("an occupied exit refuses the transfer and keeps the cube in front of A",
-		refused and a.local(cube.global_position).z >= 0.49 and cube.global_position.distance_to(b.transform.origin) > 3.0,
+		refused and a.local(cube.global_position).z >= BallastCube.LIGHT_EDGE * 0.5 and cube.global_position.distance_to(b.transform.origin) > 3.0,
 		"refused %s, at A %s" % [refused, a.local(cube.global_position)]))
 	_place(blocker, Vector3(0.5, 0.55, 3.0), Vector3.ZERO)
 	await _press_power()

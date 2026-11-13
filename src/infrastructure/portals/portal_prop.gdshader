@@ -7,6 +7,8 @@ varying vec3 portal_world;
 
 uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform sampler2D albedo_map : source_color, hint_default_white, filter_linear_mipmap_anisotropic;
+uniform sampler2D orm_map : hint_default_white, filter_linear_mipmap_anisotropic;
+uniform bool packed_orm = false;
 uniform sampler2D metallic_map : hint_default_white, filter_linear_mipmap_anisotropic;
 uniform sampler2D roughness_map : hint_default_white, filter_linear_mipmap_anisotropic;
 uniform sampler2D normal_map : hint_normal, filter_linear_mipmap_anisotropic;
@@ -26,7 +28,9 @@ uniform vec3 uv_offset = vec3(0.0);
 uniform bool repeat_enabled = true;
 
 vec2 map_uv(sampler2D image, vec2 uv) {
-	vec2 half_texel = 0.5 / vec2(textureSize(image, 0));
+	// Clamp atlas borders at the sampled mip footprint while keeping metrically tiled surfaces repeating.
+	vec2 footprint = max(abs(dFdx(uv)), abs(dFdy(uv))) * 0.5;
+	vec2 half_texel = clamp(footprint, 0.5 / vec2(textureSize(image, 0)), vec2(0.49));
 	return repeat_enabled ? uv : clamp(uv, half_texel, vec2(1.0) - half_texel);
 }
 
@@ -40,14 +44,23 @@ void fragment() {
 	}
 	vec2 uv = UV * uv_scale.xy + uv_offset.xy;
 	ALBEDO = albedo_color.rgb * texture(albedo_map, map_uv(albedo_map, uv)).rgb;
-	METALLIC = metallic_factor * dot(texture(metallic_map, map_uv(metallic_map, uv)), metallic_channel);
-	ROUGHNESS = roughness_factor * dot(texture(roughness_map, map_uv(roughness_map, uv)), roughness_channel);
+	if (packed_orm) {
+		vec3 orm = texture(orm_map, map_uv(orm_map, uv)).rgb;
+		METALLIC = metallic_factor * orm.b;
+		ROUGHNESS = roughness_factor * orm.g;
+		if (ao_enabled) {
+			AO = orm.r;
+		}
+	} else {
+		METALLIC = metallic_factor * dot(texture(metallic_map, map_uv(metallic_map, uv)), metallic_channel);
+		ROUGHNESS = roughness_factor * dot(texture(roughness_map, map_uv(roughness_map, uv)), roughness_channel);
+		if (ao_enabled) {
+			AO = dot(texture(ao_map, map_uv(ao_map, uv)), ao_channel);
+		}
+	}
 	if (normals_enabled) {
 		NORMAL_MAP = texture(normal_map, map_uv(normal_map, uv)).rgb;
 		NORMAL_MAP_DEPTH = normal_depth;
-	}
-	if (ao_enabled) {
-		AO = dot(texture(ao_map, map_uv(ao_map, uv)), ao_channel);
 	}
 	EMISSION = emission_color * texture(emission_map, map_uv(emission_map, uv)).rgb;
 }

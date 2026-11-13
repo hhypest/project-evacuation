@@ -6,7 +6,7 @@ const WALL_Z: float = -9.0
 ## Bay 5 (beam): partition along X with its own door; the beam runs in front of it.
 const PARTITION_Z: float = 3.0
 const BEAM_Z: float = 6.5
-const BEAM_HEIGHT: float = 0.6
+const BEAM_HEIGHT: float = 0.40
 ## Bay 6 (gravity): a 4.2 m wall at the left edge; the powered field pulls toward it (-X).
 const GRAVITY_WALL_X: float = -14.7
 const GRAVITY_Z: float = 8.0
@@ -21,8 +21,8 @@ func _ready() -> void:
 	# Bay 1: floor button with stackable 5 kg cubes; 8 kg presses, below 6 kg releases.
 	_plate("lab.plate", Vector3(-10.5, 0, -4), 8.0, 6.0)
 	_door("lab.door.plate", Vector3(-10.5, 0, WALL_Z), [&"lab.plate"])
-	_cube("CubeA", &"lab.cube.small_a", Vector3(-8.5, 0.55, -1.5), 5.0)
-	_cube("CubeB", &"lab.cube.small_b", Vector3(-7.2, 0.55, -1.5), 5.0)
+	_cube("CubeA", &"lab.cube.small_a", Vector3(-8.5, 0.30, -1.5), BallastCube.Kind.LIGHT)
+	_cube("CubeB", &"lab.cube.small_b", Vector3(-7.2, 0.30, -1.5), BallastCube.Kind.LIGHT)
 	_sign("Напольная кнопка · порог 8 кг\nдва куба по 5 кг — один на другой", Vector3(-10.5, 3.4, WALL_Z + 0.2))
 	# Bay 2: timed wall button.
 	_button("lab.button.timed", Vector3(-6.0, 1.3, WALL_Z + 0.25), DeviceDefinition.WallMode.TIMED, 4.0)
@@ -45,7 +45,7 @@ func _ready() -> void:
 	_emitter("lab.emitter", Vector3(14.2, BEAM_HEIGHT, BEAM_Z), [&"lab.button.beam"])
 	_receiver("lab.receiver", Vector3(4.5, BEAM_HEIGHT, BEAM_Z))
 	_door("lab.door.beam", Vector3(11.0, 0, PARTITION_Z), [&"lab.receiver"])
-	_cube("CubeC", &"lab.cube.small_c", Vector3(9.0, 0.55, 9.0), 5.0)
+	_cube("CubeC", &"lab.cube.small_c", Vector3(9.0, 0.30, 9.0), BallastCube.Kind.LIGHT)
 	_sign("Луч: переключатель питает эмиттер\nприёмник открывает дверь · куб перекрывает", Vector3(11.0, 3.4, PARTITION_Z + 0.2))
 	# Bay 6: toggle powers a field toward the wall; the cube falls onto a plate mounted on the wall,
 	# the player walks on the wall. Leaving the field along the wall returns base gravity.
@@ -65,15 +65,10 @@ func _ready() -> void:
 	field.position = Vector3(GRAVITY_WALL_X + 2.5, 2.0, GRAVITY_Z)
 	field.rotation_degrees = Vector3(0, 0, -90)
 	add_child(field)
-	var wall_plate: FloorButtonDevice = FloorButtonDevice.new()
-	wall_plate.name = "lab_plate_wall"
-	wall_plate.stable_id = &"lab.plate.wall"
-	wall_plate.press_threshold_kg = 4.0
-	wall_plate.release_threshold_kg = 3.0
-	wall_plate.position = Vector3(GRAVITY_WALL_X, 0.75, GRAVITY_Z)
-	wall_plate.rotation_degrees = Vector3(0, 0, -90)
-	add_child(wall_plate)
-	_cube("CubeD", &"lab.cube.small_d", Vector3(GRAVITY_WALL_X + 3.2, 0.55, GRAVITY_Z), 5.0)
+	_plate(&"lab.plate.wall", Vector3(GRAVITY_WALL_X, 0.98, GRAVITY_Z), 4, 3, Vector3(0, 0, -90),
+		Vector3(0.84, 0.1, 1.4))
+	_box(Vector3(3.0, 0.34, 0.84), Vector3(GRAVITY_WALL_X + 2.22, 0.17, GRAVITY_Z), FLOOR_COLOR, "GravityCubeStand")
+	_cube("CubeD", &"lab.cube.small_d", Vector3(GRAVITY_WALL_X + 3.2, 0.64, GRAVITY_Z), BallastCube.Kind.LIGHT)
 	_sign("Гравитация: переключатель включает поле к стене\nкуб падает на кнопку на стене · можно ходить по стене",
 		Vector3(GRAVITY_WALL_X + 0.05, 3.7, GRAVITY_Z - 1.0), 90.0)
 	# Bench 7: the remaining logic kinds. Two toggles feed OR and NOT; a source is always on.

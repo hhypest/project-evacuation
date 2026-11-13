@@ -20,6 +20,10 @@ var _scope: LevelScope
 var _window: Window
 var _problem: String = ""
 var _continue_level: LevelEntry
+var _continue_snapshot: SaveSnapshot
+var _active_entry: LevelEntry
+var _active_checkpoint: SaveSnapshot
+var _completed_levels: Array[StringName] = []
 var _checkpoint_load_notice: String = ""
 var _checkpoint_write_notice: String = ""
 var _log: RuntimeLog
@@ -156,34 +160,75 @@ func _on_load_checkpoint_requested() -> void:
 		_sync_session()
 		return
 	var item: LevelEntry = _continue_level
-	_start_chamber(item.scene)
+	var snapshot: SaveSnapshot = _continue_snapshot
+	_start_chamber(item.scene, item, snapshot)
 	if _scope != null:
-		print("CHECKPOINT_LOADED level=%s checkpoint=%s" % [item.level_id, SaveSnapshot.ENTRY_ID])
+		print("CHECKPOINT_LOADED level=%s checkpoint=%s" % [item.level_id, snapshot.checkpoint_id])
 
 
-func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null) -> void:
+func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null, loaded: SaveSnapshot = null) -> void:
 	if not _session.start():
 		return
 	chamber_scene = scene
-	_replace_scope()
-	if _scope != null and save_repository != null and checkpoint_entry != null:
-		var level_id: StringName = checkpoint_entry.level_id
-		var version: String = str(ProjectSettings.get_setting("application/config/version"))
-		var result: SaveResult.Code = save_repository.write_checkpoint(SaveSnapshot.new(level_id, version))
-		_refresh_checkpoint()
-		if result == SaveResult.Code.OK:
-			_checkpoint_write_notice = ""
-			print("CHECKPOINT_READY level=%s checkpoint=%s" % [level_id, SaveSnapshot.ENTRY_ID])
+	_active_entry = checkpoint_entry
+	_active_checkpoint = loaded
+	_replace_scope(loaded)
+	if _scope != null and loaded == null and save_repository != null and checkpoint_entry != null:
+		# A fresh run from the level list can replay the chamber without erasing its station.
+		if _continue_snapshot != null and _continue_snapshot.level_id == checkpoint_entry.level_id \
+				and _continue_snapshot.checkpoint_id != SaveSnapshot.ENTRY_ID:
+			_active_checkpoint = _continue_snapshot
 		else:
-			_checkpoint_write_notice = "Не удалось сохранить вход в камеру «%s». %s" % [
-				checkpoint_entry.title, _checkpoint_error(result)
-			]
-			printerr("CHECKPOINT_WRITE_FAILED level=%s code=%s" % [level_id, SaveResult.Code.keys()[result]])
+			_write_checkpoint(_new_snapshot(SaveSnapshot.ENTRY_ID))
 	_sync_session()
+
+
+func _new_snapshot(id: StringName) -> SaveSnapshot:
+	var version: String = str(ProjectSettings.get_setting("application/config/version"))
+	var snapshot: SaveSnapshot = SaveSnapshot.new(_active_entry.level_id, version, id)
+	snapshot.completed_levels = _completed_levels.duplicate()
+	return snapshot
+
+
+func _on_station_requested(station: CheckpointStation, states: Dictionary[StringName, bool]) -> void:
+	if save_repository == null or _active_entry == null \
+			or _active_entry.station(station.checkpoint.checkpoint_id) != station.checkpoint:
+		station.report("ЗАПИСЬ НЕДОСТУПНА")
+		return
+	var snapshot: SaveSnapshot = _new_snapshot(station.checkpoint.checkpoint_id)
+	snapshot.switches = states.duplicate()
+	station.report("ТОЧКА СОХРАНЕНА" if _write_checkpoint(snapshot) else "ОШИБКА ЗАПИСИ\nE · ПОВТОРИТЬ")
+
+
+func _on_chamber_completed(generation: int) -> void:
+	if _scope == null or generation != _session.get_status().generation or _active_entry == null or save_repository == null:
+		return
+	if _active_entry.level_id not in _completed_levels:
+		_completed_levels.append(_active_entry.level_id)
+	var id: StringName = _active_checkpoint.checkpoint_id if _active_checkpoint != null else SaveSnapshot.ENTRY_ID
+	var snapshot: SaveSnapshot = _new_snapshot(id)
+	if _active_checkpoint != null:
+		snapshot.switches = _active_checkpoint.switches.duplicate()
+	_write_checkpoint(snapshot)
+
+
+func _write_checkpoint(snapshot: SaveSnapshot) -> bool:
+	var result: SaveResult.Code = save_repository.write_checkpoint(snapshot)
+	_refresh_checkpoint()
+	if result == SaveResult.Code.OK:
+		_active_checkpoint = snapshot
+		_checkpoint_write_notice = ""
+		print("CHECKPOINT_READY level=%s checkpoint=%s" % [snapshot.level_id, snapshot.checkpoint_id])
+		return true
+	var location: String = "вход в камеру" if snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID else "контрольную точку"
+	_checkpoint_write_notice = "Не удалось сохранить %s «%s». %s" % [location, _active_entry.title, _checkpoint_error(result)]
+	printerr("CHECKPOINT_WRITE_FAILED level=%s code=%s" % [snapshot.level_id, SaveResult.Code.keys()[result]])
+	return false
 
 
 func _refresh_checkpoint() -> void:
 	_continue_level = null
+	_continue_snapshot = null
 	_checkpoint_load_notice = ""
 	if save_repository == null:
 		return
@@ -193,12 +238,24 @@ func _refresh_checkpoint() -> void:
 	if result.code != SaveResult.Code.OK:
 		_checkpoint_load_notice = _checkpoint_error(result.code)
 		return
-	_continue_level = catalog.find_level(result.snapshot.level_id) if catalog != null else null
-	if _continue_level == null:
+	for id: StringName in result.snapshot.completed_levels:
+		if id not in _completed_levels:
+			_completed_levels.append(id)
+	var item: LevelEntry = catalog.find_level(result.snapshot.level_id) if catalog != null else null
+	if item == null:
 		_checkpoint_load_notice = "Уровень из сохранения недоступен в этой сборке."
 		return
 	var notice: String = "Доступна предыдущая контрольная точка. " if result.recovered else ""
-	_checkpoint_load_notice = notice + "Продолжение открывает камеру с точки входа."
+	if result.snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID:
+		_checkpoint_load_notice = notice + "Продолжение открывает камеру с точки входа."
+	else:
+		var station: StationCheckpoint = item.station(result.snapshot.checkpoint_id)
+		if station == null or not station.accepts(result.snapshot.switches):
+			_checkpoint_load_notice = "Контрольная точка недоступна в этой сборке."
+			return
+		_checkpoint_load_notice = notice + "%s · %s" % [item.title, station.title]
+	_continue_level = item
+	_continue_snapshot = result.snapshot
 
 
 func _checkpoint_error(code: SaveResult.Code) -> String:
@@ -246,19 +303,21 @@ func _on_quit_requested() -> void:
 	get_tree().quit()
 
 
-func _replace_scope() -> void:
+func _replace_scope(checkpoint: SaveSnapshot = null) -> void:
 	# Close the old input gate before replacing physics nodes and their generation.
 	_input.set_gameplay_enabled(false, _session.get_status().generation)
 	_drop_scope()
 	_scope = LevelScope.new()
 	_scope.name = "LevelScope"
 	add_child(_scope)
-	if not _scope.open(chamber_scene, _session.get_status().generation):
+	if not _scope.open(chamber_scene, _session.get_status().generation, checkpoint):
 		printerr("LEVEL_LOAD_FAILED path=" + (chamber_scene.resource_path if chamber_scene != null else "<empty>"))
 		_drop_scope()
 		_session.return_to_menu()
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
 	else:
+		_scope.station_requested.connect(_on_station_requested)
+		_scope.chamber_completed.connect(_on_chamber_completed.bind(_session.get_status().generation))
 		_scope.configure_camera(camera_preferences)
 		_problem = ""
 
@@ -289,6 +348,11 @@ func _sync_session() -> void:
 	for message: String in [_problem, _checkpoint_write_notice, load_notice]:
 		if not message.is_empty():
 			messages.append(message)
+	if catalog != null:
+		for index: int in range(catalog.entries.size()):
+			var entry: LevelEntry = catalog.entry(index)
+			if entry != null:
+				_hud.set_level_completed(index, entry.title, entry.level_id in _completed_levels)
 	_hud.show_session(status, "Godot %s · %s · %s · 60 Гц%s" % [
 		_runtime.engine_version, mode, _runtime.physics_backend, notice
 	], "\n".join(messages), _continue_level != null,

@@ -14,12 +14,12 @@ func _ready() -> void:
 	_corridor(HALF_WIDTH, 4.0, -40.0, HEIGHT)
 	# Room 1: one 10 kg cube presses the 8 kg plate.
 	_plate(&"t1.plate.a", Vector3(-2.5, 0, -4.0), 8.0, 6.0)
-	_cube("CubeA", &"t1.cube.a", Vector3(2.5, 0.55, -1.0), 10.0)
+	_cube("CubeA", &"t1.cube.a", Vector3(2.5, 0.425, -1.0), BallastCube.Kind.HEAVY)
 	_partition(HALF_WIDTH, DOOR_A, HEIGHT, 0.0, &"t1.door.a", [&"t1.plate.a"])
 	_sign("1 · Положите куб на плиту", Vector3(0, 3.5, DOOR_A + 0.2))
 	# Room 2: plate AND a timed wall button; the door stays open 5 s after the press.
 	_plate(&"t1.plate.b", Vector3(-2.5, 0, -14.0), 4.0, 3.0)
-	_cube("CubeB", &"t1.cube.b", Vector3(2.5, 0.55, -11.0), 5.0)
+	_cube("CubeB", &"t1.cube.b", Vector3(2.5, 0.30, -11.0), BallastCube.Kind.LIGHT)
 	_button(&"t1.button.timer", Vector3(3.0, 1.3, DOOR_B + 0.25), DeviceDefinition.WallMode.TIMED, 5.0)
 	_logic(&"t1.and", DeviceDefinition.Kind.AND, [&"t1.plate.b", &"t1.button.timer"], Vector3(-2.8, 2.2, DOOR_B + 0.2))
 	_partition(HALF_WIDTH, DOOR_B, HEIGHT, 0.0, &"t1.door.b", [&"t1.and"])

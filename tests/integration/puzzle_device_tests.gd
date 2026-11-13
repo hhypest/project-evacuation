@@ -45,9 +45,9 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(60)
 	results.append(TestOutcome.new("the player standing on the plate presses it",
 		_output(&"lab.plate") and door.is_open() and plate.last_load >= 80.0, "load=%.2f" % plate.last_load))
-	_place(cube_a, door.global_position + Vector3(0, 0.55, 0))
+	_place(cube_a, door.global_position + Vector3.UP * (BallastCube.LIGHT_EDGE * 0.5 + 0.018))
 	_max_cube_speed = 0.0
-	await _ticks(10)
+	await _ticks(24)
 	var parked: Vector3 = cube_a.global_position
 	_player.global_position = plate_top + Vector3(-3, 0, -2)
 	await _ticks(90, cube_a)

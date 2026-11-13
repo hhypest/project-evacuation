@@ -8,7 +8,7 @@ uniform vec3 portal_up = vec3(0.0, 1.0, 0.0);
 uniform vec3 portal_normal = vec3(0.0, 0.0, 1.0);
 uniform vec2 portal_half = vec2(0.8, 1.2);
 // Owner-provided sample.md (2026-11-12): adapted slow value noise, aperture-local and opaque.
-uniform vec3 rim_color : source_color = vec3(0.88, 0.42, 0.18);
+uniform vec3 contact_color : source_color = vec3(1.0, 0.55, 0.23);
 uniform float rim_width : hint_range(0.0, 0.1) = 0.04; // metres inside the aperture
 uniform float rim_intensity : hint_range(0.0, 2.0) = 0.65;
 
@@ -49,10 +49,15 @@ void fragment() {
 	float edge_distance = min(to_edge.x, to_edge.y);
 	float width = max(rim_width, 0.000001);
 	float feather = max(fwidth(edge_distance), 0.0001);
-	float rim = 1.0 - smoothstep(0.0, width, edge_distance);
-	rim *= smoothstep(0.0, feather, edge_distance);
-	float movement = rim_noise(local * 7.0 + vec2(TIME * 0.12, -TIME * 0.09));
-	ALBEDO += rim_color * rim * rim_intensity * (0.85 + 0.3 * movement);
+	// A warm contact line and a softer reflection fall off independently inside the gasket.
+	float boundary = smoothstep(0.0, feather, edge_distance);
+	float contact = (1.0 - smoothstep(0.0, width * 0.29, edge_distance)) * 0.40;
+	float reflection = (1.0 - smoothstep(width * 0.10, width, edge_distance)) * 0.24;
+	float along = to_edge.x < to_edge.y ? local.y : local.x;
+	float variation = rim_noise(vec2(along * 10.0, TIME * 0.17));
+	float grazing = 1.0 - abs(dot(normalize(ray), portal_normal));
+	ALBEDO += contact_color * boundary * (contact + reflection * (0.72 + grazing * 0.28))
+		* rim_intensity * (0.8 + 0.2 * variation);
 	vec4 clip = PROJECTION_MATRIX * VIEW_MATRIX * vec4(point, 1.0);
 	// Real aperture depth preserves occlusion by cubes/frame; only the last near-plane sliver is
 	// clamped (Vulkan reverse-Z), so the portal stays visible until the eye actually crosses it.

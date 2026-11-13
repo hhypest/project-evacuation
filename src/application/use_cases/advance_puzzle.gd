@@ -54,6 +54,17 @@ func reset() -> void:
 		return
 	_world.cancel_pending()
 	network.reset()
+	_publish_initial()
+
+
+func restore_checkpoint_switches(states: Dictionary[StringName, bool]) -> bool:
+	if not ready() or not network.restore_checkpoint_switches(states):
+		return false
+	_publish_initial()
+	return true
+
+
+func _publish_initial() -> void:
 	var initial: PuzzleStepResult = PuzzleStepResult.new()
 	initial.outputs = network.outputs()
 	_world.apply(initial)

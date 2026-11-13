@@ -30,7 +30,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		await tree.physics_frame
 	await tree.process_frame
 	results.append(TestOutcome.new("cube settles on the floor without penetration",
-		absf(cube.position.y - 0.5) < 0.06 and cube.linear_velocity.length() < 0.2,
+		absf(cube.position.y - BallastCube.HEAVY_EDGE * 0.5) < 0.06 and cube.linear_velocity.length() < 0.2,
 		"y=%.4f velocity=%.4f" % [cube.position.y, cube.linear_velocity.length()]))
 	tree.root.remove_child(lab)
 	lab.queue_free()
