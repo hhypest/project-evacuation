@@ -90,7 +90,7 @@ text = "В главное меню"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-text = "Камера и подсказки"
+text = "Камера и графика"
 
 [node name="QuitButton" type="Button" parent="Center/Menu/Margin/Stack"]
 unique_name_in_owner = true
@@ -111,7 +111,7 @@ theme_override_constants/separation = 14
 [node name="SettingsTitle" type="Label" parent="Center/Menu/Margin/CameraSettings"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "Камера и подсказки"
+text = "Камера и графика"
 
 [node name="FovLabel" type="Label" parent="Center/Menu/Margin/CameraSettings"]
 unique_name_in_owner = true
@@ -147,6 +147,20 @@ step = 15.0
 unique_name_in_owner = true
 layout_mode = 2
 text = "Подсказка управления на экране"
+
+[node name="RenderScaleLabel" type="Label" parent="Center/Menu/Margin/CameraSettings"]
+layout_mode = 2
+text = "Масштабирование 3D"
+
+[node name="UpscalingMode" type="OptionButton" parent="Center/Menu/Margin/CameraSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Нативное"
+popup/item_0/id = 0
+popup/item_1/text = "FSR 2.2 · Качество"
+popup/item_1/id = 1
 
 [node name="CameraDone" type="Button" parent="Center/Menu/Margin/CameraSettings"]
 unique_name_in_owner = true
@@ -202,4 +216,17 @@ mouse_filter = 2
 theme_override_colors/font_outline_color = Color(0.04, 0.05, 0.06, 1)
 theme_override_constants/outline_size = 6
 text = "E — поставить"
+horizontal_alignment = 1
+
+[node name="RecoveryNotice" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 38.0
+offset_right = 250.0
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0.04, 0.05, 0.06, 1)
+theme_override_constants/outline_size = 5
 horizontal_alignment = 1

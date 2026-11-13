@@ -64,6 +64,15 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	results.append(TestOutcome.new("camera settings clamp out-of-range numbers and ignore a wrong value type",
 		fixture_written and reread.fov == CameraPreferences.FOV_MAX
 		and reread.sensitivity == 100.0 and reread.gravity_rate == CameraPreferences.ALIGN_MIN))
+	var fsr_file: String = path + ".graphics"
+	var fsr_write: bool = RenderPreferenceFile.save_fsr2(true, fsr_file) == OK
+	var fsr_roundtrip: bool = RenderPreferenceFile.load_fsr2(fsr_file)
+	file.clear()
+	file.set_value("graphics", "fsr2_quality", "true")
+	var invalid_written: bool = file.save(fsr_file) == OK
+	results.append(TestOutcome.new("FSR preferences persist separately and reject the wrong type",
+		fsr_write and fsr_roundtrip and invalid_written and not RenderPreferenceFile.load_fsr2(fsr_file)))
+	DirAccess.remove_absolute(fsr_file)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 

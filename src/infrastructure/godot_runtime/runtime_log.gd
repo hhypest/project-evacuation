@@ -56,9 +56,9 @@ func report_display(window: Window) -> void:
 	var desktop: Vector2i = DisplayServer.screen_get_size(screen)
 	var canvas_size: Vector2i = Vector2i(window.get_visible_rect().size)
 	var fullscreen: bool = window.mode in [Window.MODE_FULLSCREEN, Window.MODE_EXCLUSIVE_FULLSCREEN]
-	print("DISPLAY mode=%d fullscreen=%s window=%dx%d desktop=%dx%d screen=%d refresh_hz=%.1f render_scale=%.2f canvas=%dx%d vsync=%d fps_limit=%d" % [
+	print("DISPLAY mode=%d fullscreen=%s window=%dx%d desktop=%dx%d screen=%d refresh_hz=%.1f render_scale=%.3f scaling_mode=%d canvas=%dx%d vsync=%d fps_limit=%d" % [
 		window.mode, fullscreen, window.size.x, window.size.y, desktop.x, desktop.y, screen,
-		DisplayServer.screen_get_refresh_rate(screen), window.scaling_3d_scale, canvas_size.x, canvas_size.y,
+		DisplayServer.screen_get_refresh_rate(screen), window.scaling_3d_scale, window.scaling_3d_mode, canvas_size.x, canvas_size.y,
 		DisplayServer.window_get_vsync_mode(window.get_window_id()), Engine.max_fps
 	])
 

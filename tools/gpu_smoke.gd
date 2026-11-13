@@ -88,6 +88,18 @@ func _run() -> void:
 	await RenderingServer.frame_post_draw
 	if not _capture(capture.get_basename() + "-pause.png"):
 		return
+	var settings: Button = main.find_child("CameraButton") as Button
+	var scale: OptionButton = main.find_child("UpscalingMode") as OptionButton
+	var settings_done: Button = main.find_child("CameraDone") as Button
+	settings.pressed.emit()
+	if not _check(not scale.disabled and scale.visible and scale.selected == 0, "graphics settings default to native"):
+		return
+	scale.select(1)
+	scale.item_selected.emit(1)
+	if not _check(root.scaling_3d_mode == Viewport.SCALING_3D_MODE_FSR2
+			and is_equal_approx(root.scaling_3d_scale, RenderScale.QUALITY_SCALE), "graphics menu applies FSR 2.2 Quality"):
+		return
+	settings_done.pressed.emit()
 	root.focus_exited.emit()
 	TestInputEvents.key(KEY_ESCAPE)
 	TestInputEvents.key(KEY_ESCAPE, false)
@@ -98,7 +110,8 @@ func _run() -> void:
 		return
 	TestInputEvents.key(KEY_ESCAPE)
 	TestInputEvents.key(KEY_ESCAPE, false)
-	if not _check(not paused and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "explicit resume recaptures"):
+	if not _check(not paused and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+			and root.scaling_3d_mode == Viewport.SCALING_3D_MODE_FSR2, "explicit resume recaptures and retains FSR"):
 		return
 	TestInputEvents.key(KEY_W, false)
 	TestInputEvents.key(KEY_R)
