@@ -27,6 +27,16 @@ func _register(node: Node, scope_id: int) -> bool:
 	return true
 
 
+## Only bodies registered for this chamber count. A removed prop is as lost as one below the floor.
+func lost_body(below_y: float) -> StringName:
+	for id: StringName in _bodies:
+		var body: CarryRigidBody = _bodies[id]
+		if not is_instance_valid(body) or not body.is_inside_tree() or body.is_queued_for_deletion() \
+				or not body.global_position.is_finite() or body.global_position.y < below_y:
+			return id
+	return &""
+
+
 func candidate(view: Transform3D, reach: float) -> CarryObservation:
 	if not _open:
 		return null

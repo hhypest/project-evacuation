@@ -5,11 +5,16 @@ extends Node
 signal station_requested(station: CheckpointStation, states: Dictionary[StringName, bool])
 signal chamber_completed()
 
+## Authored chambers put their lowest reachable floor above this world-space recovery plane.
+const RECOVERY_FLOOR_Y: float = -12.0
+
+
 var _generation: int = -1
 var _level: Node3D
 var _camera: LookCamera
 var _player: PlayerMotor
 var _carry: CarryController
+var _carry_world: CarryPhysicsAdapter
 var _ghost: CarryGhost
 var _puzzle: AdvancePuzzle
 var _puzzle_world: PuzzleWorldAdapter
@@ -47,12 +52,12 @@ func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) 
 	_player = player
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(level)
-	var carry_world: CarryPhysicsAdapter = CarryPhysicsAdapter.new()
-	if not carry_world.configure(level, player, profile, generation):
-		carry_world.close()
+	_carry_world = CarryPhysicsAdapter.new()
+	if not _carry_world.configure(level, player, profile, generation):
+		_carry_world.close()
 		_abort_open()
 		return false
-	_carry = CarryController.new(carry_world, profile, generation)
+	_carry = CarryController.new(_carry_world, profile, generation)
 	_ghost = CarryGhost.new()
 	level.add_child(_ghost)
 	var settings: PuzzleSettings = preload("res://content/definitions/default_puzzle.tres") as PuzzleSettings
@@ -150,6 +155,7 @@ func _abort_open() -> void:
 	if _carry != null:
 		_carry.close()
 	_carry = null
+	_carry_world = null
 	_ghost = null
 	_puzzle = null
 	_puzzle_world = null
@@ -256,6 +262,14 @@ func portals() -> AdvancePortals:
 	return _portals
 
 
+func player_fell() -> bool:
+	return _player != null and (not _player.global_position.is_finite() or _player.global_position.y < RECOVERY_FLOOR_Y)
+
+
+func lost_body() -> StringName:
+	return _carry_world.lost_body(RECOVERY_FLOOR_Y) if _carry_world != null else &""
+
+
 func needs_recovery() -> bool:
 	return _portals != null and _portals.recovery_required
 
@@ -272,6 +286,7 @@ func close() -> void:
 	if _carry != null:
 		_carry.close()
 	_carry = null
+	_carry_world = null
 	_ghost = null
 	if _puzzle != null:
 		_puzzle.close()

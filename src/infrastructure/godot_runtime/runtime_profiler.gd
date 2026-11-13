@@ -12,7 +12,8 @@ const HEADER: PackedStringArray = ["elapsed_s", "level", "paused", "focused", "t
 	"width", "height", "frames", "fps", "frame_mean_ms", "frame_p95_ms", "frame_max_ms",
 	"process_ms", "physics_ms", "render_cpu_ms", "render_gpu_ms", "draw_calls", "primitives",
 	"texture_bytes", "video_bytes", "static_bytes", "gpu", "renderer", "viewports", "godot_version",
-	"physics_hz", "vsync_mode", "fps_limit", "generation", "active_viewports"]
+	"physics_hz", "vsync_mode", "fps_limit", "generation", "active_viewports",
+	"render_scale", "scaling_mode", "main_gpu_ms", "subviewports_gpu_ms"]
 
 var level_label: String = "menu"
 var generation: int = 0
@@ -30,6 +31,7 @@ var _last_us: int = 0
 var _window_us: int = 0
 var _started_us: int = 0
 var _gpu_sum: float = 0.0
+var _main_gpu_sum: float = 0.0
 var _render_cpu_sum: float = 0.0
 var _render_frames: int = 0
 var _file: FileAccess
@@ -37,6 +39,8 @@ var _window_paused: bool = false
 var _window_focused: bool = false
 var _window_level: String = "menu"
 var _window_generation: int = 0
+var _window_scale: float = 1.0
+var _window_scaling_mode: int = 0
 
 
 func _ready() -> void:
@@ -109,7 +113,8 @@ func stop_recording() -> void:
 func _process(_delta: float) -> void:
 	# Do not mix loading/menu/pause/focus transitions into a window labelled as steady gameplay.
 	if get_tree().paused != _window_paused or get_window().has_focus() != _window_focused or level_label != _window_level \
-			or generation != _window_generation:
+			or generation != _window_generation or _window_scale != get_window().scaling_3d_scale \
+			or _window_scaling_mode != get_window().scaling_3d_mode:
 		_reset_window()
 	var now: int = Time.get_ticks_usec()
 	if _last_us == 0:
@@ -119,15 +124,20 @@ func _process(_delta: float) -> void:
 	_last_us = now
 	if not _headless:
 		var gpu_ms: float = 0.0
+		var main_ms: float = 0.0
 		var cpu_ms: float = RenderingServer.get_frame_setup_time_cpu()
 		for viewport: Viewport in _viewports:
 			if is_instance_valid(viewport):
 				if viewport is SubViewport and (viewport as SubViewport).render_target_update_mode == SubViewport.UPDATE_DISABLED:
 					continue
-				gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid())
+				var measured: float = RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid())
+				gpu_ms += measured
+				if viewport == get_window():
+					main_ms = measured
 				cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport.get_viewport_rid())
 		if gpu_ms > 0.0:
 			_gpu_sum += gpu_ms
+			_main_gpu_sum += main_ms
 			_render_cpu_sum += cpu_ms
 			_render_frames += 1
 	if now - _window_us >= INTERVAL_US or _times.size() >= MAX_WINDOW_FRAMES:
@@ -141,6 +151,8 @@ func _publish_window() -> void:
 	latest.level = level_label
 	latest.texture_profile = SETTINGS.profile_label()
 	latest.generation = generation
+	latest.render_scale = _window_scale
+	latest.scaling_mode = _window_scaling_mode
 	latest.viewport_size = get_viewport().get_visible_rect().size if _headless else get_window().size
 	for viewport: Viewport in _viewports:
 		if is_instance_valid(viewport):
@@ -165,6 +177,8 @@ func _publish_window() -> void:
 	latest.static_bytes = int(Performance.get_monitor(Performance.MEMORY_STATIC)) if OS.is_debug_build() else -1
 	if _render_frames > 0:
 		latest.render_gpu_ms = _gpu_sum / float(_render_frames)
+		latest.main_gpu_ms = _main_gpu_sum / float(_render_frames)
+		latest.subviewports_gpu_ms = latest.render_gpu_ms - latest.main_gpu_ms
 		latest.render_cpu_ms = _render_cpu_sum / float(_render_frames)
 	if recording and _file != null:
 		_write_sample()
@@ -180,7 +194,8 @@ func _write_sample() -> void:
 		str(latest.draw_calls), str(latest.primitives), str(latest.texture_bytes), str(latest.video_bytes),
 		str(latest.static_bytes), latest.gpu, latest.renderer, str(latest.viewport_count), latest.engine_version,
 		str(latest.physics_hz), str(latest.vsync_mode), str(latest.fps_limit),
-		str(latest.generation), str(latest.active_viewport_count)]))
+		str(latest.generation), str(latest.active_viewport_count), str(latest.render_scale), str(latest.scaling_mode),
+		str(latest.main_gpu_ms), str(latest.subviewports_gpu_ms)]))
 	_file.flush()
 	if _file.get_error() != OK:
 		last_error = "Ошибка записи CSV: " + error_string(_file.get_error())
@@ -237,12 +252,15 @@ func _reset_window(discard_timestamp: bool = true) -> void:
 		_last_us = 0
 	_window_us = _last_us if _last_us > 0 else Time.get_ticks_usec()
 	_gpu_sum = 0.0
+	_main_gpu_sum = 0.0
 	_render_cpu_sum = 0.0
 	_render_frames = 0
 	_window_paused = get_tree().paused
 	_window_focused = get_window().has_focus()
 	_window_level = level_label
 	_window_generation = generation
+	_window_scale = get_window().scaling_3d_scale
+	_window_scaling_mode = get_window().scaling_3d_mode
 
 
 func _emit_status() -> void:

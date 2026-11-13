@@ -37,6 +37,15 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_record("second menu entry opens the reserve chamber", selectable)
 	_record("the chamber starts unpowered with the optical interlock shut",
 		not _out(&"reserve.portal") and _out(&"reserve.receiver") and not _out(&"reserve.service_door"))
+	var before_fall: int = _main.get_session_status().generation
+	_player.global_position.y = -20.0
+	await _ticks(25)
+	if not _bind():
+		_record("fall without a station returns to the entry", false)
+		await _close()
+		return _results
+	_record("fall without a station returns to the entry", _main.get_session_status().generation == before_fall + 1
+		and _player.position.distance_to(Vector3(0, 0, 3)) < 0.1 and not _out(&"reserve.backup"))
 	await _go(Vector3(-3, 0, -6.2))
 	await _go(Vector3(-3, 0, -11.0), true, 110)
 	_record("the unpowered aperture ends at the seal", _player.position.z > -10.0 and not _level.completed)
@@ -125,6 +134,30 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		can_continue and _player.global_position.distance_to(spawn) < 0.12 and _out(&"reserve.backup")
 		and _out(&"reserve.portal") and _out(&"reserve.service_door") and _out(&"reserve.primary") and not _out(&"reserve.receiver")
 		and absf(ballast.position.z + 5.0) < 0.12 and _scope.held_prop_id().is_empty())
+	var saved_file_count: int = DirAccess.get_files_at(_save_path).size()
+	var old_generation: int = _main.get_session_status().generation
+	ballast.global_position.y = -20.0
+	await _ticks(35)
+	if not _bind():
+		_record("lost ballast recovers the station", false)
+		await _close()
+		return _results
+	ballast = _level.get_node("Ballast") as CarryRigidBody
+	_record("lost ballast recovers the station", _main.get_session_status().generation == old_generation + 1
+		and _player.position.distance_to(spawn) < 0.12 and _out(&"reserve.primary")
+		and _out(&"reserve.backup") and _out(&"reserve.portal") and not _out(&"reserve.receiver"))
+
+	old_generation = _main.get_session_status().generation
+	_player.global_position.y = -20.0
+	await _ticks(35)
+	if not _bind():
+		_record("fall resumes from the station without a disk write", false)
+		await _close()
+		return _results
+	ballast = _level.get_node("Ballast") as CarryRigidBody
+	_record("fall resumes from the station without a disk write",
+		_main.get_session_status().generation == old_generation + 1 and _player.position.distance_to(spawn) < 0.12
+		and DirAccess.get_files_at(_save_path).size() == saved_file_count and _scope.held_prop_id().is_empty())
 	await _go(Vector3(4.1, 0, -35.0))
 	await _ticks(40)
 	var momentary: bool = _out(&"reserve.exit_door")
@@ -170,7 +203,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	await _ticks(28)
 	var reset: bool = _bind()
 	_record("R restores the same chamber, both cubes, power and completion state",
-		reset and _main.get_session_status().generation == 2 and not _level.completed
+		reset and _main.get_session_status().generation == old_generation + 2 and not _level.completed
 		and not _out(&"reserve.portal") and not _out(&"reserve.backup")
 		and (_level.get_node("Ballast") as CarryRigidBody).position.distance_to(Vector3(3.5, BallastCube.HEAVY_EDGE * 0.5, 0)) < 0.1
 		and (_level.get_node("ScreenCube") as CarryRigidBody).position.distance_to(Vector3(-3.5, BallastCube.LIGHT_EDGE * 0.5, -16.2)) < 0.1

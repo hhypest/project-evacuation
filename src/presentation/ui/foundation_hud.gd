@@ -10,6 +10,7 @@ signal restart_requested()
 signal menu_requested()
 signal quit_requested()
 signal camera_preferences_changed()
+signal fsr2_changed(enabled: bool)
 
 @onready var _menu: PanelContainer = %Menu
 @onready var _heading: Label = %Heading
@@ -32,6 +33,10 @@ signal camera_preferences_changed()
 @onready var _show_hint: CheckButton = %ShowHint
 @onready var _settings_notice: Label = %CameraNotice
 
+@onready var _fsr2: OptionButton = %UpscalingMode
+@onready var _recovery: Label = %RecoveryNotice
+
+var _recovery_tween: Tween
 var _level_buttons: Array[Button] = []
 var _last_phase: SessionLifecycle.Phase = SessionLifecycle.Phase.STOPPED
 var _last_focused: bool = false
@@ -51,6 +56,26 @@ func _ready() -> void:
 	_fov.value_changed.connect(_update_camera_labels)
 	_sensitivity.value_changed.connect(_update_camera_labels)
 	_gravity_rate.value_changed.connect(_update_camera_labels)
+	_fsr2.item_selected.connect(_on_render_scale_selected)
+
+
+func configure_fsr2(available: bool, enabled: bool) -> void:
+	_fsr2.disabled = not available
+	_fsr2.select(1 if enabled else 0)
+
+
+func _on_render_scale_selected(index: int) -> void:
+	fsr2_changed.emit(index == 1)
+
+
+func show_recovery(message: String) -> void:
+	if _recovery_tween != null:
+		_recovery_tween.kill()
+	_recovery.text = message
+	_recovery.show()
+	_recovery_tween = create_tween()
+	_recovery_tween.tween_interval(2.5)
+	_recovery_tween.tween_callback(_recovery.hide)
 
 
 func set_camera_preferences(preferences: CameraPreferences) -> void:
@@ -139,6 +164,7 @@ func show_session(status: SessionStatus, runtime_label: String, problem: String,
 	_crosshair.visible = status.accepts_gameplay
 	if not status.accepts_gameplay:
 		_placement_hint.hide()
+		_recovery.hide()
 	_heading.text = "Главное меню" if in_menu else "Пауза"
 	_status.text = runtime_label
 	if not status.focused:

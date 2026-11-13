@@ -29,6 +29,7 @@ var _checkpoint_write_notice: String = ""
 var _log: RuntimeLog
 var _profiler: RuntimeProfiler
 var _profiler_hud: ProfilerHud
+var _fsr2_quality: bool = false
 var camera_preferences: CameraPreferences = CameraPreferences.new()
 
 
@@ -50,6 +51,12 @@ func _ready() -> void:
 		CameraPreferenceFile.load_into(camera_preferences)
 	_hud.set_camera_preferences(camera_preferences)
 	_window = get_window()
+	_hud.fsr2_changed.connect(_on_fsr2_changed)
+	var can_use_fsr: bool = RenderScale.available()
+	if can_use_fsr and get_tree().current_scene == self:
+		_fsr2_quality = RenderPreferenceFile.load_fsr2()
+	_hud.configure_fsr2(can_use_fsr, _fsr2_quality)
+	RenderScale.apply(_window, _fsr2_quality)
 	_runtime = RuntimeProbe.new().read()
 	if not _runtime.headless and "--windowed" in OS.get_cmdline_user_args():
 		_window.mode = Window.MODE_WINDOWED
@@ -127,17 +134,53 @@ func _on_camera_preferences_changed() -> void:
 		printerr("CAMERA_PREFERENCES_WRITE_FAILED")
 
 
+func _on_fsr2_changed(enabled: bool) -> void:
+	if not RenderScale.available():
+		return
+	_fsr2_quality = enabled
+	RenderScale.apply(_window, enabled)
+	_log_display()
+	if get_tree().current_scene == self and RenderPreferenceFile.save_fsr2(enabled) != OK:
+		_hud.show_preferences_notice("Не удалось записать настройки графики.")
+
+
 func _physics_process(delta: float) -> void:
-	if _scope != null and _session.get_status().accepts_gameplay:
-		_scope.apply_input(_input.take_frame(), delta)
-		_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
-		if _scope.needs_recovery():
-			var portals: AdvancePortals = _scope.portals()
-			print("CHAMBER_RECOVERY body=%s level=%s generation=%d crossings=%d blocked=%d" % [
-				portals.recovery_body_id, chamber_scene.resource_path, _session.get_status().generation,
-				portals.crossing_count, portals.blocked_count
-			])
-			_on_restart_requested()
+	if _scope == null or not _session.get_status().accepts_gameplay:
+		return
+	if _scope.player_fell():
+		_recover_chamber(&"fall", PortalWorldAdapter.PLAYER_ID)
+		return
+	var lost: StringName = _scope.lost_body()
+	if not lost.is_empty():
+		_recover_chamber(&"lost_prop", lost)
+		return
+	_scope.apply_input(_input.take_frame(), delta)
+	_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
+	if _scope.needs_recovery():
+		_recover_chamber(&"portal", _scope.portals().recovery_body_id)
+
+
+func _recover_chamber(reason: StringName, body_id: StringName) -> void:
+	var before: int = _session.get_status().generation
+	if not _session.restart():
+		return
+	var portals: AdvancePortals = _scope.portals()
+	var checkpoint: SaveSnapshot = _active_checkpoint
+	var point: StringName = checkpoint.checkpoint_id if checkpoint != null else SaveSnapshot.ENTRY_ID
+	print("CHAMBER_RECOVERY body=%s level=%s generation=%d crossings=%d blocked=%d reason=%s checkpoint=%s" % [
+		body_id, chamber_scene.resource_path, before, portals.crossing_count, portals.blocked_count, reason, point
+	])
+	var restored: bool = _replace_scope(checkpoint)
+	if not restored and point != SaveSnapshot.ENTRY_ID:
+		if _replace_scope():
+			_active_checkpoint = null
+			restored = true
+			print("CHAMBER_RECOVERY_FALLBACK checkpoint=entry")
+	if restored:
+		_hud.show_recovery("Возврат к контрольной точке")
+	else:
+		_session.return_to_menu()
+	_sync_session()
 
 
 func _on_start_requested() -> void:
@@ -172,7 +215,8 @@ func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null, loa
 	chamber_scene = scene
 	_active_entry = checkpoint_entry
 	_active_checkpoint = loaded
-	_replace_scope(loaded)
+	if not _replace_scope(loaded):
+		_session.return_to_menu()
 	if _scope != null and loaded == null and save_repository != null and checkpoint_entry != null:
 		# A fresh run from the level list can replay the chamber without erasing its station.
 		if _continue_snapshot != null and _continue_snapshot.level_id == checkpoint_entry.level_id \
@@ -275,7 +319,8 @@ func _on_pause_requested() -> void:
 
 func _on_restart_requested() -> void:
 	if _session.restart():
-		_replace_scope()
+		if not _replace_scope():
+			_session.return_to_menu()
 		_sync_session()
 
 
@@ -303,7 +348,7 @@ func _on_quit_requested() -> void:
 	get_tree().quit()
 
 
-func _replace_scope(checkpoint: SaveSnapshot = null) -> void:
+func _replace_scope(checkpoint: SaveSnapshot = null) -> bool:
 	# Close the old input gate before replacing physics nodes and their generation.
 	_input.set_gameplay_enabled(false, _session.get_status().generation)
 	_drop_scope()
@@ -313,13 +358,14 @@ func _replace_scope(checkpoint: SaveSnapshot = null) -> void:
 	if not _scope.open(chamber_scene, _session.get_status().generation, checkpoint):
 		printerr("LEVEL_LOAD_FAILED path=" + (chamber_scene.resource_path if chamber_scene != null else "<empty>"))
 		_drop_scope()
-		_session.return_to_menu()
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
+		return false
 	else:
 		_scope.station_requested.connect(_on_station_requested)
 		_scope.chamber_completed.connect(_on_chamber_completed.bind(_session.get_status().generation))
 		_scope.configure_camera(camera_preferences)
 		_problem = ""
+	return true
 
 
 func _drop_scope() -> void:

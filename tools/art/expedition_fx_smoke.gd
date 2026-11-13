@@ -4,6 +4,7 @@ extends SceneTree
 var _target: SubViewport
 var _capture: String
 var _failed: bool = false
+var _compare_fsr: bool = false
 
 
 func _initialize() -> void:
@@ -13,8 +14,10 @@ func _initialize() -> void:
 func _run() -> void:
 	create_timer(90.0, true, false, true).timeout.connect(func() -> void: quit(1))
 	var args: PackedStringArray = OS.get_cmdline_user_args()
-	if args.size() != 2 or args[0] != "--capture" or not ValidateRuntime.new().execute(RuntimeProbe.new().read()).is_empty():
-		printerr("Expected Vulkan Forward+ and --capture <absolute PNG path>")
+	_compare_fsr = args.size() == 3 and args[2] == "--compare-fsr"
+	if (args.size() != 2 and not _compare_fsr) or args[0] != "--capture" \
+			or not ValidateRuntime.new().execute(RuntimeProbe.new().read()).is_empty():
+		printerr("Expected Vulkan Forward+ and --capture <absolute PNG path> [--compare-fsr]")
 		quit(2)
 		return
 	_capture = args[1].get_basename()
@@ -23,7 +26,7 @@ func _run() -> void:
 	_target.own_world_3d = true
 	_target.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(_target)
-	_target.msaa_3d = Viewport.MSAA_4X
+	_target.msaa_3d = Viewport.MSAA_DISABLED if _compare_fsr else Viewport.MSAA_4X
 	var stage: ChamberBuilder = ChamberBuilder.new()
 	_target.add_child(stage)
 	var world: WorldEnvironment = WorldEnvironment.new()
@@ -67,6 +70,10 @@ func _run() -> void:
 	emitter.show_output(true, 0)
 	emitter.show_beam(emitter.muzzle().distance_to(receiver.global_position) - 0.13)
 	receiver.show_output(true, 0)
+	if _compare_fsr:
+		field.show_output(true, 0)
+		await _benchmark_fsr(pair, camera, emitter)
+		field.show_output(false, 0)
 	var before: Image = await _frame()
 	field.show_output(true, 0)
 	var after: Image = await _frame()
@@ -96,6 +103,58 @@ func _run() -> void:
 		RenderingServer.get_video_adapter_name()])
 	quit(1 if _failed else 0)
 
+
+## Run the exact same camera and beam sequence twice. Timing covers separate viewport GPU queries.
+func _benchmark_fsr(pair: PortalPairDevice, camera: Camera3D, emitter: EmitterDevice) -> void:
+	var window_vsync: DisplayServer.VSyncMode = DisplayServer.window_get_vsync_mode()
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	var viewports: Array[Viewport] = [_target, pair.surface_a.viewport, pair.surface_b.viewport]
+	for viewport: Viewport in viewports:
+		RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), true)
+	var pose: Transform3D = camera.global_transform
+	var full_length: float = emitter.beam_length
+	for fsr: bool in [false, true]:
+		RenderScale.apply(_target, fsr)
+		var name: String = "fsr2" if fsr else "native"
+		_check(is_equal_approx(pair.surface_a.viewport.scaling_3d_scale, 1.0)
+			and is_equal_approx(pair.surface_b.viewport.scaling_3d_scale, 1.0), "portal targets keep native scale")
+		await _frame()
+		var total: Vector3 = Vector3.ZERO
+		var frame_times: Array[float] = []
+		var last_frame: int = Time.get_ticks_usec()
+		for index: int in range(120):
+			camera.global_transform = pose
+			camera.position.x += sin(float(index) * 0.09) * 0.62
+			camera.rotation.y += sin(float(index) * 0.09) * 0.075
+			emitter.show_beam(full_length if index < 60 else full_length * 0.56)
+			await process_frame
+			await RenderingServer.frame_post_draw
+			var now: int = Time.get_ticks_usec()
+			frame_times.append(float(now - last_frame) / 1000.0)
+			last_frame = now
+			total.x += RenderingServer.viewport_get_measured_render_time_gpu(viewports[0].get_viewport_rid())
+			total.y += RenderingServer.viewport_get_measured_render_time_gpu(viewports[1].get_viewport_rid())
+			total.z += RenderingServer.viewport_get_measured_render_time_gpu(viewports[2].get_viewport_rid())
+		var means: Vector3 = total / 120.0
+		_check(means.x > 0.0 and means.y > 0.0 and means.z > 0.0, "recorded GPU times for all three viewports")
+		var summary: ProfilerSample = ProfilerSample.summarize(frame_times)
+		print("FSR_SAMPLE mode=%s main_gpu_ms=%.3f portal_a_gpu_ms=%.3f portal_b_gpu_ms=%.3f frame_p95_ms=%.3f" \
+			% [name, means.x, means.y, means.z, summary.frame_p95_ms])
+		camera.global_transform = pose
+		emitter.show_beam(full_length)
+		var lit: Image = await _frame()
+		_save(lit, name + "-beam-on")
+		emitter.show_beam(full_length * 0.56)
+		await process_frame
+		await RenderingServer.frame_post_draw
+		_save(_target.get_texture().get_image(), name + "-beam-cut")
+		camera.global_transform = pair.surface_a.global_transform * Transform3D(Basis(Vector3.UP, 0.65),
+			Vector3(0.2, 0.4, 0.03))
+		_save(await _frame(), name + "-near")
+		camera.global_transform = pose
+		emitter.show_beam(full_length)
+	RenderScale.apply(_target, false)
+	DisplayServer.window_set_vsync_mode(window_vsync)
 
 func _wall(stage: ChamberBuilder, size: Vector3, at: Vector3) -> void:
 	var wall: MeshInstance3D = MeshInstance3D.new()
