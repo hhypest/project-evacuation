@@ -1,12 +1,13 @@
 # Third-party components
 
-Own code, documentation and procedural test geometry in this repository are covered by [LICENSE](LICENSE), MIT. Generated device models and PBR maps are also included: their provenance, processing and license scope are recorded in the [model registry](content/models/README.md); procedural surface textures are recorded in the [texture registry](content/textures/README.md). No external game art, audio, plugins or Steam SDK are included.
+Own code, documentation and procedural test geometry in this repository are covered by [LICENSE](LICENSE), MIT. Generated device models and PBR maps are also included: their provenance, processing and license scope are recorded in the [model registry](content/models/README.md). Surface textures and their sources are recorded in the [texture registry](content/textures/README.md).
 
 | Component | Version / source | License / notices | Use |
 | --- | --- | --- | --- |
 | Godot Engine Standard | 4.7.2-stable, official build `ed1daf0bf`; [release](https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable) | MIT plus upstream component licenses | Editor, runtime and export templates |
 | Jolt Physics | Version embedded by the pinned Godot build; [upstream](https://github.com/jrouwe/JoltPhysics), [Godot module](https://github.com/godotengine/godot/tree/4.7.2-stable/modules/jolt_physics) | MIT; see Godot copyright metadata and bundled texts | Built-in 3D simulation; no separate extension |
 | actions/checkout | v7.0.1, commit `3d3c42e5aac5ba805825da76410c181273ba90b1`; [source](https://github.com/actions/checkout/tree/3d3c42e5aac5ba805825da76410c181273ba90b1) | MIT | CI only; not shipped with the game |
+| ambientCG by Lennart Demes | 1K PNG maps from [Concrete 030](https://ambientcg.com/view?id=Concrete030) and [Metal 027](https://ambientcg.com/view?id=Metal027), retrieved 2026-11-13 | [CC0 1.0 Universal](https://docs.ambientcg.com/license/) for the upstream maps | Surface detail for the Reserve Circuit walls and its checkpoint terminal |
 
 The pinned engine reports its bundled dependencies and their exact copyright notices. They are preserved in:
 

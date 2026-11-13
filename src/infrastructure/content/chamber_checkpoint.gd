@@ -1,6 +1,6 @@
-class_name StationCheckpoint
+class_name ChamberCheckpoint
 extends Resource
-## Authored identity and prerequisites shared by the station and the level catalogue.
+## Authored identity and prerequisites shared by the terminal and the level catalogue.
 
 @export var checkpoint_id: StringName
 @export var title: String = ""

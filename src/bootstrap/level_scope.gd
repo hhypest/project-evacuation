@@ -2,7 +2,7 @@ class_name LevelScope
 extends Node
 ## Owns one chamber generation. Detached scopes reject input before they are freed.
 
-signal station_requested(station: CheckpointStation, states: Dictionary[StringName, bool])
+signal checkpoint_requested(terminal: CheckpointTerminal, states: Dictionary[StringName, bool])
 signal chamber_completed()
 
 ## Authored chambers put their lowest reachable floor above this world-space recovery plane.
@@ -19,7 +19,7 @@ var _ghost: CarryGhost
 var _puzzle: AdvancePuzzle
 var _puzzle_world: PuzzleWorldAdapter
 var _use_reach: float = 0.0
-var _stations: Dictionary[StringName, CheckpointStation] = {}
+var _checkpoints: Dictionary[StringName, CheckpointTerminal] = {}
 var _gravity: SampleGravity
 var _gravity_world: GravityWorldAdapter
 var _portals: AdvancePortals
@@ -92,11 +92,11 @@ func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) 
 		_abort_open()
 		return false
 	_puzzle.reset()
-	if not _register_stations():
+	if not _register_checkpoints():
 		_puzzle.close()
 		_abort_open()
 		return false
-	if checkpoint != null and checkpoint.checkpoint_id != SaveSnapshot.ENTRY_ID and not _restore_station(checkpoint):
+	if checkpoint != null and checkpoint.checkpoint_id != SaveSnapshot.ENTRY_ID and not _restore_checkpoint(checkpoint):
 		_puzzle.close()
 		_abort_open()
 		return false
@@ -106,22 +106,22 @@ func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) 
 	return true
 
 
-func _register_stations() -> bool:
+func _register_checkpoints() -> bool:
 	for child: Node in _level.get_children():
-		var station: CheckpointStation = child as CheckpointStation
-		if station == null:
+		var terminal: CheckpointTerminal = child as CheckpointTerminal
+		if terminal == null:
 			continue
-		if station.checkpoint == null or station.spawn == null:
+		if terminal.checkpoint == null or terminal.spawn == null:
 			return false
-		var id: StringName = station.checkpoint.checkpoint_id
-		if id == SaveSnapshot.ENTRY_ID or not SaveSnapshot.valid_id(id) or _stations.has(id):
+		var id: StringName = terminal.checkpoint.checkpoint_id
+		if id == SaveSnapshot.ENTRY_ID or not SaveSnapshot.valid_id(id) or _checkpoints.has(id):
 			return false
-		_stations[id] = station
+		_checkpoints[id] = terminal
 	return true
 
 
-func _restore_station(snapshot: SaveSnapshot) -> bool:
-	var selected: CheckpointStation = _stations.get(snapshot.checkpoint_id)
+func _restore_checkpoint(snapshot: SaveSnapshot) -> bool:
+	var selected: CheckpointTerminal = _checkpoints.get(snapshot.checkpoint_id)
 	if selected == null or not selected.checkpoint.accepts(snapshot.switches) \
 			or not _puzzle.restore_checkpoint_switches(snapshot.switches) or not selected.restore_props(_level):
 		return false
@@ -135,19 +135,19 @@ func _restore_station(snapshot: SaveSnapshot) -> bool:
 	return true
 
 
-func _use_station() -> bool:
-	if _stations.is_empty():
+func _use_checkpoint() -> bool:
+	if _checkpoints.is_empty():
 		return false
-	var station: CheckpointStation = _puzzle_world.interaction_target(_camera.global_transform, _use_reach) as CheckpointStation
-	if station == null or station.checkpoint == null:
+	var terminal: CheckpointTerminal = _puzzle_world.interaction_target(_camera.global_transform, _use_reach) as CheckpointTerminal
+	if terminal == null or terminal.checkpoint == null:
 		return false
 	var states: Dictionary[StringName, bool] = {}
-	for id: StringName in station.checkpoint.required_switches:
+	for id: StringName in terminal.checkpoint.required_switches:
 		states[id] = _puzzle.network.output(id)
-	if not station.checkpoint.accepts(states):
-		station.report("ВКЛЮЧИТЕ РЕЗЕРВ")
+	if not terminal.checkpoint.accepts(states):
+		terminal.report("ВКЛЮЧИТЕ РЕЗЕРВ")
 	else:
-		station_requested.emit(station, states)
+		checkpoint_requested.emit(terminal, states)
 	return true
 
 
@@ -159,7 +159,7 @@ func _abort_open() -> void:
 	_ghost = null
 	_puzzle = null
 	_puzzle_world = null
-	_stations.clear()
+	_checkpoints.clear()
 	_gravity = null
 	if _gravity_world != null:
 		_gravity_world.close()
@@ -206,9 +206,9 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	carry_input.carrier_up = _player.up_direction
 	carry_input.carrier_radius = _player.profile.radius
 	var interact: bool = frame.interact_requested
-	# A free hand can operate a station or wall button under the view before trying to carry.
+	# A free hand can operate a terminal or wall button under the view before trying to carry.
 	if interact and _carry.state.held_id.is_empty() \
-			and (_use_station() or _puzzle.use(_generation, _camera.global_transform)):
+			and (_use_checkpoint() or _puzzle.use(_generation, _camera.global_transform)):
 		interact = false
 	carry_input.interact = interact
 	carry_input.throw_requested = frame.throw_requested
@@ -292,7 +292,7 @@ func close() -> void:
 		_puzzle.close()
 	_puzzle = null
 	_puzzle_world = null
-	_stations.clear()
+	_checkpoints.clear()
 	_gravity = null
 	if _gravity_world != null:
 		_gravity_world.close()

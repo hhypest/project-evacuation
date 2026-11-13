@@ -1,0 +1,13 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/metal027_powder_albedo.png" id="1"]
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/metal027_powder_normal.png" id="2"]
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/metal027_powder_orm.png" id="3"]
+
+[resource]
+resource_name = "Metal 027 · Powder-coated steel"
+texture_filter = 5
+albedo_texture = ExtResource("1")
+normal_enabled = true
+normal_texture = ExtResource("2")
+orm_texture = ExtResource("3")

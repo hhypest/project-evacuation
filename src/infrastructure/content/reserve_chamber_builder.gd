@@ -2,7 +2,7 @@ class_name ReserveChamberBuilder
 extends ChamberBuilder
 ## Two isolated rooms and a gated service hall. All puzzle state belongs to the existing device network.
 
-const SERVICE_CHECKPOINT: StationCheckpoint = preload("res://content/definitions/reserve_station.tres")
+const SERVICE_CHECKPOINT: ChamberCheckpoint = preload("res://content/definitions/reserve_checkpoint.tres")
 const HALF_WIDTH: float = 7.0
 const HEIGHT: float = 4.5
 const RESERVE_Z: float = -29.0
@@ -10,7 +10,7 @@ const EXIT_Z: float = -47.0
 const PORTAL_X: float = -3.0
 const PORTAL_A_Z: float = -8.0
 const PORTAL_B_Z: float = -12.0
-const SOLID: Material = preload("res://content/materials/alien/basalt_wall.tres")
+const SOLID: Material = preload("res://content/materials/alien/concrete030_basalt.tres")
 const GROUND: Material = preload("res://content/materials/alien/basalt_floor.tres")
 const GUIDE: Color = Color(0.35, 0.72, 0.78)
 
@@ -23,7 +23,7 @@ func _ready() -> void:
 	_entry_room()
 	_optics_room()
 	_service_hall()
-	_checkpoint_station()
+	_checkpoint_terminal()
 	_exit()
 
 
@@ -107,22 +107,22 @@ func _service_hall() -> void:
 	_sign("ВЫХОД\nРезерв И нагрузка", Vector3(0, 2.76, EXIT_Z + 0.19))
 
 
-func _checkpoint_station() -> void:
-	var station: CheckpointStation = CheckpointStation.new()
-	station.name = "CheckpointStation"
-	station.checkpoint = SERVICE_CHECKPOINT
-	station.position = Vector3(-2.45, 1.35, -33.85)
+func _checkpoint_terminal() -> void:
+	var terminal: CheckpointTerminal = CheckpointTerminal.new()
+	terminal.name = "CheckpointTerminal"
+	terminal.checkpoint = SERVICE_CHECKPOINT
+	terminal.position = Vector3(-2.45, 1.35, -33.85)
 	var spawn: Marker3D = Marker3D.new()
 	spawn.name = "Spawn"
 	spawn.position = Vector3(0, -1.30, 1.45)
-	station.spawn = spawn
-	station.add_child(spawn)
+	terminal.spawn = spawn
+	terminal.add_child(spawn)
 	var primary: FloorButtonDevice = get_node("reserve_primary") as FloorButtonDevice
-	station.prop_supports[&"reserve.cube.ballast"] = primary.plate
-	station.prop_supports[&"reserve.cube.screen"] = get_node("ScreenSocket") as CarrySocketBody
-	_box(Vector3(0.44, 0.95, 0.35), Vector3(-2.45, 0.475, -33.93),
-		Color(0.21, 0.23, 0.24), "StationStand")
-	add_child(station)
+	terminal.prop_supports[&"reserve.cube.ballast"] = primary.plate
+	terminal.prop_supports[&"reserve.cube.screen"] = get_node("ScreenSocket") as CarrySocketBody
+	_surface(Vector3(0.44, 0.95, 0.35), Vector3(-2.45, 0.475, -33.93),
+		CheckpointTerminal.HOUSING, "CheckpointStand", 1.0)
+	add_child(terminal)
 
 
 func _exit() -> void:
@@ -166,10 +166,10 @@ func _portal_wall(x: float, z: float) -> void:
 	_surface(Vector3(1.6, HEIGHT - 2.4, 0.3), Vector3(x, (HEIGHT + 2.4) * 0.5, z), SOLID)
 
 
-func _surface(size: Vector3, at: Vector3, material: Material) -> void:
-	var body: StaticBody3D = _box(size, at)
+func _surface(size: Vector3, at: Vector3, material: Material, label: String = "", tile_metres: float = 2.0) -> void:
+	var body: StaticBody3D = _box(size, at, WALL_COLOR, label)
 	var mesh: MeshInstance3D = body.get_child(1) as MeshInstance3D
-	mesh.mesh = MetricBoxMesh.make(size, at)
+	mesh.mesh = MetricBoxMesh.make(size, at, tile_metres)
 	mesh.material_override = material
 
 
