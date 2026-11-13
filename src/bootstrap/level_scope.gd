@@ -25,6 +25,8 @@ var _gravity_world: GravityWorldAdapter
 var _portals: AdvancePortals
 var _portal_world: PortalWorldAdapter
 var _tick_id: int = 0
+var _oxygen: AdvanceOxygen
+var oxygen_status: OxygenStatus
 
 
 func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) -> bool:
@@ -100,6 +102,8 @@ func open(scene: PackedScene, generation: int, checkpoint: SaveSnapshot = null) 
 		_puzzle.close()
 		_abort_open()
 		return false
+	if oxygen_training() != null:
+		_oxygen = AdvanceOxygen.new()
 	var chamber: ChamberBuilder = level as ChamberBuilder
 	if chamber != null:
 		chamber.chamber_completed.connect(chamber_completed.emit)
@@ -145,7 +149,7 @@ func _use_checkpoint() -> bool:
 	for id: StringName in terminal.checkpoint.required_switches:
 		states[id] = _puzzle.network.output(id)
 	if not terminal.checkpoint.accepts(states):
-		terminal.report("ВКЛЮЧИТЕ РЕЗЕРВ")
+		terminal.report(terminal.blocked_message)
 	else:
 		checkpoint_requested.emit(terminal, states)
 	return true
@@ -226,6 +230,14 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	_camera.global_position = _player.eye_position()
 	# Portal commits can invalidate the pre-transfer placement preview in this same tick.
 	_ghost.present(_carry.preview)
+	var training: OxygenTrainingBuilder = oxygen_training()
+	if _oxygen != null and training != null:
+		oxygen_status = _oxygen.step(training.atmosphere_at(_player.center()), delta)
+		training.present_atmosphere(oxygen_status)
+
+
+func oxygen_training() -> OxygenTrainingBuilder:
+	return _level as OxygenTrainingBuilder
 
 
 func held_prop_id() -> StringName:
@@ -283,6 +295,8 @@ func _close_portals() -> void:
 
 func close() -> void:
 	_generation = -1
+	_oxygen = null
+	oxygen_status = null
 	if _carry != null:
 		_carry.close()
 	_carry = null

@@ -31,8 +31,10 @@ func _run() -> void:
 			"editor fixtures and showcase materials excluded from game pack"):
 		return
 	if not _check(ResourceLoader.exists("res://content/levels/mechanics_lab.tscn")
-			and ResourceLoader.exists("res://content/levels/reserve_circuit.tscn"),
-			"both playable levels included in game pack"):
+			and ResourceLoader.exists("res://content/levels/reserve_circuit.tscn")
+			and ResourceLoader.exists("res://content/levels/oxygen_training.tscn")
+			and ResourceLoader.exists("res://content/levels/qualification_route.tscn"),
+			"all four playable levels included in game pack"):
 		return
 	var main: SessionBootstrap = _main
 	await _tree.process_frame
@@ -174,6 +176,18 @@ func _run() -> void:
 	var reserve: ReserveChamberBuilder = scope.get_child(0) as ReserveChamberBuilder if scope != null else null
 	if not _check(main.get_session_status().accepts_gameplay and reserve != null
 			and reserve.has_node("CheckpointTerminal"), "Reserve Circuit opens from the exported menu"):
+		return
+	hud.menu_requested.emit()
+	hud.level_requested.emit(2)
+	scope = main.get_node_or_null("LevelScope") as LevelScope
+	if not _check(main.get_session_status().accepts_gameplay and scope != null
+			and scope.oxygen_training() != null, "Oxygen Training opens from the exported menu"):
+		return
+	hud.menu_requested.emit()
+	hud.level_requested.emit(3)
+	scope = main.get_node_or_null("LevelScope") as LevelScope
+	if not _check(main.get_session_status().accepts_gameplay and scope != null
+			and scope.has_node("QualificationRoute/RoutePortals"), "Qualification Route opens from the exported menu"):
 		return
 	_finished = true
 	print("EXPORTED_GAMEPLAY_SMOKE_PASSED checks=%d Godot=%s CPU_ONLY" % [_checks, Engine.get_version_info()["string"]])

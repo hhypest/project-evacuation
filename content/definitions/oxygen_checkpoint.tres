@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ChamberCheckpoint" format=3]
+
+[ext_resource type="Script" path="res://src/infrastructure/content/chamber_checkpoint.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+checkpoint_id = &"oxygen.airlock"
+title = "Шлюз перед разгерметизацией"

@@ -168,3 +168,31 @@ func _partition(half_width: float, z: float, height: float, door_x: float, door_
 		_box(Vector3(half_width - right, height, 0.3), Vector3((right + half_width) * 0.5, height * 0.5, z))
 	_box(Vector3(2.6, height - 3.0, 0.3), Vector3(door_x, 3.0 + (height - 3.0) * 0.5, z))
 	return _door(door_id, Vector3(door_x, 0, z), sources)
+
+
+func _finish_zone(at: Vector3, size: Vector3, sign_at: Vector3) -> void:
+	var zone: Area3D = Area3D.new()
+	zone.name = "Exit"
+	zone.position = at
+	zone.collision_layer = 0
+	zone.collision_mask = 4
+	zone.monitorable = false
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = size
+	var collider: CollisionShape3D = CollisionShape3D.new()
+	collider.shape = shape
+	zone.add_child(collider)
+	var sign: Label3D = Label3D.new()
+	sign.position = sign_at
+	sign.font_size = 44
+	sign.pixel_size = 0.006
+	sign.modulate = Color(0.65, 1.0, 0.9)
+	sign.text = "ВЫХОД"
+	add_child(sign)
+	zone.body_entered.connect(func(body: Node3D) -> void:
+		if body is PlayerMotor and zone.monitoring:
+			sign.text = "ИСПЫТАНИЕ ПРОЙДЕНО\nR — заново · Esc — пауза"
+			zone.set_deferred("monitoring", false)
+			chamber_completed.emit()
+	)
+	add_child(zone)
