@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 from bake_ambientcg_materials import ARCHIVES, OUTPUT, ROOT, blend_normal, save, upstream
+from bake_expedition_materials import panel_orm
 
 MODELS = ROOT.parent / "models/devices"
 ARCHIVES.update({
@@ -102,7 +103,7 @@ def bake_atlas(
 
 def bake_panel(powder: dict[str, Image.Image]) -> None:
     normal = np.asarray(Image.open(ROOT / "surfaces/panel_light/panel_light_normal.png"))
-    ao, roughness, metallic = Image.open(ROOT / "expedition/panel_reference_orm.png").convert("RGB").split()
+    ao, roughness, metallic = panel_orm().split()
     save("metal028_panel_normal", blend_normal(normal, np.asarray(powder["NormalGL"]), 0.65))
     save("metal028_panel_orm", Image.merge("RGB", (ao, blend_surface(roughness, powder["Roughness"], 0.46), metallic)))
 

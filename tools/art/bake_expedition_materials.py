@@ -118,6 +118,13 @@ def bake_cubes() -> None:
             EXPEDITION / f"ballast_{key}_albedo.jpg", quality=94, subsampling=0, optimize=True)
 
 
+def panel_orm() -> Image.Image:
+    with Image.open(TEXTURES / "surfaces/panel_light/panel_light_orm.png") as image:
+        ao, roughness, metallic = image.convert("RGB").split()
+    return Image.merge("RGB", (ao, roughness.point(lambda value: max(150, value)),
+                               metallic.point(lambda value: min(65, value))))
+
+
 def bake_surfaces() -> None:
     source_paths = {
         "basalt_reference": TEXTURES / "alien/basalt_wall/basalt_wall",
@@ -138,10 +145,12 @@ def bake_surfaces() -> None:
             enamel = np.array([199, 194, 180] if key == "panel_reference" else [211, 199, 177])
             rgb = rgb * .70 + enamel * .30
             rgb *= 1.0 - wear
-            orm[:, :, 1] = np.maximum(150, orm[:, :, 1])
-            orm[:, :, 2] = np.minimum(65, orm[:, :, 2])
+            if key == "portal_enamel":
+                orm[:, :, 1] = np.maximum(150, orm[:, :, 1])
+                orm[:, :, 2] = np.minimum(65, orm[:, :, 2])
         Image.fromarray(rgb.clip(0, 255).astype(np.uint8)).save(EXPEDITION / f"{key}_albedo.png")
-        Image.fromarray(orm).save(EXPEDITION / f"{key}_orm.png")
+        if key != "panel_reference":
+            Image.fromarray(orm).save(EXPEDITION / f"{key}_orm.png")
 
 
 if __name__ == "__main__":
