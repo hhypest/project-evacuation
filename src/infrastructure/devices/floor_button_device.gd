@@ -13,6 +13,9 @@ const STACK_HEIGHT: float = 3.0
 ## Art model (content/models/devices/floor_button), authored for a 1.4 x 0.1 x 1.4 m plate: a "Frame" that
 ## stays put and a "Plate" that sinks when pressed. Other plate sizes scale it; the collision stays the box.
 const MODEL: PackedScene = preload("res://content/models/devices/floor_button/floor_button.gltf")
+const GRIP_COLOR: Texture2D = preload("res://content/textures/ambientcg/floor_button_grip_albedo.jpg")
+const GRIP_NORMAL: Texture2D = preload("res://content/textures/ambientcg/floor_button_grip_normal.png")
+const GRIP_ORM: Texture2D = preload("res://content/textures/ambientcg/floor_button_grip_orm.png")
 const MODEL_PLATE: Vector3 = Vector3(1.4, 0.1, 1.4)
 ## Four light bars sit inside DEV-02's dark channel, clear of the moving plate and the ivory rim.
 const LAMP_WIDTH: float = 0.018
@@ -33,6 +36,8 @@ func _ready() -> void:
 	_model.scale = plate_size / MODEL_PLATE
 	add_child(_model)
 	_plate_visual = _model.get_node("Plate") as Node3D
+	PropVisuals.apply_atlas(_model.get_node("Frame") as MeshInstance3D, GRIP_NORMAL, GRIP_ORM)
+	PropVisuals.apply_atlas(_plate_visual as MeshInstance3D, GRIP_NORMAL, GRIP_ORM, GRIP_COLOR)
 	var half: Vector2 = Vector2(plate_size.x, plate_size.z) * (0.5 + LAMP_CHANNEL_OFFSET / MODEL_PLATE.x)
 	var lamp_y: float = plate_size.y * 0.96 - LAMP_DEPTH * 0.5
 	for side: float in [-1.0, 1.0]:

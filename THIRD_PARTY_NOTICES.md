@@ -8,6 +8,7 @@ Own code, documentation and procedural test geometry in this repository are cove
 | Jolt Physics | Version embedded by the pinned Godot build; [upstream](https://github.com/jrouwe/JoltPhysics), [Godot module](https://github.com/godotengine/godot/tree/4.7.2-stable/modules/jolt_physics) | MIT; see Godot copyright metadata and bundled texts | Built-in 3D simulation; no separate extension |
 | actions/checkout | v7.0.1, commit `3d3c42e5aac5ba805825da76410c181273ba90b1`; [source](https://github.com/actions/checkout/tree/3d3c42e5aac5ba805825da76410c181273ba90b1) | MIT | CI only; not shipped with the game |
 | ambientCG by Lennart Demes | 1K PNG maps from [Concrete 030](https://ambientcg.com/view?id=Concrete030) and [Metal 027](https://ambientcg.com/view?id=Metal027), retrieved 2026-11-13 | [CC0 1.0 Universal](https://docs.ambientcg.com/license/) for the upstream maps | Surface detail for the Reserve Circuit walls and its checkpoint terminal |
+| ambientCG by Lennart Demes | 1K PNG maps from [Metal 028](https://ambientcg.com/view?id=Metal028), [Rubber 004](https://ambientcg.com/view?id=Rubber004), [Metal 009](https://ambientcg.com/view?id=Metal009) and [Plastic 010](https://ambientcg.com/view?id=Plastic010), retrieved 2026-11-13 UTC | [CC0 1.0 Universal](https://docs.ambientcg.com/license/) for the upstream maps | Ballast cubes, control panels and button finishes |
 
 The pinned engine reports its bundled dependencies and their exact copyright notices. They are preserved in:
 
