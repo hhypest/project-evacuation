@@ -12,6 +12,9 @@ extends PuzzleDeviceNode
 
 const BUTTON_BODY: PackedScene = preload("res://content/models/devices/wall_button/wall_button_body.gltf")
 const SWITCH_BODY: PackedScene = preload("res://content/models/devices/wall_switch/wall_switch_body.gltf")
+const BUTTON_NORMAL: Texture2D = preload("res://content/textures/ambientcg/wall_button_powder_normal.png")
+const BUTTON_ORM: Texture2D = preload("res://content/textures/ambientcg/wall_button_powder_orm.png")
+const BEZEL_STEEL: Material = preload("res://content/materials/surfaces/metal009_bezel.tres")
 ## Key and handle are separate nodes inside their housing scene, with pivots baked by the normaliser.
 const KEY_TRAVEL: float = 0.015
 const BUTTON_LAMP_AT: Vector3 = Vector3(0, 0.162, 0.084)
@@ -48,6 +51,8 @@ func _ready() -> void:
 		_lamp = _switch_indicator()
 	else:
 		_key = housing.get_node("Key") as Node3D
+		PropVisuals.apply_atlas(housing.get_node("Body") as MeshInstance3D, BUTTON_NORMAL, BUTTON_ORM)
+		PropVisuals.apply_atlas(_key as MeshInstance3D, BUTTON_NORMAL, BUTTON_ORM)
 		_lamp = box_mesh(Vector3(0.028, 0.008, 0.004), DARK)
 		_lamp.position = BUTTON_LAMP_AT
 	_lamp.name = "Lamp"
@@ -109,9 +114,7 @@ func _switch_indicator() -> MeshInstance3D:
 	ring.ring_segments = 12
 	bezel.mesh = ring
 	bezel.rotation.x = PI * 0.5
-	var metal: StandardMaterial3D = bezel.material_override as StandardMaterial3D
-	metal.metallic = 0.75
-	metal.roughness = 0.42
+	bezel.material_override = BEZEL_STEEL
 	mount.add_child(bezel)
 	var lens: MeshInstance3D = disc_mesh(0.0108, LENS_OFF)
 	(lens.mesh as CylinderMesh).height = 0.002

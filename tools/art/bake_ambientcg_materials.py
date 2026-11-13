@@ -1,4 +1,4 @@
-"""Bake the two ambientCG materials from the original 1K PNG downloads."""
+"""Bake the Reserve Circuit wall and terminal housing from ambientCG 1K PNG downloads."""
 import argparse
 from hashlib import sha256
 from io import BytesIO
@@ -32,15 +32,19 @@ def save(name: str, image: Image.Image) -> None:
     image.save(OUTPUT / f"{name}.png", optimize=True)
 
 
+def blend_normal(base: np.ndarray, detail: np.ndarray, strength: float | np.ndarray) -> Image.Image:
+    surface = base.astype(np.float32) / 127.5 - 1.0
+    offset = detail[:, :, :2].astype(np.float32) / 127.5 - 1.0
+    surface[:, :, :2] += offset * surface[:, :, 2:] * strength
+    surface /= np.maximum(np.linalg.norm(surface, axis=2, keepdims=True), 0.001)
+    return Image.fromarray(np.clip(np.rint((surface + 1.0) * 127.5), 0, 255).astype(np.uint8))
+
+
 def bake_basalt(path: Path) -> None:
     detail = upstream(path, "Concrete030", {"NormalGL": "RGB", "Roughness": "L"})
-    base_normal = np.asarray(Image.open(BASALT / "basalt_wall_normal.png"), dtype=np.float32) / 127.5 - 1.0
-    detail_normal = np.asarray(detail["NormalGL"], dtype=np.float32) / 127.5 - 1.0
+    base_normal = np.asarray(Image.open(BASALT / "basalt_wall_normal.png"))
     # Add a shallow perturbation while keeping the normal direction at the authored seams.
-    base_normal[:, :, :2] += detail_normal[:, :, :2] * base_normal[:, :, 2:] * 0.28
-    base_normal /= np.linalg.norm(base_normal, axis=2, keepdims=True)
-    encoded = (base_normal + 1.0) * 127.5
-    save("concrete030_basalt_normal", Image.fromarray(np.clip(np.rint(encoded), 0, 255).astype(np.uint8)))
+    save("concrete030_basalt_normal", blend_normal(base_normal, np.asarray(detail["NormalGL"]), 0.28))
     ao, roughness, metallic = Image.open(BASALT / "basalt_wall_orm.png").convert("RGB").split()
     save("concrete030_basalt_orm", Image.merge("RGB", (ao, Image.blend(roughness, detail["Roughness"], 0.3), metallic)))
 

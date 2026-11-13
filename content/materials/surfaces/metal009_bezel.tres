@@ -1,0 +1,15 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/metal009_bezel_normal.png" id="1"]
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/metal009_bezel_orm.png" id="2"]
+
+[resource]
+resource_name = "Metal 009 · Brushed bezel"
+texture_filter = 5
+albedo_color = Color(0.43, 0.45, 0.47, 1)
+metallic = 1.0
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.4
+normal_texture = ExtResource("1")
+orm_texture = ExtResource("2")

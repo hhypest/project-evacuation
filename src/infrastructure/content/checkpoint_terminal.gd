@@ -3,6 +3,7 @@ extends StaticBody3D
 ## The selector uses the same world collision layers as wall buttons. Local +Z is the front.
 
 const HOUSING: Material = preload("res://content/materials/surfaces/metal027_powder.tres")
+const FACEPLATE: Material = preload("res://content/materials/surfaces/plastic010_faceplate.tres")
 
 @export var checkpoint: ChamberCheckpoint
 @export var spawn: Marker3D
@@ -23,7 +24,9 @@ func _ready() -> void:
 	housing.mesh = MetricBoxMesh.make(size, Vector3.ZERO, 1.0)
 	housing.material_override = HOUSING
 	add_child(housing)
-	var panel: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.64, 0.76, 0.028), Color(0.84, 0.85, 0.82))
+	var panel: MeshInstance3D = MeshInstance3D.new()
+	panel.mesh = MetricBoxMesh.make(Vector3(0.64, 0.76, 0.028), Vector3.ZERO, 0.5)
+	panel.material_override = FACEPLATE
 	panel.position.z = 0.12
 	add_child(panel)
 	var display: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.59, 0.36, 0.014), Color(0.045, 0.065, 0.065))

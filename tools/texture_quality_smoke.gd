@@ -5,6 +5,11 @@ const SETTINGS: DeviceTextureSettings = preload("res://content/definitions/devic
 const MODELS: Dictionary[String, String] = {"ballast_cube": "ballast_cube", "floor_button": "floor_button",
 	"emitter": "emitter_body", "receiver": "receiver_body", "wall_button": "wall_button_body",
 	"wall_switch": "wall_switch_body", "logic_box": "logic_box", "door": "door_leaf", "door_frame": "door_frame"}
+const FINISH_ATLASES: Array[Texture2D] = [
+	PropVisuals.BALLAST_NORMAL, PropVisuals.BALLAST_ORM,
+	FloorButtonDevice.GRIP_COLOR, FloorButtonDevice.GRIP_NORMAL, FloorButtonDevice.GRIP_ORM,
+	WallButtonDevice.BUTTON_NORMAL, WallButtonDevice.BUTTON_ORM,
+]
 
 
 func _initialize() -> void:
@@ -29,5 +34,12 @@ func _initialize() -> void:
 			printerr("TEXTURE_QUALITY_FAILED %s expected=%d" % [albedo.resource_path, side])
 		else:
 			print("TEXTURE_SIZE %s %dx%d" % [albedo.resource_path, side, side])
-	print("TEXTURE_QUALITY_%s profile=%s maps=29" % ["FAILED" if failed else "PASSED", SETTINGS.profile_label()])
+	for texture: Texture2D in FINISH_ATLASES:
+		if texture.get_width() != 2048 or texture.get_height() != 2048:
+			failed = true
+			printerr("TEXTURE_QUALITY_FAILED %s expected=2048" % texture.resource_path)
+		else:
+			print("TEXTURE_SIZE %s 2048x2048" % texture.resource_path)
+	print("TEXTURE_QUALITY_%s profile=%s maps=%d" % ["FAILED" if failed else "PASSED",
+		SETTINGS.profile_label(), MODELS.size() * 3 + 2 + FINISH_ATLASES.size()])
 	quit(1 if failed else 0)
