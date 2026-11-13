@@ -1510,7 +1510,7 @@ ASSETS: list[Asset] = [
     Asset("power_node_side", "devices", dev_power_node, "amber", "Боковая панель силового узла HEVS-02; 8 сегментов заряда"),
     Asset("cable", "devices", dev_cable, "amber", "Силовой кабель, бесшовный; U вдоль кабеля; полоса горит под питанием"),
     Asset("chamber_terminal", "devices", dev_chamber_terminal, "screen", "Терминал камеры: экран со схемой камеры, клавиатура; обучение и состояния цепей (ADR-0006)"),
-    Asset("vanguard_station", "devices", dev_vanguard_station, "white", "Станция авангарда: пополнение кислорода и крепление узла; совпадает с контрольной точкой"),
+    Asset("vanguard_station", "devices", dev_vanguard_station, "white", "Оборудование станции авангарда для пополнения кислорода и крепления узла"),
     Asset("basalt_wall", "alien", mat_basalt_wall, None, "Монолитная кладка чужого слоя, 2 м на тайл"),
     Asset("basalt_floor", "alien", mat_basalt_floor, None, "Плиты пола чужого слоя, 2 м на тайл"),
     Asset("glyph_panel", "alien", mat_glyph_panel, "alien", "Монолит с колонками неалфавитных глифов; бледное свечение — атмосфера, не сигнал"),

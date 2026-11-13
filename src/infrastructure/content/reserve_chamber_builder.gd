@@ -10,7 +10,7 @@ const EXIT_Z: float = -47.0
 const PORTAL_X: float = -3.0
 const PORTAL_A_Z: float = -8.0
 const PORTAL_B_Z: float = -12.0
-const SOLID: Material = preload("res://content/materials/alien/basalt_wall.tres")
+const SOLID: Material = preload("res://content/materials/alien/concrete030_basalt.tres")
 const GROUND: Material = preload("res://content/materials/alien/basalt_floor.tres")
 const GUIDE: Color = Color(0.35, 0.72, 0.78)
 
@@ -120,8 +120,8 @@ func _checkpoint_terminal() -> void:
 	var primary: FloorButtonDevice = get_node("reserve_primary") as FloorButtonDevice
 	terminal.prop_supports[&"reserve.cube.ballast"] = primary.plate
 	terminal.prop_supports[&"reserve.cube.screen"] = get_node("ScreenSocket") as CarrySocketBody
-	_box(Vector3(0.44, 0.95, 0.35), Vector3(-2.45, 0.475, -33.93),
-		Color(0.21, 0.23, 0.24), "CheckpointStand")
+	_surface(Vector3(0.44, 0.95, 0.35), Vector3(-2.45, 0.475, -33.93),
+		CheckpointTerminal.HOUSING, "CheckpointStand", 1.0)
 	add_child(terminal)
 
 
@@ -166,10 +166,10 @@ func _portal_wall(x: float, z: float) -> void:
 	_surface(Vector3(1.6, HEIGHT - 2.4, 0.3), Vector3(x, (HEIGHT + 2.4) * 0.5, z), SOLID)
 
 
-func _surface(size: Vector3, at: Vector3, material: Material) -> void:
-	var body: StaticBody3D = _box(size, at)
+func _surface(size: Vector3, at: Vector3, material: Material, label: String = "", tile_metres: float = 2.0) -> void:
+	var body: StaticBody3D = _box(size, at, WALL_COLOR, label)
 	var mesh: MeshInstance3D = body.get_child(1) as MeshInstance3D
-	mesh.mesh = MetricBoxMesh.make(size, at)
+	mesh.mesh = MetricBoxMesh.make(size, at, tile_metres)
 	mesh.material_override = material
 
 

@@ -1,0 +1,14 @@
+[gd_resource type="ORMMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://content/textures/alien/basalt_wall/basalt_wall_albedo.png" id="1"]
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/concrete030_basalt_normal.png" id="2"]
+[ext_resource type="Texture2D" path="res://content/textures/ambientcg/concrete030_basalt_orm.png" id="3"]
+
+[resource]
+resource_name = "Concrete 030 · Basalt"
+texture_filter = 5
+albedo_texture = ExtResource("1")
+normal_enabled = true
+normal_texture = ExtResource("2")
+ao_enabled = true
+orm_texture = ExtResource("3")

@@ -2,6 +2,8 @@ class_name CheckpointTerminal
 extends StaticBody3D
 ## The selector uses the same world collision layers as wall buttons. Local +Z is the front.
 
+const HOUSING: Material = preload("res://content/materials/surfaces/metal027_powder.tres")
+
 @export var checkpoint: ChamberCheckpoint
 @export var spawn: Marker3D
 var prop_supports: Dictionary[StringName, CarrySocketBody] = {}
@@ -17,7 +19,10 @@ func _ready() -> void:
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = shape
 	add_child(collision)
-	add_child(PuzzleDeviceNode.box_mesh(size, Color(0.16, 0.19, 0.21)))
+	var housing: MeshInstance3D = MeshInstance3D.new()
+	housing.mesh = MetricBoxMesh.make(size, Vector3.ZERO, 1.0)
+	housing.material_override = HOUSING
+	add_child(housing)
 	var panel: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.64, 0.76, 0.028), Color(0.84, 0.85, 0.82))
 	panel.position.z = 0.12
 	add_child(panel)
