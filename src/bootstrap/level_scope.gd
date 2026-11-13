@@ -145,7 +145,7 @@ func _use_checkpoint() -> bool:
 	for id: StringName in terminal.checkpoint.required_switches:
 		states[id] = _puzzle.network.output(id)
 	if not terminal.checkpoint.accepts(states):
-		terminal.report("ВКЛЮЧИТЕ РЕЗЕРВ")
+		terminal.report(terminal.blocked_message)
 	else:
 		checkpoint_requested.emit(terminal, states)
 	return true
@@ -226,6 +226,13 @@ func apply_input(frame: GameplayInputFrame, delta: float = 1.0 / 60.0) -> void:
 	_camera.global_position = _player.eye_position()
 	# Portal commits can invalidate the pre-transfer placement preview in this same tick.
 	_ghost.present(_carry.preview)
+	var training: OxygenTrainingBuilder = _level as OxygenTrainingBuilder
+	if training != null:
+		training.advance_air(_player.center(), delta)
+
+
+func oxygen_training() -> OxygenTrainingBuilder:
+	return _level as OxygenTrainingBuilder
 
 
 func held_prop_id() -> StringName:

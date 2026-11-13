@@ -35,6 +35,7 @@ signal fsr2_changed(enabled: bool)
 
 @onready var _fsr2: OptionButton = %UpscalingMode
 @onready var _recovery: Label = %RecoveryNotice
+@onready var _oxygen: Label = %OxygenStatus
 
 var _recovery_tween: Tween
 var _level_buttons: Array[Button] = []
@@ -76,6 +77,15 @@ func show_recovery(message: String) -> void:
 	_recovery_tween = create_tween()
 	_recovery_tween.tween_interval(2.5)
 	_recovery_tween.tween_callback(_recovery.hide)
+
+
+func show_oxygen(percent: int, exposed: bool, supplied: bool) -> void:
+	var area: String = "РАЗГЕРМЕТИЗАЦИЯ" if exposed else ("СНАБЖЕНИЕ" if supplied else "БЕЗОПАСНО")
+	var message: String = "O₂  %d%%   ·   %s" % [percent, area]
+	if _oxygen.text != message:
+		_oxygen.text = message
+	_oxygen.modulate = Color(0.78, 1.0, 0.40) if exposed else Color.WHITE
+	_oxygen.show()
 
 
 func set_camera_preferences(preferences: CameraPreferences) -> void:
@@ -165,6 +175,7 @@ func show_session(status: SessionStatus, runtime_label: String, problem: String,
 	if not status.accepts_gameplay:
 		_placement_hint.hide()
 		_recovery.hide()
+		_oxygen.hide()
 	_heading.text = "Главное меню" if in_menu else "Пауза"
 	_status.text = runtime_label
 	if not status.focused:

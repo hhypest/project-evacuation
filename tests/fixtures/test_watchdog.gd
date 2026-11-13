@@ -2,8 +2,8 @@ class_name TestWatchdog
 extends Node
 ## Fixed-fps tests can simulate minutes quickly; timeout must use the wall clock.
 
-# The full real-time run includes the second chamber's walk from entry to exit and two bypass attempts.
-const TIMEOUT_MSEC: int = 360000
+# The real-time run includes the reserve chamber, two oxygen countdowns and three qualification walks.
+const TIMEOUT_MSEC: int = 540000
 
 var _started: int = Time.get_ticks_msec()
 

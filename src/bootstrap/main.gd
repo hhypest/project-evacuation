@@ -156,6 +156,12 @@ func _physics_process(delta: float) -> void:
 		return
 	_scope.apply_input(_input.take_frame(), delta)
 	_hud.show_carry_feedback(not _scope.held_prop_id().is_empty(), _scope.has_placement())
+	var training: OxygenTrainingBuilder = _scope.oxygen_training()
+	if training != null:
+		_hud.show_oxygen(training.reserve.percentage(), training.exposed, training.supplied)
+		if training.reserve.remaining_seconds <= 0.0:
+			_recover_chamber(&"oxygen", PortalWorldAdapter.PLAYER_ID)
+			return
 	if _scope.needs_recovery():
 		_recover_chamber(&"portal", _scope.portals().recovery_body_id)
 
@@ -177,7 +183,8 @@ func _recover_chamber(reason: StringName, body_id: StringName) -> void:
 			restored = true
 			print("CHAMBER_RECOVERY_FALLBACK checkpoint=entry")
 	if restored:
-		_hud.show_recovery("Возврат к контрольной точке")
+		_hud.show_recovery("Кислород исчерпан · возврат к контрольной точке" if reason == &"oxygen"
+			else "Возврат к контрольной точке")
 	else:
 		_session.return_to_menu()
 	_sync_session()

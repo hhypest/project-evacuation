@@ -7,6 +7,7 @@ const FACEPLATE: Material = preload("res://content/materials/surfaces/plastic010
 
 @export var checkpoint: ChamberCheckpoint
 @export var spawn: Marker3D
+@export var blocked_message: String = "ВКЛЮЧИТЕ РЕЗЕРВ"
 var prop_supports: Dictionary[StringName, CarrySocketBody] = {}
 var _status: Label3D
 
