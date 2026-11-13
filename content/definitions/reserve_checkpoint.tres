@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ChamberCheckpoint" format=3]
+
+[ext_resource type="Script" path="res://src/infrastructure/content/chamber_checkpoint.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+; Shipped schema 2 saves use this ID.
+checkpoint_id = &"reserve.service_station"
+title = "Контрольная точка"
+required_switches = Array[StringName]([&"reserve.backup"])

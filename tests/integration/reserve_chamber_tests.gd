@@ -20,7 +20,7 @@ func suite_name() -> StringName:
 
 func run(tree: SceneTree) -> Array[TestOutcome]:
 	_tree = tree
-	_save_path = ProjectSettings.globalize_path("res://work/station-run-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()])
+	_save_path = ProjectSettings.globalize_path("res://work/checkpoint-run-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()])
 	_main = MAIN.instantiate() as SessionBootstrap
 	_main.save_repository = JsonSaveRepository.new(_save_path)
 	tree.root.add_child(_main)
@@ -41,10 +41,10 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_player.global_position.y = -20.0
 	await _ticks(25)
 	if not _bind():
-		_record("fall without a station returns to the entry", false)
+		_record("fall without a checkpoint returns to the entry", false)
 		await _close()
 		return _results
-	_record("fall without a station returns to the entry", _main.get_session_status().generation == before_fall + 1
+	_record("fall without a checkpoint returns to the entry", _main.get_session_status().generation == before_fall + 1
 		and _player.position.distance_to(Vector3(0, 0, 3)) < 0.1 and not _out(&"reserve.backup"))
 	await _go(Vector3(-3, 0, -6.2))
 	await _go(Vector3(-3, 0, -11.0), true, 110)
@@ -89,15 +89,17 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		await _close()
 		return _results
 
-	var station: CheckpointStation = _level.get_node("CheckpointStation") as CheckpointStation
+	var terminal: CheckpointTerminal = _level.get_node("CheckpointTerminal") as CheckpointTerminal
+	_record("the in-world terminal identifies itself as a checkpoint",
+		(terminal.get_node("Heading") as Label3D).text == "КОНТРОЛЬНАЯ\nТОЧКА")
 	await _go(Vector3(-2.45, 0, -32.2))
-	_aim(station.global_position)
+	_aim(terminal.global_position)
 	_tap(KEY_E)
 	await _ticks(3)
 	var saved: SaveResult = _main.save_repository.read_checkpoint()
-	_record("E at the world station requires the reserve to be on", saved.code == SaveResult.Code.OK
+	_record("E at the checkpoint terminal requires the reserve to be on", saved.code == SaveResult.Code.OK
 		and saved.snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID
-		and (station.get_node("Status") as Label3D).text == "ВКЛЮЧИТЕ РЕЗЕРВ")
+		and (terminal.get_node("Status") as Label3D).text == "ВКЛЮЧИТЕ РЕЗЕРВ")
 
 	var backup: WallButtonDevice = _level.get_node("reserve_backup") as WallButtonDevice
 	await _go(Vector3(-4.5, 0, -32.45))
@@ -108,14 +110,14 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		_out(&"reserve.backup") and _out(&"reserve.service_access") and _out(&"reserve.portal"))
 
 	await _go(Vector3(-2.45, 0, -32.2))
-	_aim(station.global_position)
+	_aim(terminal.global_position)
 	_tap(KEY_E)
 	await _ticks(3)
 	saved = _main.save_repository.read_checkpoint()
-	_record("E at the powered station records its stable ID and the reserve toggle",
-		saved.code == SaveResult.Code.OK and saved.snapshot.checkpoint_id == station.checkpoint.checkpoint_id
+	_record("E at the powered checkpoint records its stable ID and the reserve toggle",
+		saved.code == SaveResult.Code.OK and saved.snapshot.checkpoint_id == terminal.checkpoint.checkpoint_id
 		and saved.snapshot.switches == {&"reserve.backup": true})
-	var spawn: Vector3 = station.spawn.global_position
+	var spawn: Vector3 = terminal.spawn.global_position
 	await _close(false)
 	_main = MAIN.instantiate() as SessionBootstrap
 	_main.save_repository = JsonSaveRepository.new(_save_path)
@@ -126,11 +128,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	continue_button.pressed.emit()
 	await _ticks(35)
 	if not _bind():
-		_record("reload from a fresh session opens the station", false)
+		_record("reload from a fresh session opens the checkpoint", false)
 		await _close()
 		return _results
 	ballast = _level.get_node("Ballast") as CarryRigidBody
-	_record("reload restores the station, power, safe cube poses and an open return route",
+	_record("reload restores the checkpoint, power, safe cube poses and an open return route",
 		can_continue and _player.global_position.distance_to(spawn) < 0.12 and _out(&"reserve.backup")
 		and _out(&"reserve.portal") and _out(&"reserve.service_door") and _out(&"reserve.primary") and not _out(&"reserve.receiver")
 		and absf(ballast.position.z + 5.0) < 0.12 and _scope.held_prop_id().is_empty())
@@ -139,11 +141,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	ballast.global_position.y = -20.0
 	await _ticks(35)
 	if not _bind():
-		_record("lost ballast recovers the station", false)
+		_record("lost ballast recovers the checkpoint", false)
 		await _close()
 		return _results
 	ballast = _level.get_node("Ballast") as CarryRigidBody
-	_record("lost ballast recovers the station", _main.get_session_status().generation == old_generation + 1
+	_record("lost ballast recovers the checkpoint", _main.get_session_status().generation == old_generation + 1
 		and _player.position.distance_to(spawn) < 0.12 and _out(&"reserve.primary")
 		and _out(&"reserve.backup") and _out(&"reserve.portal") and not _out(&"reserve.receiver"))
 
@@ -151,11 +153,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_player.global_position.y = -20.0
 	await _ticks(35)
 	if not _bind():
-		_record("fall resumes from the station without a disk write", false)
+		_record("fall resumes from the checkpoint without a disk write", false)
 		await _close()
 		return _results
 	ballast = _level.get_node("Ballast") as CarryRigidBody
-	_record("fall resumes from the station without a disk write",
+	_record("fall resumes from the checkpoint without a disk write",
 		_main.get_session_status().generation == old_generation + 1 and _player.position.distance_to(spawn) < 0.12
 		and DirAccess.get_files_at(_save_path).size() == saved_file_count and _scope.held_prop_id().is_empty())
 	await _go(Vector3(4.1, 0, -35.0))
@@ -196,7 +198,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 
 	await _tree.process_frame
 	saved = _main.save_repository.read_checkpoint()
-	_record("exit records completion while preserving the station",
+	_record("exit records completion while preserving the checkpoint",
 		saved.code == SaveResult.Code.OK and &"reserve_circuit" in saved.snapshot.completed_levels
 		and saved.snapshot.checkpoint_id == &"reserve.service_station")
 	_tap(KEY_R)
@@ -215,7 +217,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	if replay != null:
 		replay.pressed.emit()
 	saved = _main.save_repository.read_checkpoint()
-	_record("starting another attempt preserves the same authored station and progress",
+	_record("starting another attempt preserves the same authored checkpoint and progress",
 		saved.code == SaveResult.Code.OK and saved.snapshot.checkpoint_id == &"reserve.service_station"
 		and &"reserve_circuit" in saved.snapshot.completed_levels)
 	await _close()

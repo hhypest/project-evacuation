@@ -218,7 +218,7 @@ func _start_chamber(scene: PackedScene, checkpoint_entry: LevelEntry = null, loa
 	if not _replace_scope(loaded):
 		_session.return_to_menu()
 	if _scope != null and loaded == null and save_repository != null and checkpoint_entry != null:
-		# A fresh run from the level list can replay the chamber without erasing its station.
+		# A fresh run from the level list can replay the chamber without erasing its checkpoint.
 		if _continue_snapshot != null and _continue_snapshot.level_id == checkpoint_entry.level_id \
 				and _continue_snapshot.checkpoint_id != SaveSnapshot.ENTRY_ID:
 			_active_checkpoint = _continue_snapshot
@@ -234,14 +234,14 @@ func _new_snapshot(id: StringName) -> SaveSnapshot:
 	return snapshot
 
 
-func _on_station_requested(station: CheckpointStation, states: Dictionary[StringName, bool]) -> void:
+func _on_checkpoint_requested(terminal: CheckpointTerminal, states: Dictionary[StringName, bool]) -> void:
 	if save_repository == null or _active_entry == null \
-			or _active_entry.station(station.checkpoint.checkpoint_id) != station.checkpoint:
-		station.report("ЗАПИСЬ НЕДОСТУПНА")
+			or _active_entry.checkpoint(terminal.checkpoint.checkpoint_id) != terminal.checkpoint:
+		terminal.report("ЗАПИСЬ НЕДОСТУПНА")
 		return
-	var snapshot: SaveSnapshot = _new_snapshot(station.checkpoint.checkpoint_id)
+	var snapshot: SaveSnapshot = _new_snapshot(terminal.checkpoint.checkpoint_id)
 	snapshot.switches = states.duplicate()
-	station.report("ТОЧКА СОХРАНЕНА" if _write_checkpoint(snapshot) else "ОШИБКА ЗАПИСИ\nE · ПОВТОРИТЬ")
+	terminal.report("ТОЧКА СОХРАНЕНА" if _write_checkpoint(snapshot) else "ОШИБКА ЗАПИСИ\nE · ПОВТОРИТЬ")
 
 
 func _on_chamber_completed(generation: int) -> void:
@@ -293,11 +293,11 @@ func _refresh_checkpoint() -> void:
 	if result.snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID:
 		_checkpoint_load_notice = notice + "Продолжение открывает камеру с точки входа."
 	else:
-		var station: StationCheckpoint = item.station(result.snapshot.checkpoint_id)
-		if station == null or not station.accepts(result.snapshot.switches):
+		var definition: ChamberCheckpoint = item.checkpoint(result.snapshot.checkpoint_id)
+		if definition == null or not definition.accepts(result.snapshot.switches):
 			_checkpoint_load_notice = "Контрольная точка недоступна в этой сборке."
 			return
-		_checkpoint_load_notice = notice + "%s · %s" % [item.title, station.title]
+		_checkpoint_load_notice = notice + "%s · %s" % [item.title, definition.title]
 	_continue_level = item
 	_continue_snapshot = result.snapshot
 
@@ -361,7 +361,7 @@ func _replace_scope(checkpoint: SaveSnapshot = null) -> bool:
 		_problem = "Не удалось загрузить уровень. Попробуйте начать сессию ещё раз."
 		return false
 	else:
-		_scope.station_requested.connect(_on_station_requested)
+		_scope.checkpoint_requested.connect(_on_checkpoint_requested)
 		_scope.chamber_completed.connect(_on_chamber_completed.bind(_session.get_status().generation))
 		_scope.configure_camera(camera_preferences)
 		_problem = ""

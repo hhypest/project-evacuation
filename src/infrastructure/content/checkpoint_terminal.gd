@@ -1,8 +1,8 @@
-class_name CheckpointStation
+class_name CheckpointTerminal
 extends StaticBody3D
 ## The selector uses the same world collision layers as wall buttons. Local +Z is the front.
 
-@export var checkpoint: StationCheckpoint
+@export var checkpoint: ChamberCheckpoint
 @export var spawn: Marker3D
 var prop_supports: Dictionary[StringName, CarrySocketBody] = {}
 var _status: Label3D
@@ -18,20 +18,21 @@ func _ready() -> void:
 	collision.shape = shape
 	add_child(collision)
 	add_child(PuzzleDeviceNode.box_mesh(size, Color(0.16, 0.19, 0.21)))
-	var panel: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.64, 0.76, 0.028), Color(0.88, 0.82, 0.70))
+	var panel: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.64, 0.76, 0.028), Color(0.84, 0.85, 0.82))
 	panel.position.z = 0.12
 	add_child(panel)
 	var display: MeshInstance3D = PuzzleDeviceNode.box_mesh(Vector3(0.59, 0.36, 0.014), Color(0.045, 0.065, 0.065))
 	display.position = Vector3(0, -0.09, 0.139)
 	add_child(display)
-	var heading: Label3D = _label("СТАНЦИЯ\nАВАНГАРДА", Vector3(0, 0.20, 0.15))
+	var heading: Label3D = _label("КОНТРОЛЬНАЯ\nТОЧКА", Vector3(0, 0.20, 0.15))
+	heading.name = "Heading"
 	heading.modulate = Color(0.12, 0.13, 0.14)
 	_status = _label("", Vector3(0, -0.09, 0.15))
 	_status.name = "Status"
 	report("E · СОХРАНИТЬ")
 	var lamp: OmniLight3D = OmniLight3D.new()
 	lamp.position = Vector3(0, 0.43, 0.48)
-	lamp.light_color = Color(1.0, 0.75, 0.46)
+	lamp.light_color = Color(0.86, 0.90, 0.94)
 	lamp.light_energy = 0.45
 	lamp.omni_range = 2.4
 	add_child(lamp)
