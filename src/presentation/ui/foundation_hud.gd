@@ -125,6 +125,11 @@ func set_levels(titles: PackedStringArray) -> void:
 		_level_buttons.append(button)
 
 
+func set_level_completed(index: int, title: String, completed: bool) -> void:
+	if index < _level_buttons.size():
+		_level_buttons[index].text = title + (" · пройдено" if completed else "")
+
+
 func show_session(status: SessionStatus, runtime_label: String, problem: String, has_checkpoint: bool,
 		restart_label: String) -> void:
 	var in_menu: bool = status.phase == SessionLifecycle.Phase.READY

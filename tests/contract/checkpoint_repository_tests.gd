@@ -40,7 +40,7 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 		results.append(TestOutcome.new("a truncated latest checkpoint falls back without modifying either file",
 			loaded.code == SaveResult.Code.OK and loaded.recovered and loaded.snapshot.level_id == first.level_id
 			and FileAccess.get_file_as_string(current) == "{"))
-		var future: String = '{"schema_version": 2, "level_id": "portal_lab"}'
+		var future: String = '{"schema_version": 3, "level_id": "portal_lab"}'
 		_put(current, future)
 		results.append(TestOutcome.new("a newer schema blocks both loading and writing through this build",
 			repository.read_checkpoint().code == SaveResult.Code.UNSUPPORTED
@@ -51,6 +51,7 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 			repository.read_checkpoint().recovered))
 	else:
 		results.append(TestOutcome.new("fixture contains both checkpoints for failure checks", false))
+	results.append_array(_station_roundtrip(path.path_join("station")))
 	var blocked: String = path.path_join("saves-blocked")
 	_put(blocked, "not a directory")
 	var blocked_repository: SaveRepository = JsonSaveRepository.new(blocked)
@@ -58,6 +59,45 @@ func run(_tree: SceneTree) -> Array[TestOutcome]:
 		blocked_repository.read_checkpoint().code == SaveResult.Code.IO_ERROR
 		and blocked_repository.write_checkpoint(first) == SaveResult.Code.IO_ERROR
 		and FileAccess.get_file_as_string(blocked) == "not a directory"))
+	for name: String in DirAccess.get_files_at(path):
+		DirAccess.remove_absolute(path.path_join(name))
+	DirAccess.remove_absolute(path)
+	return results
+
+
+func _station_roundtrip(path: String) -> Array[TestOutcome]:
+	var results: Array[TestOutcome] = []
+	DirAccess.make_dir_recursive_absolute(path)
+	var old_path: String = path.path_join("checkpoint-000000000001-1-1.json")
+	var old_json: String = '{"schema_version": 1, "game_version": "test", "level_id": "reserve_circuit", "checkpoint_id": "entry"}'
+	_put(old_path, old_json)
+	var repository: SaveRepository = JsonSaveRepository.new(path)
+	var loaded: SaveResult = repository.read_checkpoint()
+	results.append(TestOutcome.new("schema 1 entrance loads with empty progress and stays byte-for-byte intact",
+		loaded.code == SaveResult.Code.OK and loaded.snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID
+		and loaded.snapshot.completed_levels.is_empty() and loaded.snapshot.switches.is_empty()
+		and FileAccess.get_file_as_string(old_path) == old_json))
+	var station: SaveSnapshot = SaveSnapshot.new(&"reserve_circuit", "test", &"reserve.service_station")
+	station.switches[&"reserve.backup"] = true
+	var written: bool = repository.write_checkpoint(station) == SaveResult.Code.OK
+	loaded = repository.read_checkpoint()
+	results.append(TestOutcome.new("station supersedes the same level entry and round-trips toggle state",
+		written and loaded.code == SaveResult.Code.OK and loaded.snapshot.matches(station)
+		and DirAccess.get_files_at(path).size() == 2))
+	station.completed_levels.append(&"reserve_circuit")
+	written = repository.write_checkpoint(station) == SaveResult.Code.OK
+	var repeated: bool = repository.write_checkpoint(station) == SaveResult.Code.OK
+	loaded = repository.read_checkpoint()
+	results.append(TestOutcome.new("completion updates the existing station; an identical retry adds no file",
+		written and repeated and loaded.code == SaveResult.Code.OK and loaded.snapshot.matches(station)
+		and DirAccess.get_files_at(path).size() == 3))
+	var invalid: String = '{"schema_version": 2, "game_version": "test", "level_id": "reserve_circuit", "checkpoint_id": "reserve.service_station", "completed_levels": [], "switches": {"reserve.backup": 1}}'
+	var file: String = path.path_join("checkpoint-000000000004-1-1.json")
+	_put(file, invalid)
+	loaded = repository.read_checkpoint()
+	results.append(TestOutcome.new("malformed station progress falls back to the last complete generation",
+		loaded.code == SaveResult.Code.OK and loaded.recovered and loaded.snapshot.matches(station)
+		and FileAccess.get_file_as_string(file) == invalid))
 	for name: String in DirAccess.get_files_at(path):
 		DirAccess.remove_absolute(path.path_join(name))
 	DirAccess.remove_absolute(path)

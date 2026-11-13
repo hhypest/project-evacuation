@@ -4,6 +4,8 @@ extends Node3D
 ## its stable ID and a node name derived from it, so tests and the gpu smoke can find it.
 
 const WALL_COLOR: Color = Color(0.2, 0.23, 0.26)
+signal chamber_completed()
+
 const FLOOR_COLOR: Color = Color(0.13, 0.16, 0.19)
 
 

@@ -3,8 +3,8 @@ extends SaveRepository
 ## Each committed checkpoint has its own name. Windows' DirAccess.rename can remove an existing
 ## destination before moving, so publication never targets an earlier checkpoint.
 
-const SCHEMA_VERSION: int = 1
-const MAX_FILE_BYTES: int = 16 * 1024
+const SCHEMA_VERSION: int = 2
+const MAX_FILE_BYTES: int = 64 * 1024
 const MAX_SEQUENCE: int = 999999999999
 
 var _directory: String
@@ -45,7 +45,7 @@ func write_checkpoint(snapshot: SaveSnapshot) -> SaveResult.Code:
 		return current.code
 	# Re-entering the same authored checkpoint adds no new progress.
 	if current.code == SaveResult.Code.OK and not current.recovered \
-			and current.snapshot.level_id == snapshot.level_id and current.snapshot.game_version == snapshot.game_version:
+			and snapshot.matches(current.snapshot):
 		return SaveResult.Code.OK
 	var sequence: int = 1 if files.is_empty() else files[-1].get_slice("-", 1).to_int() + 1
 	if sequence > MAX_SEQUENCE:
@@ -61,15 +61,17 @@ func write_checkpoint(snapshot: SaveSnapshot) -> SaveResult.Code:
 		"schema_version": SCHEMA_VERSION,
 		"game_version": snapshot.game_version,
 		"level_id": String(snapshot.level_id),
-		"checkpoint_id": String(snapshot.checkpoint_id)
+		"checkpoint_id": String(snapshot.checkpoint_id),
+		"completed_levels": snapshot.completed_levels,
+		"switches": snapshot.switches
 	}
 	file.store_string(JSON.stringify(data, "\t") + "\n")
 	file.flush()
 	var flushed: bool = file.get_error() == OK
 	file.close()
 	var checked: SaveResult = _read_file(temporary)
-	if not flushed or checked.code != SaveResult.Code.OK or checked.snapshot.level_id != snapshot.level_id \
-			or checked.snapshot.game_version != snapshot.game_version or FileAccess.file_exists(target) \
+	if not flushed or checked.code != SaveResult.Code.OK or not snapshot.matches(checked.snapshot) \
+			or FileAccess.file_exists(target) \
 			or DirAccess.rename_absolute(temporary, target) != OK:
 		DirAccess.remove_absolute(temporary)
 		return SaveResult.Code.IO_ERROR
@@ -116,7 +118,7 @@ func _read_file(path: String) -> SaveResult:
 	var version: Variant = data.get("schema_version")
 	if not (version is int or version is float):
 		return SaveResult.new(SaveResult.Code.INVALID)
-	if version != SCHEMA_VERSION:
+	if version != 1 and version != SCHEMA_VERSION:
 		return SaveResult.new(SaveResult.Code.UNSUPPORTED)
 	var level: Variant = data.get("level_id")
 	var checkpoint: Variant = data.get("checkpoint_id")
@@ -124,4 +126,32 @@ func _read_file(path: String) -> SaveResult:
 	if not (level is String and checkpoint is String and game is String):
 		return SaveResult.new(SaveResult.Code.INVALID)
 	var snapshot: SaveSnapshot = SaveSnapshot.new(StringName(str(level)), str(game), StringName(str(checkpoint)))
+	if version == 1:
+		if snapshot.checkpoint_id != SaveSnapshot.ENTRY_ID:
+			return SaveResult.new(SaveResult.Code.INVALID)
+	elif not _decode_progress(data, snapshot):
+		return SaveResult.new(SaveResult.Code.INVALID)
 	return SaveResult.new(SaveResult.Code.OK, snapshot) if snapshot.is_valid() else SaveResult.new(SaveResult.Code.INVALID)
+
+
+static func _decode_progress(data: Dictionary, snapshot: SaveSnapshot) -> bool:
+	var levels: Variant = data.get("completed_levels")
+	var switches: Variant = data.get("switches")
+	if levels is not Array or switches is not Dictionary:
+		return false
+	@warning_ignore("unsafe_cast")
+	var completed: Array = levels as Array
+	@warning_ignore("unsafe_cast")
+	var toggle_states: Dictionary = switches as Dictionary
+	if completed.size() > SaveSnapshot.MAX_LEVELS or toggle_states.size() > SaveSnapshot.MAX_SWITCHES:
+		return false
+	for level: Variant in completed:
+		if level is not String:
+			return false
+		snapshot.completed_levels.append(StringName(str(level)))
+	for key: Variant in toggle_states:
+		var on: Variant = toggle_states[key]
+		if key is not String or on is not bool:
+			return false
+		snapshot.switches[StringName(str(key))] = on == true
+	return true

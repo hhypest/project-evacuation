@@ -60,7 +60,7 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-text = "Продолжить с точки входа"
+text = "Продолжить с контрольной точки"
 
 [node name="StartButton" type="Button" parent="Center/Menu/Margin/Stack"]
 unique_name_in_owner = true

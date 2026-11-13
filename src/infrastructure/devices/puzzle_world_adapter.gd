@@ -118,22 +118,25 @@ func _trace(emitter: EmitterDevice) -> BeamHit:
 
 
 func usable(view: Transform3D, reach: float) -> StringName:
-	if not _open or _player == null:
-		return &""
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-		view.origin, view.origin - view.basis.z * reach, 3, [_player.get_rid()])
-	var hit: Dictionary = _player.get_world_3d().direct_space_state.intersect_ray(query)
-	var collider: Variant = hit.get("collider")
-	if collider is not Object:
-		return &""
-	# Raw engine query result; the Object type was checked before crossing the typed boundary.
-	@warning_ignore("unsafe_cast")
-	var target: Object = collider as Object
+	var target: Object = interaction_target(view, reach)
 	for id: StringName in _devices.keys():
 		var button: WallButtonDevice = _devices[id] as WallButtonDevice
 		if button != null and button.owns(target):
 			return id
 	return &""
+
+
+func interaction_target(view: Transform3D, reach: float) -> Object:
+	if not _open or _player == null:
+		return null
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		view.origin, view.origin - view.basis.z * reach, 3, [_player.get_rid()])
+	var hit: Dictionary = _player.get_world_3d().direct_space_state.intersect_ray(query)
+	var collider: Variant = hit.get("collider")
+	if collider is not Object:
+		return null
+	@warning_ignore("unsafe_cast")
+	return collider as Object
 
 
 func press(id: StringName) -> bool:

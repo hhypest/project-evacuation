@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="StationCheckpoint" format=3]
+
+[ext_resource type="Script" path="res://src/infrastructure/content/station_checkpoint.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+checkpoint_id = &"reserve.service_station"
+title = "Станция авангарда"
+required_switches = Array[StringName]([&"reserve.backup"])
