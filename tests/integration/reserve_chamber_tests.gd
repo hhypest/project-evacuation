@@ -5,6 +5,7 @@ extends TestSuite
 const MAIN: PackedScene = preload("res://src/bootstrap/main.tscn")
 
 var _tree: SceneTree
+var _save_path: String
 var _main: SessionBootstrap
 var _scope: LevelScope
 var _level: ReserveChamberBuilder
@@ -19,7 +20,9 @@ func suite_name() -> StringName:
 
 func run(tree: SceneTree) -> Array[TestOutcome]:
 	_tree = tree
+	_save_path = ProjectSettings.globalize_path("res://work/station-run-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()])
 	_main = MAIN.instantiate() as SessionBootstrap
+	_main.save_repository = JsonSaveRepository.new(_save_path)
 	tree.root.add_child(_main)
 	await tree.process_frame
 	var button: Button = _main.find_child("LevelButton1", true, false) as Button
@@ -77,6 +80,16 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		await _close()
 		return _results
 
+	var station: CheckpointStation = _level.get_node("CheckpointStation") as CheckpointStation
+	await _go(Vector3(-2.45, 0, -32.2))
+	_aim(station.global_position)
+	_tap(KEY_E)
+	await _ticks(3)
+	var saved: SaveResult = _main.save_repository.read_checkpoint()
+	_record("E at the world station requires the reserve to be on", saved.code == SaveResult.Code.OK
+		and saved.snapshot.checkpoint_id == SaveSnapshot.ENTRY_ID
+		and (station.get_node("Status") as Label3D).text == "ВКЛЮЧИТЕ РЕЗЕРВ")
+
 	var backup: WallButtonDevice = _level.get_node("reserve_backup") as WallButtonDevice
 	await _go(Vector3(-4.5, 0, -32.45))
 	_aim(backup.global_position + Vector3(0, 0, 0.04))
@@ -85,6 +98,33 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_record("the reserve switch powers the portal and keeps the service route open",
 		_out(&"reserve.backup") and _out(&"reserve.service_access") and _out(&"reserve.portal"))
 
+	await _go(Vector3(-2.45, 0, -32.2))
+	_aim(station.global_position)
+	_tap(KEY_E)
+	await _ticks(3)
+	saved = _main.save_repository.read_checkpoint()
+	_record("E at the powered station records its stable ID and the reserve toggle",
+		saved.code == SaveResult.Code.OK and saved.snapshot.checkpoint_id == station.checkpoint.checkpoint_id
+		and saved.snapshot.switches == {&"reserve.backup": true})
+	var spawn: Vector3 = station.spawn.global_position
+	await _close(false)
+	_main = MAIN.instantiate() as SessionBootstrap
+	_main.save_repository = JsonSaveRepository.new(_save_path)
+	_tree.root.add_child(_main)
+	await _tree.process_frame
+	var continue_button: Button = _main.find_child("LoadCheckpointButton") as Button
+	var can_continue: bool = continue_button.visible and not continue_button.disabled
+	continue_button.pressed.emit()
+	await _ticks(35)
+	if not _bind():
+		_record("reload from a fresh session opens the station", false)
+		await _close()
+		return _results
+	ballast = _level.get_node("Ballast") as CarryRigidBody
+	_record("reload restores the station, power, safe cube poses and an open return route",
+		can_continue and _player.global_position.distance_to(spawn) < 0.12 and _out(&"reserve.backup")
+		and _out(&"reserve.portal") and _out(&"reserve.service_door") and _out(&"reserve.primary") and not _out(&"reserve.receiver")
+		and absf(ballast.position.z + 5.0) < 0.12 and _scope.held_prop_id().is_empty())
 	await _go(Vector3(4.1, 0, -35.0))
 	await _ticks(40)
 	var momentary: bool = _out(&"reserve.exit_door")
@@ -107,7 +147,7 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	var freed: bool = ballast.is_carried() and not _out(&"reserve.primary") and _out(&"reserve.portal")
 	await _go(Vector3(-3, 0, -6.1))
 	await _go(Vector3(-3, 0, -13.75))
-	_record("the reserve lets the player carry the ballast through the portal after lifting it off the plate",
+	_record("the restored reserve lets the player lift the restored ballast off the plate and carry it through the portal",
 		freed and ballast.is_carried() and _player.position.z < -12.0 and ballast.position.z < -12.0)
 
 	await _go(Vector3(0, 0, -26.0))
@@ -121,6 +161,11 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 	_record("the ballast holds the exit open and crossing the threshold completes the chamber",
 		exit_ready and _level.completed and _player.position.z < -49.0)
 
+	await _tree.process_frame
+	saved = _main.save_repository.read_checkpoint()
+	_record("exit records completion while preserving the station",
+		saved.code == SaveResult.Code.OK and &"reserve_circuit" in saved.snapshot.completed_levels
+		and saved.snapshot.checkpoint_id == &"reserve.service_station")
 	_tap(KEY_R)
 	await _ticks(28)
 	var reset: bool = _bind()
@@ -130,6 +175,16 @@ func run(tree: SceneTree) -> Array[TestOutcome]:
 		and (_level.get_node("Ballast") as CarryRigidBody).position.distance_to(Vector3(3.5, 0.38, 0)) < 0.1
 		and (_level.get_node("ScreenCube") as CarryRigidBody).position.distance_to(Vector3(-3.5, 0.38, -16.2)) < 0.1
 		and _player.position.distance_to(Vector3(0, 0, 3)) < 0.1)
+	_tap(KEY_ESCAPE)
+	(_main.find_child("MenuButton") as Button).pressed.emit()
+	var replay: Button = _main.find_child("LevelButton1", true, false) as Button
+	_record("menu marks the chamber complete after a full restart of the attempt", replay != null and "пройдено" in replay.text)
+	if replay != null:
+		replay.pressed.emit()
+	saved = _main.save_repository.read_checkpoint()
+	_record("starting another attempt preserves the same authored station and progress",
+		saved.code == SaveResult.Code.OK and saved.snapshot.checkpoint_id == &"reserve.service_station"
+		and &"reserve_circuit" in saved.snapshot.completed_levels)
 	await _close()
 	return _results
 
@@ -201,7 +256,11 @@ func _record(name: String, passed: bool) -> void:
 	_results.append(TestOutcome.new(name, passed, detail))
 
 
-func _close() -> void:
+func _close(remove_saves: bool = true) -> void:
 	_tree.root.remove_child(_main)
 	_main.queue_free()
 	await _tree.process_frame
+	if remove_saves:
+		for name: String in DirAccess.get_files_at(_save_path):
+			DirAccess.remove_absolute(_save_path.path_join(name))
+		DirAccess.remove_absolute(_save_path)

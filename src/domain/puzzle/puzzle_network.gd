@@ -81,6 +81,22 @@ func reset() -> void:
 		_memory[id].output = _evaluate(_devices[id])
 
 
+## A station restores only persistent toggles onto a freshly reset network. Settle the dependent
+## combinational outputs before interaction resumes; transient sensors will observe the new scene.
+func restore_checkpoint_switches(states: Dictionary[StringName, bool]) -> bool:
+	if last_tick != -1:
+		return false
+	for id: StringName in states:
+		var definition: DeviceDefinition = _devices.get(id)
+		if definition == null or definition.kind != DeviceDefinition.Kind.WALL_BUTTON 				or definition.wall_mode != DeviceDefinition.WallMode.TOGGLE:
+			return false
+	for id: StringName in states:
+		_memory[id].output = states[id]
+	for id: StringName in _combinational:
+		_memory[id].output = _evaluate(_devices[id])
+	return true
+
+
 func has_device(id: StringName) -> bool:
 	return _devices.has(id)
 

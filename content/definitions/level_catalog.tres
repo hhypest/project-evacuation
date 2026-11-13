@@ -5,6 +5,9 @@
 [ext_resource type="Script" path="res://src/infrastructure/content/level_catalog.gd" id="3"]
 [ext_resource type="PackedScene" path="res://content/levels/reserve_circuit.tscn" id="4"]
 
+[ext_resource type="Resource" path="res://content/definitions/reserve_station.tres" id="5"]
+[ext_resource type="Script" path="res://src/infrastructure/content/station_checkpoint.gd" id="6"]
+
 [sub_resource type="Resource" id="UnifiedLab"]
 script = ExtResource("1")
 level_id = &"mechanics_lab"
@@ -18,6 +21,7 @@ level_id = &"reserve_circuit"
 title = "Резервный контур"
 summary = "Камера с двумя источниками питания портала, оптической блокировкой и выходным шлюзом."
 scene = ExtResource("4")
+stations = Array[ExtResource("6")]([ExtResource("5")])
 
 [resource]
 script = ExtResource("3")
